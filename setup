@@ -149,7 +149,7 @@ fancy_echo "Checking for SSH key, generating one if it doesn't exist ..."
 # Tools
 brew_install_or_upgrade 'tmux'
 brew_install_or_upgrade 'reattach-to-user-namespace'
-brew_install_or_upgrade 'wget' '--enable-iri'
+brew_install_or_upgrade 'wget' '--with-iri'
 brew_install_or_upgrade 'the_silver_searcher'
 brew_install_or_upgrade 'ack'
 brew_install_or_upgrade 'ctags'
