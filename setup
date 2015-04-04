@@ -142,7 +142,7 @@ fancy_echo "Adding fish to /etc/shells"
   echo "/usr/local/bin/fish" | sudo tee -a /etc/shells
 
 fancy_echo "Checking for SSH key, generating one if it doesn't exist ..."
-  [[ -f ~/.ssh/id_rsa.pub ]] || ssh-keygen -t rsa -b 4096 -o -a 100 -C "nano@fdp.io"
+  [[ -f ~/.ssh/id_rsa.pub ]] || ssh-keygen -t rsa -b 4096 -a 100 -C "nano@fdp.io"
   ssh-add ~/.ssh/id_rsa
   pbcopy < ~/.ssh/id_rsa.pub
 
