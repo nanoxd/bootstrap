@@ -1,0 +1,38 @@
+#!/bin/sh
+
+fancy_echo() {
+  local fmt="$1"; shift
+
+  # shellcheck disable=SC2059
+  printf "\n$fmt\n" "$@"
+}
+
+fancy_echo "Trackpad: enable tap to click for this user and for the login screen"
+  defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
+  defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+  defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+  defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad TrackpadThreeFingerDrag -bool true
+
+fancy_echo "Enable full keyboard access for all controls"
+  defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
+
+fancy_echo "Set a blazingly fast keyboard repeat rate"
+  defaults write NSGlobalDomain KeyRepeat -int 0
+
+fancy_echo "Finder: allow text selection in Quick Look"
+  defaults write com.apple.finder QLEnableTextSelection -bool true
+
+fancy_echo "Avoid creating .DS_Store files on network volumes"
+  defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
+
+fancy_echo "Set the icon size of Dock items to 36 pixels"
+  defaults write com.apple.dock tilesize -int 36
+
+fancy_echo "Automatically hide and show the Dock"
+  defaults write com.apple.dock autohide -bool true
+
+fancy_echo "Set Safari’s home page to `about:blank` for faster loading"
+  defaults write com.apple.Safari HomePage -string "about:blank"
+
+fancy_echo "Make Safari’s search banners default to Contains instead of Starts With"
+  defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
