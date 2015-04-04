@@ -137,7 +137,7 @@ brew_install_or_upgrade 'git-extras'
 brew_install_or_upgrade 'hub'
 brew_install_or_upgrade 'tig'
 
-brew_install_or_upgrade 'fish' '--head'
+brew_install_or_upgrade 'fish' '--HEAD'
 fancy_echo "Adding fish to /etc/shells"
   echo "/usr/local/bin/fish" | sudo tee -a /etc/shells
 
