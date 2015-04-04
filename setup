@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/zsh
 
 fancy_echo() {
   local fmt="$1"; shift
@@ -174,14 +174,14 @@ brew unlink openssl && brew link openssl --force
 
 ruby_version="ruby 2.2.1"
 
-
 if ! ruby -v | grep -Fq "$ruby_version"; then
-  ruby-install $ruby_version
+  ruby-install $ruby_version -c --no-reinstall
   echo $ruby_version > ~/.ruby-version
   append_to_zshrc 'source /usr/local/share/chruby/chruby.sh'
   append_to_zshrc 'source /usr/local/share/chruby/auto.sh'
 fi
 
+source /usr/local/share/chruby/chruby.sh
 chruby ruby-2.2.1
 
 gem update --system
