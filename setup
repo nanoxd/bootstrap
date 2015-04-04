@@ -166,15 +166,23 @@ brew_launchctl_restart 'redis'
 brew_install_or_upgrade 'go'
 brew_install_or_upgrade 'carthage'
 
-brew_tap 'igas/fry'
-brew_install_or_upgrade 'fry'
+brew_install_or_upgrade 'chruby-fish'
 brew_install_or_upgrade 'ruby-install'
 
 brew_install_or_upgrade 'openssl'
 brew unlink openssl && brew link openssl --force
 
-ruby_version="ruby-2.2.1"
-ruby-install $ruby_version
+ruby_version="ruby 2.2.1"
+
+
+if ! ruby -v | grep -Fq "$ruby_version"; then
+  ruby-install $ruby_version
+  echo $ruby_version > ~/.ruby-version
+  append_to_zshrc 'source /usr/local/share/chruby/chruby.sh'
+  append_to_zshrc 'source /usr/local/share/chruby/auto.sh'
+fi
+
+chruby ruby-2.2.1
 
 gem update --system
 gem_install_or_update 'bundler'
