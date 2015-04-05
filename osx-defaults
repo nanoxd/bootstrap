@@ -31,7 +31,7 @@ fancy_echo "Set the icon size of Dock items to 36 pixels"
 fancy_echo "Automatically hide and show the Dock"
   defaults write com.apple.dock autohide -bool true
 
-fancy_echo "Set Safari’s home page to `about:blank` for faster loading"
+fancy_echo "Set Safari’s home page to about:blank for faster loading"
   defaults write com.apple.Safari HomePage -string "about:blank"
 
 fancy_echo "Make Safari’s search banners default to Contains instead of Starts With"
