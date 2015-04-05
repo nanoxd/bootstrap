@@ -209,6 +209,13 @@ if [ ! -d "$HOME/.nvm/" ]; then
   ln -s "$(brew --prefix nvm)/nvm.sh" ~/.nvm/nvm.sh
 fi
 
+export NVM_DIR=~/.nvm
+
+if ! command -v npm >/dev/null; then
+  source ~/.nvm/nvm.sh
+  nvm install stable
+fi
+
 if ! command -v rcup >/dev/null; then
   brew_tap 'thoughtbot/formulae'
   brew_install_or_upgrade 'rcm'
@@ -221,6 +228,7 @@ export HOMEBREW_CASK_OPTS=--appdir=/Applications
 brew_tap 'caskroom/cask'
 brew_tap 'caskroom/fonts'
 brew_install_or_upgrade 'caskroom/cask/brew-cask'
+
 cask_install 'appdelete'
 cask_install 'atom'
 cask_install 'bartender'
