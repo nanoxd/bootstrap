@@ -213,7 +213,9 @@ export NVM_DIR=~/.nvm
 
 if ! command -v npm >/dev/null; then
   source ~/.nvm/nvm.sh
+  fancy_echo "Installing Node"
   nvm install stable
+  nvm alias default stable
 fi
 
 if ! command -v rcup >/dev/null; then
