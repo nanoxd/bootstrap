@@ -83,8 +83,17 @@ brew_expand_alias() {
   brew info "$1" 2>/dev/null | head -1 | awk '{gsub(/:/, ""); print $1}'
 }
 
-brew_cask_install() {
-  brew cask install "$1" 2> /dev/null
+cask_is_installed() {
+  brew cask list -1 | grep -Fqx "$1"
+}
+
+cask_install() {
+  if cask_is_installed "$1"; then
+    fancy_echo "Already using the latest version of %s. Skipping ..." "$1"
+  else
+    fancy_echo "Installing %s ..." "$1"
+    brew cask install "$@"
+  fi
 }
 
 brew_launchctl_restart() {
@@ -212,22 +221,22 @@ export HOMEBREW_CASK_OPTS=--appdir=/Applications
 brew_tap 'caskroom/cask'
 brew_tap 'caskroom/fonts'
 brew_install_or_upgrade 'caskroom/cask/brew-cask'
-brew_cask_install 'appdelete'
-brew_cask_install 'atom'
-brew_cask_install 'bartender'
-brew_cask_install 'electrum'
-brew_cask_install 'font-ubuntu-mono-powerline'
-brew_cask_install 'genymotion'
-brew_cask_install 'imageoptim'
-brew_cask_install 'iterm2'
-brew_cask_install 'karabiner'
-brew_cask_install 'mplayerx'
-brew_cask_install 'paw'
-brew_cask_install 'postgres'
-brew_cask_install 'seil'
-brew_cask_install 'sketch'
-brew_cask_install 'sketch-toolbox'
-brew_cask_install 'spillo'
-brew_cask_install 'the-unarchiver'
-brew_cask_install 'tower'
-brew_cask_install 'xscope'
+cask_install 'appdelete'
+cask_install 'atom'
+cask_install 'bartender'
+cask_install 'electrum'
+cask_install 'font-ubuntu-mono-powerline'
+cask_install 'genymotion'
+cask_install 'imageoptim'
+cask_install 'iterm2'
+cask_install 'karabiner'
+cask_install 'mplayerx'
+cask_install 'paw'
+cask_install 'postgres'
+cask_install 'seil'
+cask_install 'sketch'
+cask_install 'sketch-toolbox'
+cask_install 'spillo'
+cask_install 'the-unarchiver'
+cask_install 'tower'
+cask_install 'xscope'
