@@ -167,6 +167,7 @@ brew_install_or_upgrade 'jq'
 brew_install_or_upgrade 'httpie'
 brew_install_or_upgrade 'youtube-dl'
 brew_install_or_upgrade 'cmake'
+brew_install_or_upgrade 'heroku-toolbelt'
 
 # Databases/Languages
 brew_install_or_upgrade 'redis'
