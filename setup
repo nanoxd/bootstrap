@@ -221,6 +221,11 @@ if ! command -v rcup >/dev/null; then
   rcup -x apps
 fi
 
+if [! -d "$HOME/Dev" ]; then
+  fancy_echo "Creating Dev folder"
+  mkdir ~/Dev
+fi
+
 # homebrew-cask
 export HOMEBREW_CASK_OPTS=--appdir=/Applications
 brew_tap 'caskroom/cask'
