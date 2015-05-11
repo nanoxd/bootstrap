@@ -182,7 +182,7 @@ brew_install_or_upgrade 'ruby-install'
 brew_install_or_upgrade 'openssl'
 brew unlink openssl && brew link openssl --force
 
-ruby_version="ruby 2.2.1"
+ruby_version="ruby 2.2.2"
 
 if ! ruby -v | grep -Fq "$ruby_version"; then
   ruby-install $ruby_version -c --no-reinstall
@@ -192,7 +192,7 @@ if ! ruby -v | grep -Fq "$ruby_version"; then
 fi
 
 source /usr/local/share/chruby/chruby.sh
-chruby ruby-2.2.1
+chruby ruby-2.2.2
 
 gem update --system
 gem_install_or_update 'bundler'
