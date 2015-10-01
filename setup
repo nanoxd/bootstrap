@@ -191,7 +191,6 @@ rbenv global 2.2.3
 
 gem update --system
 gem_install_or_update 'bundler'
-gem_install_or_update 'rails'
 gem_install_or_update 'cocoapods'
 gem_install_or_update 'synx'
 gem_install_or_update 'tmuxinator'
