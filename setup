@@ -233,4 +233,6 @@ cask_install 'spillo'
 cask_install 'the-unarchiver'
 cask_install 'tower'
 cask_install 'xscope'
+cask_install 'fabric'
+cask_install 'xamarin-studio'
 # Done
