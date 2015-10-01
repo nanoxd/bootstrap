@@ -171,23 +171,23 @@ brew_install_or_upgrade 'dateutils'
 brew_install_or_upgrade 'go'
 #brew_install_or_upgrade 'carthage'
 
-brew_install_or_upgrade 'chruby-fish'
-brew_install_or_upgrade 'ruby-install'
+brew_install_or_upgrade 'rbenv' '--HEAD'
+brew_install_or_upgrade 'ruby-build'
 
 brew_install_or_upgrade 'openssl'
 brew unlink openssl && brew link openssl --force
 
-ruby_version="ruby 2.2.2"
+ruby_version="ruby 2.2.3"
 
 if ! ruby -v | grep -Fq "$ruby_version"; then
   ruby-install $ruby_version -c --no-reinstall
+  rbenv install 2.2.3
   echo $ruby_version > ~/.ruby-version
-  append_to_zshrc 'source /usr/local/share/chruby/chruby.sh'
-  append_to_zshrc 'source /usr/local/share/chruby/auto.sh'
+  append_to_zshrc 'if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi'
 fi
 
-source /usr/local/share/chruby/chruby.sh
-chruby ruby-2.2.2
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+rbenv global 2.2.3
 
 gem update --system
 gem_install_or_update 'bundler'
