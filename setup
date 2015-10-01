@@ -161,18 +161,13 @@ brew_install_or_upgrade 'the_silver_searcher'
 brew_install_or_upgrade 'ack'
 brew_install_or_upgrade 'ctags'
 brew_install_or_upgrade 'macvim' '--override-system-vim'
-brew_install_or_upgrade 'ngrok'
-brew_install_or_upgrade 'mosh'
 brew_install_or_upgrade 'jq'
 brew_install_or_upgrade 'httpie'
 brew_install_or_upgrade 'youtube-dl'
 brew_install_or_upgrade 'cmake'
-brew_install_or_upgrade 'heroku-toolbelt'
 brew_install_or_upgrade 'dateutils'
 
-# Databases/Languages
-brew_install_or_upgrade 'redis'
-brew_launchctl_restart 'redis'
+# Languages
 brew_install_or_upgrade 'go'
 brew_install_or_upgrade 'carthage'
 
