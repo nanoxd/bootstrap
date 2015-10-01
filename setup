@@ -169,7 +169,7 @@ brew_install_or_upgrade 'dateutils'
 
 # Languages
 brew_install_or_upgrade 'go'
-brew_install_or_upgrade 'carthage'
+#brew_install_or_upgrade 'carthage'
 
 brew_install_or_upgrade 'chruby-fish'
 brew_install_or_upgrade 'ruby-install'
