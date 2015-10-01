@@ -195,21 +195,6 @@ gem_install_or_update 'cocoapods'
 gem_install_or_update 'synx'
 gem_install_or_update 'tmuxinator'
 
-brew_install_or_upgrade 'nvm'
-if [ ! -d "$HOME/.nvm/" ]; then
-  mkdir "$HOME/.nvm"
-  ln -s "$(brew --prefix nvm)/nvm.sh" ~/.nvm/nvm.sh
-fi
-
-export NVM_DIR=~/.nvm
-
-if ! command -v npm >/dev/null; then
-  source ~/.nvm/nvm.sh
-  fancy_echo "Installing Node"
-  nvm install stable
-  nvm alias default stable
-fi
-
 if ! command -v rcup >/dev/null; then
   brew_tap 'thoughtbot/formulae'
   brew_install_or_upgrade 'rcm'
