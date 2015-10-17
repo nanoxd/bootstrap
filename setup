@@ -193,7 +193,7 @@ gem update --system
 gem_install_or_update 'bundler'
 gem_install_or_update 'cocoapods'
 gem_install_or_update 'synx'
-gem_install_or_update 'tmuxinator'
+gem_install_or_update 'xcodesnippet'
 
 if ! command -v rcup >/dev/null; then
   brew_tap 'thoughtbot/formulae'
