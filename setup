@@ -238,4 +238,8 @@ cask_install 'xscope'
 cask_install 'fabric'
 cask_install 'xamarin-studio'
 cask_install 'things'
+
+# Alcatraz 
+# TODO: Find CLI installer
+curl -fsSL https://raw.githubusercontent.com/supermarin/Alcatraz/deploy/Scripts/install.sh | sh
 # Done
