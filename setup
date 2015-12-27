@@ -165,17 +165,15 @@ brew_install_or_upgrade 'youtube-dl'
 brew_install_or_upgrade 'dateutils'
 
 # Languages
-brew_install_or_upgrade 'go'
 brew_install_or_upgrade 'carthage'
 brew_install_or_upgrade 'swiftlint'
-
 brew_install_or_upgrade 'rbenv' '--HEAD'
 brew_install_or_upgrade 'ruby-build'
 
 brew_install_or_upgrade 'openssl'
 brew unlink openssl && brew link openssl --force
 
-ruby_version="2.2.3"
+ruby_version="2.3.0"
 
 if ! ruby -v | grep -Fq "ruby $ruby_version"; then
   rbenv install $ruby_version
@@ -187,7 +185,7 @@ if which rbenv > /dev/null; then
   eval "$(rbenv init -)";
 fi
 
-rbenv global 2.2.3
+rbenv global $ruby_version
 
 gem update --system
 gem_install_or_update 'bundler'
@@ -201,7 +199,7 @@ if ! command -v rcup >/dev/null; then
   rcup -x apps
 fi
 
-if  [ ! -e "$HOME/.tmux" ]; then
+if [ ! -e "$HOME/.tmux" ]; then
   mkdir -p $HOME/.tmux
   git clone git@github.com:tmux-plugins/tmux-sessionist.git ~/.tmux/sessionist
   git clone git@github.com:tmux-plugins/tmux-resurrect.git ~/.tmux/resurrect
@@ -236,7 +234,7 @@ cask_install 'xscope'
 cask_install 'fabric'
 cask_install 'xamarin-studio'
 
-# Alcatraz 
+# Alcatraz
 # TODO: Find CLI installer
 curl -fsSL https://raw.githubusercontent.com/supermarin/Alcatraz/deploy/Scripts/install.sh | sh
 # Done
