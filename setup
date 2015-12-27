@@ -168,7 +168,8 @@ brew_install_or_upgrade 'dateutils'
 
 # Languages
 brew_install_or_upgrade 'go'
-#brew_install_or_upgrade 'carthage'
+brew_install_or_upgrade 'carthage'
+brew_install_or_upgrade 'swiftlint'
 
 brew_install_or_upgrade 'rbenv' '--HEAD'
 brew_install_or_upgrade 'ruby-build'
@@ -194,7 +195,6 @@ gem update --system
 gem_install_or_update 'bundler'
 gem_install_or_update 'cocoapods'
 gem_install_or_update 'synx'
-gem_install_or_update 'xcodesnippet'
 
 if ! command -v rcup >/dev/null; then
   brew_tap 'thoughtbot/formulae'
@@ -221,6 +221,7 @@ cask_install 'atom'
 cask_install 'bartender'
 cask_install 'electrum'
 cask_install 'font-fantasque-sans-mono'
+cask_install 'font-hack'
 cask_install 'genymotion'
 cask_install 'imageoptim'
 cask_install 'iterm2'
@@ -237,7 +238,6 @@ cask_install 'tower'
 cask_install 'xscope'
 cask_install 'fabric'
 cask_install 'xamarin-studio'
-cask_install 'things'
 
 # Alcatraz 
 # TODO: Find CLI installer
