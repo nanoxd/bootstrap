@@ -125,7 +125,6 @@ if ! command -v brew >/dev/null; then
       'https://raw.githubusercontent.com/Homebrew/install/master/install' | ruby
 
     append_to_zshrc '# recommended by brew doctor'
-
     append_to_zshrc 'export PATH="/usr/local/bin:$PATH"' 1
 
     export PATH="/usr/local/bin:$PATH"
@@ -141,7 +140,6 @@ brew_install_or_upgrade 'git'
 brew_install_or_upgrade 'git-extras'
 brew_install_or_upgrade 'hub'
 brew_install_or_upgrade 'tig'
-brew_install_or_upgrade 'blade'
 
 brew_install_or_upgrade 'fish' '--HEAD'
 if ! cat /etc/shells | grep -Fq fish; then
@@ -214,7 +212,6 @@ fi
 export HOMEBREW_CASK_OPTS=--appdir=/Applications
 brew_tap 'caskroom/cask'
 brew_tap 'caskroom/fonts'
-brew_install_or_upgrade 'caskroom/cask/brew-cask'
 
 cask_install 'alfred'
 cask_install 'atom'
