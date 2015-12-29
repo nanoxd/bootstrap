@@ -36,3 +36,13 @@ fancy_echo "Set Safari’s home page to about:blank for faster loading"
 
 fancy_echo "Make Safari’s search banners default to Contains instead of Starts With"
   defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
+
+fancy_echo "Xcode: See how long a build takes"
+  defaults write com.apple.dt.Xcode ShowBuildOperationDuration YES
+
+fancy_echo "Xcode: Improve autocompletion"
+  defaults write com.apple.dt.Xcode IDECodeCompletionFuzzyMode 3
+  defaults write com.apple.dt.Xcode IDEWorkaroundForRadar6288283 3
+
+fancy_echo "Xcode: Use all cores to build"
+  defaults write com.apple.dt.Xcode IDEBuildOperationMaxNumberOfConcurrentCompileTasks `sysctl -n hw.ncpu`
