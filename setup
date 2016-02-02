@@ -233,6 +233,7 @@ cask_install 'tower'
 cask_install 'xscope'
 cask_install 'fabric'
 cask_install 'xamarin-studio'
+cask_install 'viscosity'
 
 # Alcatraz
 # TODO: Find CLI installer
