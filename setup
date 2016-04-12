@@ -142,9 +142,15 @@ brew_install_or_upgrade 'hub'
 brew_install_or_upgrade 'tig'
 
 brew_install_or_upgrade 'fish' '--HEAD'
+brew_install_or_upgrade 'zsh'
+
 if ! cat /etc/shells | grep -Fq fish; then
   fancy_echo "Adding fish to /etc/shells"
   echo "/usr/local/bin/fish" | sudo tee -a /etc/shells
+fi
+
+if ! command -v antibody >/dev/null; then
+  curl -s https://raw.githubusercontent.com/getantibody/installer/master/install | bash -s
 fi
 
 fancy_echo "Checking for SSH key, generating one if it doesn't exist ..."
