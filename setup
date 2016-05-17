@@ -39,6 +39,18 @@ fi
 
 append_to_zshrc 'export PATH="$HOME/.bin:$PATH"'
 
+HOMEBREW_PREFIX="/usr/local"
+
+if [ -d "$HOMEBREW_PREFIX" ]; then
+  if ! [ -r "$HOMEBREW_PREFIX" ]; then
+    sudo chown -R "$LOGNAME:admin" /usr/local
+  fi
+else
+  sudo mkdir "$HOMEBREW_PREFIX"
+  sudo chflags norestricted "$HOMEBREW_PREFIX"
+  sudo chown -R "$LOGNAME:admin" "$HOMEBREW_PREFIX"
+fi
+
 case "$SHELL" in
   */zsh) : ;;
   *)
@@ -46,68 +58,6 @@ case "$SHELL" in
       chsh -s "$(which zsh)"
     ;;
 esac
-
-brew_install_or_upgrade() {
-  if brew_is_installed "$1"; then
-    if brew_is_upgradable "$1"; then
-      fancy_echo "Upgrading %s ..." "$1"
-      brew upgrade "$@"
-    else
-      fancy_echo "Already using the latest version of %s. Skipping ..." "$1"
-    fi
-  else
-    fancy_echo "Installing %s ..." "$1"
-    brew install "$@"
-  fi
-}
-
-brew_is_installed() {
-  local name="$(brew_expand_alias "$1")"
-
-  brew list -1 | grep -Fqx "$name"
-}
-
-brew_is_upgradable() {
-  local name="$(brew_expand_alias "$1")"
-
-  ! brew outdated --quiet "$name" >/dev/null
-}
-
-brew_tap() {
-  brew tap "$1" 2> /dev/null
-}
-
-brew_expand_alias() {
-  brew info "$1" 2>/dev/null | head -1 | awk '{gsub(/:/, ""); print $1}'
-}
-
-cask_is_installed() {
-  brew cask list -1 | grep -Fqx "$1"
-}
-
-cask_install() {
-  if cask_is_installed "$1"; then
-    fancy_echo "Already installed %s. Skipping ..." "$1"
-  else
-    fancy_echo "Installing %s ..." "$1"
-    brew cask install "$@"
-  fi
-}
-
-brew_launchctl_restart() {
-  local name="$(brew_expand_alias "$1")"
-  local domain="homebrew.mxcl.$name"
-  local plist="$domain.plist"
-
-  fancy_echo "Restarting %s ..." "$1"
-  mkdir -p "$HOME/Library/LaunchAgents"
-  ln -sfv "/usr/local/opt/$name/$plist" "$HOME/Library/LaunchAgents"
-
-  if launchctl list | grep -Fq "$domain"; then
-    launchctl unload "$HOME/Library/LaunchAgents/$plist" >/dev/null
-  fi
-  launchctl load "$HOME/Library/LaunchAgents/$plist" >/dev/null
-}
 
 gem_install_or_update() {
   if gem list "$1" --installed > /dev/null; then
@@ -138,15 +88,7 @@ fi
 
 fancy_echo "Updating Homebrew formulas ..."
 brew update
-
-# Git formulas
-brew_install_or_upgrade 'git'
-brew_install_or_upgrade 'git-extras'
-brew_install_or_upgrade 'hub'
-brew_install_or_upgrade 'tig'
-
-brew_install_or_upgrade 'fish' '--HEAD'
-brew_install_or_upgrade 'zsh'
+brew tap Homebrew/bundle
 
 if ! cat /etc/shells | grep -Fq fish; then
   fancy_echo "Adding fish to /etc/shells"
@@ -161,27 +103,6 @@ fancy_echo "Checking for SSH key, generating one if it doesn't exist ..."
   [[ -f ~/.ssh/id_rsa.pub ]] || ssh-keygen -t rsa -b 4096 -a 100 -C "nano@fdp.io"
   ssh-add ~/.ssh/id_rsa
   pbcopy < ~/.ssh/id_rsa.pub
-
-# Tools
-brew_install_or_upgrade 'tmux'
-brew_install_or_upgrade 'reattach-to-user-namespace'
-brew_install_or_upgrade 'wget' '--with-iri'
-brew_install_or_upgrade 'the_silver_searcher'
-brew_install_or_upgrade 'ack'
-brew_install_or_upgrade 'macvim' '--with-override-system-vim'
-brew_install_or_upgrade 'jq'
-brew_install_or_upgrade 'httpie'
-brew_install_or_upgrade 'youtube-dl'
-brew_install_or_upgrade 'dateutils'
-
-# Languages
-brew_install_or_upgrade 'carthage'
-brew_install_or_upgrade 'swiftlint'
-brew_install_or_upgrade 'rbenv' '--HEAD'
-brew_install_or_upgrade 'ruby-build'
-
-brew_install_or_upgrade 'openssl'
-brew unlink openssl && brew link openssl --force
 
 ruby_version="$(find_latest_ruby)"
 
@@ -200,11 +121,8 @@ rbenv global $ruby_version
 gem update --system
 gem_install_or_update 'bundler'
 gem_install_or_update 'cocoapods'
-gem_install_or_update 'synx'
 
-if ! command -v rcup >/dev/null; then
-  brew_tap 'thoughtbot/formulae'
-  brew_install_or_upgrade 'rcm'
+if [ ! -d "$HOME/.dotfiles/" ]; then
   git clone git@github.com:NanoXD/dotfiles.git ~/.dotfiles
   rcup -x apps
 fi
@@ -215,35 +133,6 @@ if [ ! -e "$HOME/.tmux" ]; then
   git clone git@github.com:tmux-plugins/tmux-resurrect.git ~/.tmux/resurrect
   git clone git@github.com:tmux-plugins/tmux-continuum.git ~/.tmux/continuum
 fi
-
-# homebrew-cask
-export HOMEBREW_CASK_OPTS=--appdir=/Applications
-brew_tap 'caskroom/cask'
-brew_tap 'caskroom/fonts'
-
-cask_install 'alfred'
-cask_install 'atom'
-cask_install 'bartender'
-cask_install 'electrum'
-cask_install 'font-fantasque-sans-mono'
-cask_install 'font-hack'
-cask_install 'genymotion'
-cask_install 'imageoptim'
-cask_install 'iterm2'
-cask_install 'karabiner'
-cask_install 'kaleidoscope'
-cask_install 'mplayerx'
-cask_install 'paw'
-cask_install 'postgres'
-cask_install 'seil'
-cask_install 'sketch'
-cask_install 'spillo'
-cask_install 'the-unarchiver'
-cask_install 'tower'
-cask_install 'xscope'
-cask_install 'fabric'
-cask_install 'xamarin-studio'
-cask_install 'viscosity'
 
 # Alcatraz
 # TODO: Find CLI installer
