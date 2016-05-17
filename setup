@@ -119,6 +119,10 @@ gem_install_or_update() {
   fi
 }
 
+find_latest_ruby() {
+  rbenv install -l | grep -v - | tail -1 | sed -e 's/^ *//'
+}
+
 if ! command -v brew >/dev/null; then
   fancy_echo "Installing Homebrew ..."
     curl -fsS \
@@ -179,10 +183,10 @@ brew_install_or_upgrade 'ruby-build'
 brew_install_or_upgrade 'openssl'
 brew unlink openssl && brew link openssl --force
 
-ruby_version="2.3.0"
+ruby_version="$(find_latest_ruby)"
 
 if ! ruby -v | grep -Fq "ruby $ruby_version"; then
-  rbenv install $ruby_version
+  rbenv install -s $ruby_version
   echo $ruby_version > ~/.ruby-version
   append_to_zshrc 'if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi'
 fi
