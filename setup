@@ -90,6 +90,8 @@ fancy_echo "Updating Homebrew formulas ..."
 brew update
 brew tap Homebrew/bundle
 
+brew bundle ./Brewfile
+
 if ! cat /etc/shells | grep -Fq fish; then
   fancy_echo "Adding fish to /etc/shells"
   echo "/usr/local/bin/fish" | sudo tee -a /etc/shells
