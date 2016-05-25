@@ -123,6 +123,7 @@ rbenv global $ruby_version
 gem update --system
 gem_install_or_update 'bundler'
 gem_install_or_update 'cocoapods'
+gem_install_or_update 'xcversion'
 
 if [ ! -d "$HOME/.dotfiles/" ]; then
   git clone git@github.com:NanoXD/dotfiles.git ~/.dotfiles
