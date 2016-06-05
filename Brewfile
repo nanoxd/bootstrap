@@ -1,5 +1,6 @@
 tap "thoughtbot/formulae"
 tap "homebrew/services"
+tap "neovim/neovim"
 
 cask_args appdir: '/Applications'
 tap 'caskroom/cask'
@@ -22,6 +23,7 @@ brew 'wget', args: ['--with-iri']
 brew 'the_silver_searcher'
 brew 'ack'
 brew 'macvim', args: ['--with-override-system-vim']
+brew 'neovim'
 brew 'jq'
 brew 'httpie'
 brew 'youtube-dl'
@@ -55,5 +57,4 @@ cask 'spillo'
 cask 'the-unarchiver'
 cask 'tower'
 cask 'xscope'
-cask 'fabric'
 cask 'viscosity'
