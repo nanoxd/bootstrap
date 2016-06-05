@@ -13,7 +13,7 @@ brew "hub"
 brew "tig"
 brew "openssl"
 
-brew "fish", args: ["--HEAD"]
+brew "fish"
 brew "zsh"
 
 # Tools
