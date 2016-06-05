@@ -38,6 +38,16 @@ brew 'ruby-build'
 brew 'node'
 brew 'hugo'
 
+# Media
+brew 'flac'
+brew 'faac'
+brew 'ffmpeg'
+brew 'lame'
+brew 'mktorrent'
+brew 'vorbis-tools'
+brew 'vorbisgain'
+
+
 ### Casks ###
 cask 'alfred'
 cask 'atom'
