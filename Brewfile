@@ -37,6 +37,7 @@ brew 'rbenv'
 brew 'ruby-build'
 brew 'node'
 brew 'hugo'
+brew 'ctags'
 
 # Media
 brew 'flac'
