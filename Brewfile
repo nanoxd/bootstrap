@@ -29,12 +29,10 @@ brew 'dateutils'
 brew 'rcm'
 
 brew 'carthage'
-brew 'swiftlint'
 brew 'postgres'
 brew 'rbenv'
 brew 'ruby-build'
 brew 'node'
-brew 'hugo'
 brew 'ctags'
 
 # Media
