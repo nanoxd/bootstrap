@@ -133,8 +133,6 @@ fi
 if [ ! -e "$HOME/.tmux" ]; then
   mkdir -p $HOME/.tmux
   git clone git@github.com:tmux-plugins/tmux-sessionist.git ~/.tmux/sessionist
-  git clone git@github.com:tmux-plugins/tmux-resurrect.git ~/.tmux/resurrect
-  git clone git@github.com:tmux-plugins/tmux-continuum.git ~/.tmux/continuum
 fi
 
 pip install diff-highlight
