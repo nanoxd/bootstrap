@@ -137,7 +137,3 @@ fi
 
 pip install diff-highlight
 
-# Alcatraz
-# TODO: Find CLI installer
-curl -fsSL https://raw.githubusercontent.com/supermarin/Alcatraz/deploy/Scripts/install.sh | sh
-# Done
