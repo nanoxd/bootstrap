@@ -8,12 +8,10 @@ tap 'caskroom/fonts'
 
 # Git formulas
 brew "git"
-brew "git-extras"
 brew "hub"
 brew "tig"
 brew "openssl"
 
-brew "fish"
 brew "zsh"
 
 # Tools
