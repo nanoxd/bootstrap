@@ -42,3 +42,6 @@ fancy_echo "Xcode: See how long a build takes"
 
 fancy_echo "Xcode: Use all cores to build"
   defaults write com.apple.dt.Xcode IDEBuildOperationMaxNumberOfConcurrentCompileTasks `sysctl -n hw.ncpu`
+
+fancy_echo "Make Window animations faster"
+  defaults write NSGlobalDomain NSAutomaticWindowAnimationsEnabled -bool false
