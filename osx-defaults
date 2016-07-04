@@ -25,17 +25,27 @@ fancy_echo "Finder: allow text selection in Quick Look"
 fancy_echo "Avoid creating .DS_Store files on network volumes"
   defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
 
-fancy_echo "Set the icon size of Dock items to 36 pixels"
+fancy_echo "Dock: Set the icon size of Dock items to 36 pixels"
   defaults write com.apple.dock tilesize -int 36
 
-fancy_echo "Automatically hide and show the Dock"
+fancy_echo "Dock: Automatically hide and show"
   defaults write com.apple.dock autohide -bool true
 
-fancy_echo "Set Safari’s home page to about:blank for faster loading"
+fancy_echo "Safari: Set home page to about:blank for faster loading"
   defaults write com.apple.Safari HomePage -string "about:blank"
 
-fancy_echo "Make Safari’s search banners default to Contains instead of Starts With"
+fancy_echo "Safari: Make search banners default to Contains instead of Starts With"
   defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
+
+fancy_echo "Safari: Prevent opening ‘safe’ files automatically after downloading"
+  defaults write com.apple.Safari AutoOpenSafeDownloads -bool false
+
+fancy_echo "Safari: Enable debug menu"
+  defaults write com.apple.Safari IncludeInternalDebugMenu -bool true
+  defaults write com.apple.Safari IncludeDevelopMenu -bool true
+  defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
+  defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
+  defaults write NSGlobalDomain WebKitDeveloperExtras -bool true
 
 fancy_echo "Xcode: See how long a build takes"
   defaults write com.apple.dt.Xcode ShowBuildOperationDuration YES
@@ -45,3 +55,21 @@ fancy_echo "Xcode: Use all cores to build"
 
 fancy_echo "Make Window animations faster"
   defaults write NSGlobalDomain NSAutomaticWindowAnimationsEnabled -bool false
+
+fancy_echo "Increase sound quality for bluetooth speakers/headsets"
+  defaults write com.apple.BluetoothAudioAgent "Apple Bitpool Min (editable)" -int 40
+
+fancy_echo "Show icons for hard drives, servers, and removable media on the desktop"
+  defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool true
+  defaults write com.apple.finder ShowHardDrivesOnDesktop -bool true
+  defaults write com.apple.finder ShowMountedServersOnDesktop -bool true
+  defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool true
+
+fancy_echo "Display all file extensions and disable rename warning"
+  defaults write NSGlobalDomain AppleShowAllExtensions -bool true
+  defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
+
+fancy_echo "Mail: Copy email addreses without names"
+  defaults write com.apple.mail AddressesIncludeNameOnPasteboard -bool false
+fancy_echo "Mail: Add the keyboard shortcut ⌘ + Enter to send an email"
+  defaults write com.apple.mail NSUserKeyEquivalents -dict-add "Send" -string "@\\U21a9"
