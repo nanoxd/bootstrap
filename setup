@@ -25,6 +25,7 @@ append_to_zshrc() {
   fi
 }
 
+
 trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
 
 set -e
@@ -67,6 +68,21 @@ gem_install_or_update() {
     fancy_echo "Installing %s ..." "$1"
     gem install "$@" --no-document
   fi
+}
+
+pip_install_or_update() {
+  local package = "$1"
+  if pip_is_installed $package > /dev/null; then
+    fancy_echo "Updating %s ..." "$package"
+    pip install --upgrade $package
+  else
+    fancy_echo "Installing %s ..." "$package"
+    pip install $package
+  fi
+}
+
+pip_is_installed() {
+  pip list | grep "$1"
 }
 
 find_latest_ruby() {
@@ -135,5 +151,6 @@ if [ ! -e "$HOME/.tmux" ]; then
   git clone git@github.com:tmux-plugins/tmux-sessionist.git ~/.tmux/sessionist
 fi
 
-pip install diff-highlight
+pip_install_or_update 'diff-highlight'
+pip_install_or_update 'neovim'
 
