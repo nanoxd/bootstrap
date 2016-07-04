@@ -25,7 +25,6 @@ append_to_zshrc() {
   fi
 }
 
-
 trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
 
 set -e
@@ -87,6 +86,10 @@ pip_is_installed() {
 
 find_latest_ruby() {
   rbenv install -l | grep -v - | tail -1 | sed -e 's/^ *//'
+}
+
+safari_extension_installed() {
+  defaults read ~/Library/Safari/Extensions/extensions | grep --quiet "$1"
 }
 
 if ! command -v brew >/dev/null; then
@@ -154,3 +157,12 @@ fi
 pip_install_or_update 'diff-highlight'
 pip_install_or_update 'neovim'
 
+if ! safari_extension_installed "com.buunguyen.octotree"; then
+  curl -o "$TMPDIR/octotree.safariextz" -O "https://github.com/buunguyen/octotree/blob/master/dist/safari.safariextz?raw=true"
+  open "$TMPDIR/octotree.safariextz"
+fi
+
+if ! safari_extension_installed "me.fantattitude.refined-github"; then
+  curl -o "$TMPDIR/refined-github.safariextz" -O "https://github.com/fantattitude/refined-github-safari/raw/master/dist/Refined%20GitHub.safariextz"
+  open "$TMPDIR/refined-github.safariextz"
+fi
