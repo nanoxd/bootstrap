@@ -8,9 +8,16 @@ tap 'caskroom/fonts'
 
 # Git formulas
 brew "git"
+brew 'git-lfs'
+brew 'gitignore'
 brew "hub"
 brew "tig"
 brew "openssl"
+
+# GPG stuff
+brew 'gnupg'
+brew 'gpg-agent'
+brew 'pinentry-mac'
 
 brew "zsh"
 
