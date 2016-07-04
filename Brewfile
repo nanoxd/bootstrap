@@ -9,7 +9,6 @@ tap 'caskroom/fonts'
 # Git formulas
 brew "git"
 brew 'git-lfs'
-brew 'gitignore'
 brew "hub"
 brew "tig"
 brew "openssl"
