@@ -177,3 +177,5 @@ if ! safari_extension_installed "me.fantattitude.refined-github"; then
   curl -o "$TMPDIR/refined-github.safariextz" -O "https://github.com/fantattitude/refined-github-safari/raw/master/dist/Refined%20GitHub.safariextz"
   open "$TMPDIR/refined-github.safariextz"
 fi
+
+apm install --packages-file ./Atomfile
