@@ -2,7 +2,6 @@ tap "thoughtbot/formulae"
 tap "homebrew/services"
 tap "neovim/neovim"
 
-cask_args appdir: '/Applications'
 tap 'caskroom/cask'
 tap 'caskroom/fonts'
 
@@ -27,7 +26,7 @@ brew 'wget', args: ['--with-iri']
 brew 'the_silver_searcher'
 brew 'ack'
 brew 'macvim', args: ['--with-override-system-vim']
-brew 'neovim'
+brew 'neovim', args: ['--HEAD']
 brew 'jq'
 brew 'httpie'
 brew 'youtube-dl'
