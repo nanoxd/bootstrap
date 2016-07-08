@@ -10,7 +10,6 @@ es6-javascript
 pigments
 minimap-git-diff
 language-swift
-seti-ui
 language-viml
 language-tmux
 tree-view-git-status
@@ -19,3 +18,5 @@ autocomplete-ctags
 ctags-status
 symbol-gen
 align-regexp
+native-ui
+file-icons
