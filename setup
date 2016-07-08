@@ -178,4 +178,4 @@ if ! safari_extension_installed "me.fantattitude.refined-github"; then
   open "$TMPDIR/refined-github.safariextz"
 fi
 
-apm install --packages-file ./Atomfile
+make atom
