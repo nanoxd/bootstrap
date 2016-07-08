@@ -13,3 +13,9 @@ language-swift
 seti-ui
 language-viml
 language-tmux
+tree-view-git-status
+minimap-pigments
+autocomplete-ctags
+ctags-status
+symbol-gen
+align-regexp
