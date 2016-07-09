@@ -20,3 +20,7 @@ symbol-gen
 align-regexp
 native-ui
 file-icons
+autocomplete-paths
+git-plus
+highlight-selected
+merge-conflicts
