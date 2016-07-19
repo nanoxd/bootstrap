@@ -25,3 +25,5 @@ git-plus
 highlight-selected
 merge-conflicts
 emmet
+relative-numbers
+git-time-machine
