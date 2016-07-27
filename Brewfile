@@ -1,6 +1,7 @@
 tap "thoughtbot/formulae"
 tap "homebrew/services"
 tap "neovim/neovim"
+tap "ravenac95/sudolikeaboss"
 
 tap 'caskroom/cask'
 tap 'caskroom/fonts'
@@ -39,6 +40,7 @@ brew 'rbenv'
 brew 'ruby-build'
 brew 'node'
 brew 'ctags'
+brew 'sudolikeaboss'
 
 # Media
 brew 'flac'
