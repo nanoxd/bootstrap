@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/sh
 
 fancy_echo() {
   local fmt="$1"; shift
@@ -136,22 +136,27 @@ fancy_echo "Checking for GPG Key, generating one if it doesn't exist ..."
     git config --file="$local_gitconfig" commit.gpgsign true
   fi
 
+# Ruby Install
+
 ruby_version="$(find_latest_ruby)"
+append_to_zshrc 'eval "$(rbenv init - --no-rehash)"' 1
+eval "$(rbenv init -)"
 
-if ! ruby -v | grep -Fq "ruby $ruby_version"; then
-  rbenv install -s $ruby_version
-  echo $ruby_version > ~/.ruby-version
-  append_to_zshrc 'if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi'
-fi
-
-if which rbenv > /dev/null; then
-  eval "$(rbenv init -)";
+if ! rbenv versions | grep -Fq "$ruby_version"; then
+  RUBY_CONFIGURE_OPTS=--with-openssl-dir=/usr/local/opt/openssl rbenv install -s "$ruby_version"
 fi
 
 rbenv global $ruby_version
+rbenv shell "$ruby_version"
+
+# Gems
 
 gem update --system
+
 gem_install_or_update 'bundler'
+number_of_cores=$(sysctl -n hw.ncpu)
+bundle config --global jobs $((number_of_cores - 1))
+
 gem_install_or_update 'cocoapods'
 gem_install_or_update 'xcode-install'
 
