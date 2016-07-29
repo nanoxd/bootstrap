@@ -109,7 +109,7 @@ fancy_echo "Updating Homebrew formulas ..."
 brew update
 brew tap Homebrew/bundle
 
-brew bundle ./Brewfile
+make brew
 
 if ! cat /etc/shells | grep -Fq fish; then
   fancy_echo "Adding fish to /etc/shells"
