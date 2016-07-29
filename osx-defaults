@@ -22,14 +22,29 @@ fancy_echo "Set a blazingly fast keyboard repeat rate"
 fancy_echo "Finder: allow text selection in Quick Look"
   defaults write com.apple.finder QLEnableTextSelection -bool true
 
-fancy_echo "Avoid creating .DS_Store files on network volumes"
+fancy_echo "Finder: Avoid creating .DS_Store files on network volumes"
   defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
+
+fancy_echo "Finder: Show All Files"
+  defaults write com.apple.finder AppleShowAllFiles YES
+
+fancy_echo "Finder: Show Status Bar"
+  defaults write com.apple.finder ShowStatusBar -bool true
+
+fancy_echo "Finder: Show Path Bar"
+  defaults write com.apple.finder ShowPathbar -bool true
+
+fancy_echo "Finder: Search Current Folder By Default"
+  defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"
 
 fancy_echo "Dock: Set the icon size of Dock items to 36 pixels"
   defaults write com.apple.dock tilesize -int 36
 
 fancy_echo "Dock: Automatically hide and show"
   defaults write com.apple.dock autohide -bool true
+
+fancy_echo "Mission Control: Don't rearrange by use"
+  defaults write com.apple.dock mru-spaces -bool false
 
 fancy_echo "Safari: Set home page to about:blank for faster loading"
   defaults write com.apple.Safari HomePage -string "about:blank"
