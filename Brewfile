@@ -41,6 +41,7 @@ brew 'ruby-build'
 brew 'node'
 brew 'ctags'
 brew 'sudolikeaboss'
+brew 'sourcekitten'
 
 # Media
 brew 'flac'

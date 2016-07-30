@@ -12,6 +12,7 @@ es6-javascript
 pigments
 minimap-git-diff
 language-swift
+autocomplete-swift
 language-viml
 language-tmux
 tree-view-git-status
