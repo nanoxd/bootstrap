@@ -8,6 +8,7 @@ tap 'caskroom/fonts'
 
 # Git formulas
 brew "git"
+brew 'git-extras'
 brew 'git-lfs'
 brew "hub"
 brew "tig"
