@@ -31,7 +31,6 @@ linter-js-standard
 standard-formatter
 ctags-status
 symbol-gen
-symbols-tree-view
 align-regexp
 markdown-writer
 terminal-plus
