@@ -27,13 +27,13 @@ brew 'reattach-to-user-namespace'
 brew 'wget', args: ['--with-iri']
 brew 'the_silver_searcher'
 brew 'ack'
-brew 'macvim', args: ['--with-override-system-vim']
 brew 'neovim', args: ['--HEAD']
 brew 'jq'
 brew 'httpie'
 brew 'youtube-dl'
 brew 'dateutils'
 brew 'rcm'
+brew 'n'
 
 brew 'carthage'
 brew 'postgres'
