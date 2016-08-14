@@ -34,6 +34,7 @@ brew 'youtube-dl'
 brew 'dateutils'
 brew 'rcm'
 brew 'n'
+brew 'tree'
 
 brew 'carthage'
 brew 'postgres'
