@@ -43,3 +43,5 @@ ava-standard
 editorconfig
 ava
 language-apache
+flow-ide
+nuclide
