@@ -44,4 +44,5 @@ editorconfig
 ava
 language-apache
 flow-ide
-nuclide
+linter-flow
+language-gradle
