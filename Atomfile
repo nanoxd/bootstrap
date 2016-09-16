@@ -14,6 +14,8 @@ language-graphql
 language-swift
 language-tmux
 language-elm
+language-apache
+language-gradle
 es6-javascript
 autocomplete-swift
 autocomplete-ctags
@@ -28,12 +30,12 @@ tree-view-git-status
 merge-conflicts
 linter
 linter-js-standard
+linter-flow
 standard-formatter
 ctags-status
 symbol-gen
 align-regexp
 markdown-writer
-terminal-plus
 autoprefixer
 atom-beautify
 set-syntax
@@ -41,8 +43,4 @@ painless-panes
 project-find-navigation
 ava-standard
 editorconfig
-ava
-language-apache
 flow-ide
-linter-flow
-language-gradle
