@@ -26,7 +26,7 @@ brew 'reattach-to-user-namespace'
 brew 'wget', args: ['--with-iri']
 brew 'the_silver_searcher'
 brew 'ack'
-brew 'neovim', args: ['--HEAD']
+brew 'neovim'
 brew 'jq'
 brew 'httpie'
 brew 'youtube-dl'
