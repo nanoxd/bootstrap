@@ -133,8 +133,8 @@ fancy_echo "Checking for GPG Key, generating one if it doesn't exist ..."
     gpg_pub_key="$(gpg --list-keys --keyid-format LONG | grep pub | awk '{print $2}' | awk -F '/' '{print $2}' | xargs)"
     local_gitconfig="$HOME/.gitconfig.local"
 
-    git config --file="$local_gitconfig" user.signingkey "$(gpg_pub_key)"
-    pbcopy < gpg --armor --export "$(gpg_pub_key)"
+    git config --file="$local_gitconfig" user.signingkey "$gpg_pub_key"
+    pbcopy < gpg --armor --export "$gpg_pub_key"
     git config --file="$local_gitconfig" commit.gpgsign true
   fi
 
