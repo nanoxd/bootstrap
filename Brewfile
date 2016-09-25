@@ -3,7 +3,6 @@ tap "homebrew/services"
 tap "neovim/neovim"
 tap "ravenac95/sudolikeaboss"
 
-tap 'caskroom/cask'
 tap 'caskroom/fonts'
 
 # Git formulas
@@ -63,11 +62,8 @@ cask 'electrum'
 cask 'font-fira-code'
 cask 'imageoptim'
 cask 'iterm2'
-cask 'karabiner'
 cask 'kaleidoscope'
-cask 'mplayerx'
 cask 'paw'
-cask 'seil'
 cask 'sketch'
 cask 'spillo'
 cask 'tower'
