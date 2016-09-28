@@ -3,7 +3,6 @@ tap "homebrew/services"
 tap "neovim/neovim"
 tap "ravenac95/sudolikeaboss"
 
-tap 'caskroom/cask'
 tap 'caskroom/fonts'
 
 # Git formulas
@@ -27,7 +26,7 @@ brew 'reattach-to-user-namespace'
 brew 'wget', args: ['--with-iri']
 brew 'the_silver_searcher'
 brew 'ack'
-brew 'neovim', args: ['--HEAD']
+brew 'neovim'
 brew 'jq'
 brew 'httpie'
 brew 'youtube-dl'
@@ -63,11 +62,8 @@ cask 'electrum'
 cask 'font-fira-code'
 cask 'imageoptim'
 cask 'iterm2'
-cask 'karabiner'
 cask 'kaleidoscope'
-cask 'mplayerx'
 cask 'paw'
-cask 'seil'
 cask 'sketch'
 cask 'spillo'
 cask 'tower'
