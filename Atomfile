@@ -44,3 +44,4 @@ project-find-navigation
 ava-standard
 editorconfig
 flow-ide
+language-lua
