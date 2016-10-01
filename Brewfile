@@ -14,7 +14,7 @@ brew "tig"
 brew "openssl"
 
 # GPG stuff
-brew 'gnupg'
+brew 'gnupg2'
 brew 'gpg-agent'
 brew 'pinentry-mac'
 
@@ -44,15 +44,8 @@ brew 'elm'
 brew 'ctags'
 brew 'sudolikeaboss'
 brew 'sourcekitten'
-
-# Media
-brew 'flac'
-brew 'faac'
-brew 'ffmpeg'
-brew 'lame'
-brew 'mktorrent'
-brew 'vorbis-tools'
-brew 'vorbisgain'
+brew 'fzf'
+brew 'https://raw.githubusercontent.com/BurntSushi/ripgrep/master/pkg/brew/ripgrep.rb'
 
 ### Casks ###
 cask 'alfred'
