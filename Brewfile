@@ -2,6 +2,7 @@ tap "thoughtbot/formulae"
 tap "homebrew/services"
 tap "neovim/neovim"
 tap "ravenac95/sudolikeaboss"
+tap 'burntsushi/ripgrep'
 
 tap 'caskroom/fonts'
 
@@ -45,7 +46,7 @@ brew 'ctags'
 brew 'sudolikeaboss'
 brew 'sourcekitten'
 brew 'fzf'
-brew 'https://raw.githubusercontent.com/BurntSushi/ripgrep/master/pkg/brew/ripgrep.rb'
+brew 'burntsushi/ripgrep/ripgrep-bin'
 
 ### Casks ###
 cask 'alfred'
