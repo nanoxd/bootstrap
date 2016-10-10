@@ -24,6 +24,7 @@ pigments
 minimap
 minimap-git-diff
 minimap-pigments
+minimap-find-and-replace
 git-plus
 git-time-machine
 tree-view-git-status
