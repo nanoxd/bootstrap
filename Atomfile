@@ -46,3 +46,4 @@ ava-standard
 editorconfig
 flow-ide
 language-lua
+language-docker
