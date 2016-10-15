@@ -47,3 +47,9 @@ editorconfig
 flow-ide
 language-lua
 language-docker
+language-haskell
+autocomplete-haskell
+language-rust
+linter-rust
+git-diff-details
+language-nginx
