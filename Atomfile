@@ -42,7 +42,6 @@ atom-beautify
 set-syntax
 painless-panes
 project-find-navigation
-ava-standard
 editorconfig
 flow-ide
 language-lua
