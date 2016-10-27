@@ -31,7 +31,6 @@ tree-view-git-status
 merge-conflicts
 linter
 linter-js-standard
-linter-flow
 standard-formatter
 ctags-status
 symbol-gen
