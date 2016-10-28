@@ -52,3 +52,4 @@ autocomplete-haskell
 linter-rust
 git-diff-details
 choose-pane
+terminal-fusion
