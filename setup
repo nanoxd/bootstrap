@@ -98,6 +98,10 @@ generate_ssh_key() {
   pbcopy < ~/.ssh/id_ed25519.pub
 }
 
+yarn_install_or_update() {
+  yarn global add "$1"
+}
+
 if ! command -v brew >/dev/null; then
   fancy_echo "Installing Homebrew ..."
     /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
@@ -180,3 +184,7 @@ if ! safari_extension_installed "com.buunguyen.octotree"; then
 fi
 
 make atom
+
+# Yarn
+
+yarn_install_or_update 'tern'
