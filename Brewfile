@@ -2,7 +2,7 @@ tap "thoughtbot/formulae"
 tap "homebrew/services"
 tap "neovim/neovim"
 tap "ravenac95/sudolikeaboss"
-tap 'burntsushi/ripgrep', args: ['https://github.com/BurntSushi/ripgrep.git']
+tap 'burntsushi/ripgrep', 'https://github.com/BurntSushi/ripgrep.git'
 
 tap 'caskroom/fonts'
 
