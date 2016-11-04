@@ -22,6 +22,7 @@ brew 'pinentry-mac'
 brew "zsh"
 
 # Tools
+brew 'fish'
 brew 'tmux'
 brew 'reattach-to-user-namespace'
 brew 'wget', args: ['--with-iri']
