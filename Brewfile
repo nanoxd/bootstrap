@@ -47,6 +47,7 @@ brew 'sudolikeaboss'
 brew 'sourcekitten'
 brew 'fzf'
 brew 'burntsushi/ripgrep/ripgrep-bin'
+brew 'z'
 
 ### Casks ###
 cask 'alfred'
