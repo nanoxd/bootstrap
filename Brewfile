@@ -48,6 +48,7 @@ brew 'sourcekitten'
 brew 'fzf'
 brew 'burntsushi/ripgrep/ripgrep-bin'
 brew 'z'
+brew 'editorconfig'
 
 ### Casks ###
 cask 'alfred'
