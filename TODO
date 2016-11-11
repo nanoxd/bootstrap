@@ -1,7 +1,1 @@
-NPM: 
-* Add `npm-check`
-* Add `yo`
-* Add `generator-mnm`
-* Add `tern `
-
-* Add yarn
+* Fix GPG generation
