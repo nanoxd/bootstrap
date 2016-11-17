@@ -17,6 +17,7 @@ brew "openssl"
 # GPG stuff
 brew 'gnupg2'
 brew 'gpg-agent'
+brew 'keybase'
 brew 'pinentry-mac'
 
 brew "zsh"
@@ -49,7 +50,6 @@ brew 'fzf'
 brew 'burntsushi/ripgrep/ripgrep-bin'
 brew 'z'
 brew 'editorconfig'
-brew 'hyper'
 
 ### Casks ###
 cask 'alfred'
