@@ -50,6 +50,7 @@ brew 'fzf'
 brew 'burntsushi/ripgrep/ripgrep-bin'
 brew 'z'
 brew 'editorconfig'
+brew 'trash'
 
 ### Casks ###
 cask 'alfred'
