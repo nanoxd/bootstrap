@@ -130,7 +130,6 @@ fancy_echo "Checking for GPG Key, generating one if it doesn't exist ..."
   fi
 
 # Ruby Install
-
 ruby_version="$(find_latest_ruby)"
 append_to_zshrc 'eval "$(rbenv init - --no-rehash)"' 1
 eval "$(rbenv init -)"
@@ -174,5 +173,4 @@ fi
 make atom
 
 # Yarn
-
 yarn_install_or_update 'tern'
