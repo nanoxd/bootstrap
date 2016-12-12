@@ -174,3 +174,4 @@ make atom
 
 # Yarn
 yarn_install_or_update 'tern'
+yarn_install_or_update 'clipboard-cli'
