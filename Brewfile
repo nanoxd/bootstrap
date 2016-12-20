@@ -9,16 +9,15 @@ tap 'caskroom/fonts'
 
 # Git formulas
 brew "git"
+brew "hub"
 brew 'git-extras'
 brew 'git-lfs'
-brew "hub"
 brew "tig"
 brew "openssl"
 
 # GPG stuff
 brew 'gnupg2'
 brew 'gpg-agent'
-brew 'keybase'
 brew 'pinentry-mac'
 
 brew "zsh"
@@ -27,7 +26,7 @@ brew "zsh"
 brew 'fish'
 brew 'tmux'
 brew 'reattach-to-user-namespace'
-brew 'wget', args: ['--with-iri']
+brew 'wget', args: ['with-iri']
 brew 'ack'
 brew 'neovim'
 brew 'jq'
@@ -47,7 +46,7 @@ brew 'rbenv'
 brew 'ruby-build'
 brew 'rust'
 brew 'elm'
-brew 'homebrew/devel-only/elm-format', args: ['--devel']
+brew 'homebrew/devel-only/elm-format', args: ['devel']
 brew 'ctags'
 brew 'sudolikeaboss'
 brew 'sourcekitten'
