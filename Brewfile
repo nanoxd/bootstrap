@@ -38,6 +38,7 @@ brew 'yarn'
 brew 'watchman'
 brew 'tree'
 brew 'trash'
+brew 'mas'
 
 # Languages
 brew 'carthage'
