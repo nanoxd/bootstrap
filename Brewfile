@@ -76,3 +76,9 @@ cask 'hammerspoon'
 cask 'graphiql'
 cask 'karabiner-elements'
 cask 'dash'
+cask 'spotify'
+
+### Quicklook ###
+cask 'qlvideo'
+cask 'quicklook-json'
+
