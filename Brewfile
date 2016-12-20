@@ -82,3 +82,16 @@ cask 'spotify'
 cask 'qlvideo'
 cask 'quicklook-json'
 
+### MAS ###
+mas '1Blocker', id: 1107421413
+mas '2Do', id: 477670270
+mas 'Airmail 3', id: 918858936
+mas 'Deckset', id: 847496013
+mas 'Deliveries', id: 924726344
+mas 'GIFs', id: 961850017
+mas 'Monosnap', id: 540348655
+mas 'PaintCode', id: 808809998
+mas 'Reeder', id: 880001334
+mas 'SnippetsLab', id: 1006087419
+mas 'Spark', id: 1176895641
+mas 'Tweetbot', id: 557168941
