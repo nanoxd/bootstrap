@@ -1,5 +1,6 @@
-tap "thoughtbot/formulae"
 tap "homebrew/services"
+tap "homebrew/devel-only"
+tap "thoughtbot/formulae"
 tap "neovim/neovim"
 tap "ravenac95/sudolikeaboss"
 tap 'burntsushi/ripgrep', 'https://github.com/BurntSushi/ripgrep.git'
