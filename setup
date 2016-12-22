@@ -115,7 +115,7 @@ fi
 
 fancy_echo "Checking for SSH key, generating one if it doesn't exist ..."
   if [[ ! -f ~/.ssh/id_ed25519.pub ]]; then
-    generate_ssh_key()
+    generate_ssh_key
   fi
 
 fancy_echo "Checking for GPG Key, generating one if it doesn't exist ..."
