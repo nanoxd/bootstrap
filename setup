@@ -82,8 +82,17 @@ generate_ssh_key() {
   pbcopy < ~/.ssh/id_ed25519.pub
 }
 
+yarn_is_installed() {
+  yarn global ls | grep "$1"
+}
+
 yarn_install_or_update() {
-  yarn global add "$1"
+  local package="$1"
+  if yarn_is_installed $package > /dev/null; then
+    yarn global upgrade $package
+  else
+    yarn global add $package
+  fi
 }
 
 if ! command -v brew >/dev/null; then
