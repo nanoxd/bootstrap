@@ -76,10 +76,6 @@ find_latest_ruby() {
   rbenv install -l | grep -v - | tail -1 | sed -e 's/^ *//'
 }
 
-safari_extension_installed() {
-  defaults read ~/Library/Safari/Extensions/extensions | grep --quiet "$1"
-}
-
 generate_ssh_key() {
   ssh-keygen -a 100 -t ed25519
   ssh-add ~/.ssh/id_ed25519
@@ -164,11 +160,6 @@ fi
 
 pip_install_or_update 'diff-highlight'
 pip_install_or_update 'neovim'
-
-if ! safari_extension_installed "com.buunguyen.octotree"; then
-  curl -o "$TMPDIR/octotree.safariextz" -O "https://github.com/buunguyen/octotree/blob/master/dist/safari.safariextz?raw=true"
-  open "$TMPDIR/octotree.safariextz"
-fi
 
 make atom
 
