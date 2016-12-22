@@ -61,15 +61,15 @@ pip_install_or_update() {
   local package = "$1"
   if pip_is_installed $package > /dev/null; then
     fancy_echo "Updating %s ..." "$package"
-    pip install --upgrade $package
+    pip3 install --upgrade $package
   else
     fancy_echo "Installing %s ..." "$package"
-    pip install $package
+    pip3 install $package
   fi
 }
 
 pip_is_installed() {
-  pip list | grep "$1"
+  pip3 list | grep "$1"
 }
 
 find_latest_ruby() {
