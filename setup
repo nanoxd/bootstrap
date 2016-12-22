@@ -1,5 +1,7 @@
 #!/bin/sh
 
+ELM_VERSION="0.18"
+
 fancy_echo() {
   local fmt="$1"; shift
 
@@ -112,6 +114,11 @@ brew update
 brew tap Homebrew/bundle
 
 make brew
+
+if ! command -v elm-format >/dev/null; then
+  fancy_echo "Linking elm-format"
+  ln -s "/usr/local/bin/elm-format-$ELM_VERSION" /usr/local/bin/elm-format
+fi
 
 if ! cat /etc/shells | grep -Fq fish; then
   fancy_echo "Adding fish to /etc/shells"
