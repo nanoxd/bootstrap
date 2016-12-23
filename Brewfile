@@ -56,6 +56,7 @@ brew 'burntsushi/ripgrep/ripgrep-bin'
 brew 'z'
 brew 'editorconfig'
 brew 'pidcat'
+brew 'haskell-stack'
 
 ### Casks ###
 cask 'alfred'
