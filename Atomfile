@@ -50,6 +50,9 @@ project-find-navigation
 editorconfig
 flow-ide
 autocomplete-haskell
+haskell-ghc-mod
+ide-haskell-cabal
+ide-haskell
 linter-rust
 git-diff-details
 choose-pane
