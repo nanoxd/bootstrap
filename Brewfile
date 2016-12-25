@@ -57,6 +57,7 @@ brew 'z'
 brew 'editorconfig'
 brew 'pidcat'
 brew 'haskell-stack'
+brew 'gifsicle'
 
 ### Casks ###
 cask 'alfred'
