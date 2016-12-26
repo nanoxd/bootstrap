@@ -81,6 +81,7 @@ cask 'graphiql'
 cask 'karabiner-elements'
 cask 'dash'
 cask 'spotify'
+cask 'rocket'
 
 ### Quicklook ###
 cask 'qlvideo'
