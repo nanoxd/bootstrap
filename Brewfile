@@ -59,6 +59,7 @@ brew 'pidcat'
 brew 'haskell-stack'
 brew 'gifsicle'
 brew 'imagemagick'
+brew 'ffmpeg'
 
 ### Casks ###
 cask 'alfred'
