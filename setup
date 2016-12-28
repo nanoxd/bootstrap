@@ -102,6 +102,10 @@ yarn_install_or_update() {
   fi
 }
 
+cargo_install() {
+  cargo install "$1" --force
+}
+
 if ! command -v brew >/dev/null; then
   fancy_echo "Installing Homebrew ..."
     /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
@@ -198,4 +202,6 @@ yarn_install_or_update 'clipboard-cli'
 yarn_install_or_update 'elm-oracle'
 
 # Rust
-cargo install cargo-update --force # We have to force this to be able to verify installs
+cargo_install 'cargo-update'
+cargo_install 'rustfmt'
+cargo_install 'clippy'
