@@ -195,3 +195,6 @@ make atom
 yarn_install_or_update 'tern'
 yarn_install_or_update 'clipboard-cli'
 yarn_install_or_update 'elm-oracle'
+
+# Rust
+cargo install cargo-update --force # We have to force this to be able to verify installs
