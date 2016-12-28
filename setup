@@ -188,6 +188,7 @@ fi
 
 pip_install_or_update 'diff-highlight'
 pip_install_or_update 'neovim'
+pip_install_or_update 'jedi'
 
 make atom
 
