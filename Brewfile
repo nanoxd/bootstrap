@@ -82,6 +82,7 @@ cask 'karabiner-elements'
 cask 'dash'
 cask 'spotify'
 cask 'rocket'
+cask 'docker'
 
 ### Quicklook ###
 cask 'qlvideo'
