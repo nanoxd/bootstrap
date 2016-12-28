@@ -201,6 +201,14 @@ yarn_install_or_update 'tern'
 yarn_install_or_update 'clipboard-cli'
 yarn_install_or_update 'elm-oracle'
 
+fancy_echo "Installing Rust"
+if [ ! -e "$HOME/.cabal/bin"]; then
+  curl https://sh.rustup.rs -sSf | sh
+  append_to_zshrc 'export PATH="$HOME/.cabal/bin:$PATH"' 1
+
+  export PATH="$HOME/.cabal/bin:$PATH"
+fi
+
 # Rust
 cargo_install 'cargo-update'
 cargo_install 'rustfmt'

@@ -45,7 +45,6 @@ brew 'carthage'
 brew 'postgres'
 brew 'rbenv'
 brew 'ruby-build'
-brew 'rust'
 brew 'elm'
 brew 'homebrew/devel-only/elm-format', args: ['devel']
 brew 'ctags'
