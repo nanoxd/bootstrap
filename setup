@@ -207,9 +207,12 @@ if [ ! -e "$HOME/.cabal/bin"]; then
   append_to_zshrc 'export PATH="$HOME/.cabal/bin:$PATH"' 1
 
   export PATH="$HOME/.cabal/bin:$PATH"
+
+  rustup component add rust-src
 fi
 
 # Rust
 cargo_install 'cargo-update'
+cargo_install 'racer'
 cargo_install 'rustfmt'
 cargo_install 'clippy'
