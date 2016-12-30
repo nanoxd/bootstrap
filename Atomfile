@@ -61,3 +61,4 @@ elm-format
 elmjutsu
 linter-elm-make
 language-elixir
+racer
