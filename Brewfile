@@ -82,6 +82,8 @@ cask 'dash'
 cask 'spotify'
 cask 'rocket'
 cask 'docker'
+cask 'slack'
+cask 'mplayerx'
 
 ### Quicklook ###
 cask 'qlvideo'
