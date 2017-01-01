@@ -84,6 +84,7 @@ cask 'rocket'
 cask 'docker'
 cask 'slack'
 cask 'mplayerx'
+cask 'hazel'
 
 ### Quicklook ###
 cask 'qlvideo'
