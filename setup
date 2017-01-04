@@ -124,19 +124,21 @@ brew tap Homebrew/bundle
 
 make brew
 
+if ! cat /etc/shells | grep -Fq '/usr/local/bin/zsh'; then
+  fancy_echo "Adding brew zsh to /etc/shells"
+  echo "/usr/local/bin/zsh" | sudo tee -a /etc/shells
+fi
+
 if ! command -v elm-format >/dev/null; then
-  fancy_echo "Linking elm-format"
-  ln -s "/usr/local/bin/elm-format-$ELM_VERSION" /usr/local/bin/elm-format
+  if [[ ! -f /usr/local/bin/elm-format ]]; then
+    fancy_echo "Linking elm-format"
+    ln -s "/usr/local/bin/elm-format-$ELM_VERSION" /usr/local/bin/elm-format
+  fi
 fi
 
 if ! cat /etc/shells | grep -Fq fish; then
   fancy_echo "Adding fish to /etc/shells"
   echo "/usr/local/bin/fish" | sudo tee -a /etc/shells
-fi
-
-if ! cat /etc/shells | grep -Fq '/usr/local/bin/zsh'; then
-  fancy_echo "Adding brew zsh to /etc/shells"
-  echo "/usr/local/bin/zsh" | sudo tee -a /etc/shells
 fi
 
 fancy_echo "Checking for SSH key, generating one if it doesn't exist ..."
