@@ -83,7 +83,7 @@ cask 'spotify'
 cask 'rocket'
 cask 'docker'
 cask 'slack'
-cask 'mplayerx'
+cask 'iina'
 cask 'hazel'
 
 ### Quicklook ###
