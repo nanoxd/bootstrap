@@ -38,8 +38,7 @@ brew 'yarn'
 brew 'watchman'
 brew 'tree'
 brew 'trash'
-brew 'mas'
-
+brew 'mas' 
 # Languages
 brew 'carthage'
 brew 'postgres'
@@ -85,6 +84,7 @@ cask 'docker'
 cask 'slack'
 cask 'iina'
 cask 'hazel'
+cask 'the-unarchiver'
 
 ### Quicklook ###
 cask 'qlvideo'
