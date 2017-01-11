@@ -13,6 +13,7 @@ brew "hub"
 brew 'git-extras'
 brew 'git-lfs'
 brew "tig"
+brew "libgit2"
 brew "openssl"
 
 # GPG stuff
