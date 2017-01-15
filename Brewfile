@@ -35,11 +35,12 @@ brew 'httpie'
 brew 'youtube-dl'
 brew 'dateutils'
 brew 'rcm'
-brew 'yarn'
 brew 'watchman'
 brew 'tree'
 brew 'trash'
 brew 'mas' 
+brew 'binutils'
+
 # Languages
 brew 'carthage'
 brew 'postgres'
