@@ -108,3 +108,4 @@ mas 'Spark', id: 1176895641
 mas 'Tweetbot', id: 557168941
 mas 'Screens', id: 446107677
 mas 'Pocket', id: 568494494
+mas 'Bear', id: 1091189122
