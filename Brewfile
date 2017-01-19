@@ -88,6 +88,7 @@ cask 'iina'
 cask 'hazel'
 cask 'the-unarchiver'
 cask 'hex-fiend'
+cask 'gitscout'
 
 ### Quicklook ###
 cask 'qlvideo'
