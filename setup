@@ -205,12 +205,13 @@ yarn_install_or_update 'elm-oracle'
 yarn_install_or_update 'release'
 
 fancy_echo "Installing Rust"
-if [ ! -e "$HOME/.cabal/bin" ]; then
+if [ ! -e "$HOME/.cargo/bin" ]; then
   curl https://sh.rustup.rs -sSf | sh
-  append_to_zshrc 'export PATH="$HOME/.cabal/bin:$PATH"' 1
+  append_to_zshrc 'export PATH="$HOME/.cargo/bin:$PATH"' 1
 
   source $HOME/.cargo/env
   rustup component add rust-src
+  rustup install nightly
 fi
 
 # Rust
