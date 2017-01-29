@@ -60,6 +60,7 @@ brew 'haskell-stack'
 brew 'gifsicle'
 brew 'imagemagick'
 brew 'ffmpeg'
+brew 'exercism'
 
 ### Casks ###
 cask 'alfred'
