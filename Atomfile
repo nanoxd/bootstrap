@@ -55,7 +55,7 @@ ide-haskell
 linter-rust
 git-diff-details
 choose-pane
-terminal-fusion
+platformio-ide-terminal
 elm-format
 elmjutsu
 linter-elm-make
