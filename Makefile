@@ -9,3 +9,6 @@ brew:
 
 defaults:
 	./osx-defaults
+
+go:
+	./Gofile
