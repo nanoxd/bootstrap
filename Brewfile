@@ -90,6 +90,7 @@ cask 'hazel'
 cask 'the-unarchiver'
 cask 'hex-fiend'
 cask 'gitscout'
+cask 'contexts'
 
 ### Quicklook ###
 cask 'qlvideo'
