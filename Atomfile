@@ -66,3 +66,5 @@ hyperclick
 go-plus
 atom-elixir
 linter-elixirc
+autocomplete-emojis
+advanced-open-file
