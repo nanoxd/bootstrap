@@ -68,3 +68,4 @@ atom-elixir
 linter-elixirc
 autocomplete-emojis
 advanced-open-file
+atom-ternjs
