@@ -91,6 +91,7 @@ cask 'the-unarchiver'
 cask 'hex-fiend'
 cask 'gitscout'
 cask 'contexts'
+cask 'itsycal'
 
 ### Quicklook ###
 cask 'qlvideo'
