@@ -43,7 +43,6 @@ brew 'binutils'
 
 # Languages
 brew 'carthage'
-brew 'postgres'
 brew 'rbenv'
 brew 'ruby-build'
 brew 'elm'
@@ -93,6 +92,7 @@ cask 'hex-fiend'
 cask 'gitscout'
 cask 'contexts'
 cask 'itsycal'
+cask 'postgres'
 
 ### Quicklook ###
 cask 'qlvideo'
