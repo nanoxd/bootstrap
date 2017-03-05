@@ -34,3 +34,7 @@ apm ls --bare | cut -d'@' -f1 > Atomfile
 # Creates your Brewfile
 brew bundle dump --file=./Brewfile
 ```
+
+### Dotfiles
+
+Change to point to where you keep your dotfiles and how you install them [here](https://github.com/nanoxd/bootstrap/blob/master/setup#L185-L188)
