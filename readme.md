@@ -38,3 +38,9 @@ brew bundle dump --file=./Brewfile
 ### Dotfiles
 
 Change to point to where you keep your dotfiles and how you install them [here](https://github.com/nanoxd/bootstrap/blob/master/setup#L185-L188)
+
+## Acknowledgments
+
+This project is heavily inspired by the following projects:
+
+* [@thoughtbot Laptop](https://github.com/thoughtbot/laptop)
