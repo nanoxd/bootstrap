@@ -93,6 +93,7 @@ cask 'gitscout'
 cask 'contexts'
 cask 'itsycal'
 cask 'postgres'
+cask 'forklift'
 
 ### Quicklook ###
 cask 'qlvideo'
