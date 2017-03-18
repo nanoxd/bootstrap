@@ -6,7 +6,6 @@ vim-mode-plus-ex-mode
 vim-mode-plus-keymaps-for-surround
 open-this
 quick-highlight
-relative-numbers
 highlight-selected
 language-viml
 language-fish-shell
