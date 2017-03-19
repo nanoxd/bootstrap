@@ -22,6 +22,7 @@ brew 'gpg-agent'
 brew 'pinentry-mac'
 
 brew "zsh"
+brew 'bash'
 
 # Tools
 brew 'fish'
