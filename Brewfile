@@ -61,6 +61,7 @@ brew 'imagemagick'
 brew 'ffmpeg'
 brew 'exercism'
 brew 'elixir'
+brew 'swiftplate'
 
 ### Casks ###
 cask 'alfred'
