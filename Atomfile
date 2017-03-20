@@ -21,9 +21,7 @@ language-docker
 language-nginx
 language-rust
 language-haskell
-es6-javascript
 autocomplete-swift
-autocomplete-ctags
 autocomplete-paths
 pigments
 minimap
@@ -37,9 +35,6 @@ merge-conflicts
 linter
 linter-js-standard
 linter-write-good
-standard-formatter
-ctags-status
-symbol-gen
 align-regexp
 markdown-writer
 autoprefixer
