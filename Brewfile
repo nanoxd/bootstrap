@@ -120,3 +120,4 @@ mas 'Bear', id: 1091189122
 mas 'Speedtest', id: 1153157709
 mas 'Magnet', id: 441258766
 mas 'Giphy Capture', id: 668208984
+mas 'clearview', id: 557090104
