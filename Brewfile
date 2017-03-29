@@ -47,7 +47,6 @@ brew 'carthage'
 brew 'rbenv'
 brew 'ruby-build'
 brew 'elm'
-brew 'homebrew/devel-only/elm-format', args: ['devel']
 brew 'ctags'
 brew 'sudolikeaboss'
 brew 'sourcekitten'
