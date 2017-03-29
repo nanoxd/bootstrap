@@ -180,7 +180,6 @@ number_of_cores=$(sysctl -n hw.ncpu)
 bundle config --global jobs $((number_of_cores - 1))
 
 gem_install_or_update 'cocoapods'
-gem_install_or_update 'xcode-install'
 
 if [ ! -d "$HOME/.dotfiles/" ]; then
   git clone git@github.com:NanoXD/dotfiles.git ~/.dotfiles
