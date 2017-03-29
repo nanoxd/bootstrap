@@ -139,11 +139,6 @@ brew tap Homebrew/bundle
 
 make brew
 
-if ! cat /etc/shells | grep -Fq '/usr/local/bin/zsh'; then
-  fancy_echo "Adding brew zsh to /etc/shells"
-  echo "/usr/local/bin/zsh" | sudo tee -a /etc/shells
-fi
-
 if ! cat /etc/shells | grep -Fq fish; then
   fancy_echo "Adding fish to /etc/shells"
   echo "/usr/local/bin/fish" | sudo tee -a /etc/shells
