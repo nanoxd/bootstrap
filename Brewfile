@@ -21,10 +21,9 @@ brew 'gnupg2'
 brew 'gpg-agent'
 brew 'pinentry-mac'
 
+# Tools
 brew "zsh"
 brew 'bash'
-
-# Tools
 brew 'fish'
 brew 'tmux'
 brew 'reattach-to-user-namespace'
@@ -39,7 +38,7 @@ brew 'rcm'
 brew 'watchman'
 brew 'tree'
 brew 'trash'
-brew 'mas' 
+brew 'mas'
 brew 'binutils'
 
 # Languages
@@ -116,7 +115,6 @@ mas 'Tweetbot', id: 557168941
 mas 'Screens', id: 446107677
 mas 'Pocket', id: 568494494
 mas 'Bear', id: 1091189122
-mas 'Speedtest', id: 1153157709
 mas 'Magnet', id: 441258766
 mas 'Giphy Capture', id: 668208984
 mas 'clearview', id: 557090104
