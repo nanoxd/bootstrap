@@ -205,6 +205,7 @@ yarn_install_or_update 'elm-format'
 yarn_install_or_update 'elm-oracle'
 yarn_install_or_update 'release'
 yarn_install_or_update 'fkill-cli'
+yarn_install_or_update 'fony'
 
 fancy_echo "Installing Rust"
 if [ ! -e "$HOME/.cargo/bin" ]; then
