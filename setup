@@ -209,6 +209,7 @@ yarn_install_or_update 'fkill-cli'
 yarn_install_or_update 'fony'
 yarn_install_or_update '@captainsafia/legit'
 yarn_install_or_update 'goops'
+yarn_install_or_update 'create-react-native-app'
 
 fancy_echo "Installing Rust"
 if [ ! -e "$HOME/.cargo/bin" ]; then
