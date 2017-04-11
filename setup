@@ -211,6 +211,7 @@ yarn_install_or_update '@captainsafia/legit'
 yarn_install_or_update 'goops'
 yarn_install_or_update 'create-react-native-app'
 yarn_install_or_update 'conduct'
+yarn_install_or_update 'alfred-xcode'
 
 fancy_echo "Installing Rust"
 if [ ! -e "$HOME/.cargo/bin" ]; then
