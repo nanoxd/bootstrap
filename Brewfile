@@ -4,6 +4,7 @@ tap "thoughtbot/formulae"
 tap "neovim/neovim"
 tap "ravenac95/sudolikeaboss"
 tap 'burntsushi/ripgrep', 'https://github.com/BurntSushi/ripgrep.git'
+tap 'softprops/tools'
 
 tap 'caskroom/fonts'
 
@@ -51,6 +52,7 @@ brew 'sudolikeaboss'
 brew 'sourcekitten'
 brew 'fzf'
 brew 'burntsushi/ripgrep/ripgrep-bin'
+brew 'softprops/tools/porteurbars'
 brew 'z'
 brew 'editorconfig'
 brew 'pidcat'
