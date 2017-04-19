@@ -12,3 +12,6 @@ defaults:
 
 go:
 	./Gofile
+
+yarn:
+	./Yarnfile

@@ -103,19 +103,6 @@ generate_ssh_key() {
   pbcopy < ~/.ssh/id_ed25519.pub
 }
 
-yarn_is_installed() {
-  yarn global ls | grep "$1"
-}
-
-yarn_install_or_update() {
-  local package="$1"
-  if yarn_is_installed $package > /dev/null; then
-    yarn global upgrade $package
-  else
-    yarn global add $package
-  fi
-}
-
 cargo_install() {
   cargo install "$1" --force
 }
@@ -197,21 +184,7 @@ pip_install_or_update 'diff-highlight'
 pip_install_or_update 'neovim'
 
 make atom
-
-# Yarn
-yarn_install_or_update 'tern'
-yarn_install_or_update 'clipboard-cli'
-yarn_install_or_update 'elm'
-yarn_install_or_update 'elm-format'
-yarn_install_or_update 'elm-oracle'
-yarn_install_or_update 'release'
-yarn_install_or_update 'fkill-cli'
-yarn_install_or_update 'fony'
-yarn_install_or_update '@captainsafia/legit'
-yarn_install_or_update 'goops'
-yarn_install_or_update 'create-react-native-app'
-yarn_install_or_update 'conduct'
-yarn_install_or_update 'alfred-xcode'
+make yarn
 
 fancy_echo "Installing Rust"
 if [ ! -e "$HOME/.cargo/bin" ]; then
