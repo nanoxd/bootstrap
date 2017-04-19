@@ -219,8 +219,11 @@ if [ ! -e "$HOME/.cargo/bin" ]; then
   append_to_zshrc 'export PATH="$HOME/.cargo/bin:$PATH"' 1
 
   source $HOME/.cargo/env
-  rustup component add rust-src
   rustup install nightly
+  rustup default nightly
+  rustup component add rls
+  rustup component add rust-analysis
+  rustup component add rust-src
 fi
 
 # Rust
