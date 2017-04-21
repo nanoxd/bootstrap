@@ -1,28 +1,13 @@
-#!/bin/sh
-
-yarn_is_installed() {
-  yarn global ls | grep "$1"
-}
-
-yarn_install_or_update() {
-  local package="$1"
-  if yarn_is_installed $package > /dev/null; then
-    yarn global upgrade --no-progress $package
-  else
-    yarn global add --no-progress $package
-  fi
-}
-
-yarn_install_or_update 'tern'
-yarn_install_or_update 'clipboard-cli'
-yarn_install_or_update 'elm'
-yarn_install_or_update 'elm-format'
-yarn_install_or_update 'elm-oracle'
-yarn_install_or_update 'release'
-yarn_install_or_update 'fkill-cli'
-yarn_install_or_update 'fony'
-yarn_install_or_update '@captainsafia/legit'
-yarn_install_or_update 'goops'
-yarn_install_or_update 'create-react-native-app'
-yarn_install_or_update 'conduct'
-yarn_install_or_update 'alfred-xcode'
+tern
+clipboard-cli
+elm
+elm-format
+elm-oracle
+release
+fkill-cli
+fony
+@captainsafia/legit
+goops
+create-react-native-app
+conduct
+alfred-xcode

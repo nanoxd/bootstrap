@@ -14,4 +14,4 @@ go:
 	./Gofile
 
 yarn:
-	./Yarnfile
+	cat ./Yarnfile | xargs yarn global add
