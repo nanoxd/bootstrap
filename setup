@@ -1,7 +1,5 @@
 #!/bin/sh
 
-ELM_VERSION="0.18"
-
 fancy_echo() {
   local fmt="$1"; shift
 
