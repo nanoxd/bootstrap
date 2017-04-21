@@ -11,7 +11,7 @@ defaults:
 	./osx-defaults
 
 go:
-	./Gofile
+	cat ./Gofile | xargs go get
 
 yarn:
 	cat ./Yarnfile | xargs yarn global add
