@@ -101,10 +101,6 @@ generate_ssh_key() {
   pbcopy < ~/.ssh/id_ed25519.pub
 }
 
-cargo_install() {
-  cargo install "$1" --force
-}
-
 if ! command -v brew >/dev/null; then
   fancy_echo "Installing Homebrew ..."
     curl -fsS \
@@ -197,9 +193,4 @@ if [ ! -e "$HOME/.cargo/bin" ]; then
   rustup component add rust-src
 fi
 
-# Rust
-cargo_install 'cargo-update'
-cargo_install 'racer'
-cargo_install 'rustfmt'
-cargo_install 'clippy'
-cargo_install 'diesel_cli'
+make rust

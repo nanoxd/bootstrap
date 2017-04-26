@@ -13,5 +13,8 @@ defaults:
 go:
 	cat ./Gofile | xargs go get
 
+rust:
+	./Cargofile
+
 yarn:
 	cat ./Yarnfile | xargs yarn global add
