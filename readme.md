@@ -28,7 +28,7 @@ apm ls --bare | cut -d'@' -f1 > Atomfile
 
 ### Brew
 
-[homebrew-bundle](https://github.com/Homebrew/homebrew-bundle) is a bundler for your `brew` dependencies. Installing it is as simple as `brew tap Homebrew/bundle`.
+[homebrew-bundle](https://github.com/Homebrew/homebrew-bundle) is a bundler for your `brew` dependencies. Installing it is can be done via `brew tap Homebrew/bundle`.
 
 ```sh
 # Creates your Brewfile
