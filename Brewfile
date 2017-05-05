@@ -95,6 +95,7 @@ cask 'contexts'
 cask 'itsycal'
 cask 'postgres'
 cask 'forklift'
+cask 'etcher'
 
 ### Quicklook ###
 cask 'qlvideo'
