@@ -171,6 +171,7 @@ fi
 
 if [ ! -e "$HOME/.tmux" ]; then
   mkdir -p $HOME/.tmux
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
   git clone git@github.com:tmux-plugins/tmux-sessionist.git ~/.tmux/sessionist
 fi
 
