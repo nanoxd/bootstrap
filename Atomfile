@@ -21,7 +21,6 @@ language-docker
 language-nginx
 language-rust
 language-haskell
-autocomplete-swift
 autocomplete-paths
 pigments
 minimap
