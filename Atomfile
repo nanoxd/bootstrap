@@ -53,7 +53,7 @@ elm-format
 elmjutsu
 linter-elm-make
 language-elixir
-racer
+racer-v2
 hyperclick
 go-plus
 atom-elixir
