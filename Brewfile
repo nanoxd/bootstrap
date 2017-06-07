@@ -99,6 +99,10 @@ cask 'tripmode'
 cask 'viscosity'
 cask 'hyper'
 
+### Dev Specific ###
+cask 'charles'
+cask 'now'
+
 ### Quicklook ###
 cask 'qlvideo'
 cask 'quicklook-json'
