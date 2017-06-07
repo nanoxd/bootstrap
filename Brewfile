@@ -96,6 +96,7 @@ cask 'itsycal'
 cask 'postgres'
 cask 'forklift'
 cask 'etcher'
+cask 'tripmode'
 
 ### Quicklook ###
 cask 'qlvideo'
