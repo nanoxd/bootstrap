@@ -84,7 +84,6 @@ cask 'karabiner-elements'
 cask 'dash'
 cask 'spotify'
 cask 'rocket'
-cask 'docker'
 cask 'slack'
 cask 'hazel'
 cask 'the-unarchiver'
@@ -102,6 +101,8 @@ cask 'hyper'
 ### Dev Specific ###
 cask 'charles'
 cask 'now'
+cask 'postico'
+cask 'docker'
 
 ### Quicklook ###
 cask 'qlvideo'
