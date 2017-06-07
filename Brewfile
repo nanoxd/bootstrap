@@ -4,7 +4,6 @@ tap "thoughtbot/formulae"
 tap "neovim/neovim"
 tap "ravenac95/sudolikeaboss"
 tap 'burntsushi/ripgrep', 'https://github.com/BurntSushi/ripgrep.git'
-tap 'softprops/tools'
 
 tap 'caskroom/fonts'
 
@@ -52,11 +51,9 @@ brew 'sudolikeaboss'
 brew 'sourcekitten'
 brew 'fzf'
 brew 'burntsushi/ripgrep/ripgrep-bin'
-brew 'softprops/tools/porteurbars'
 brew 'z'
 brew 'editorconfig'
 brew 'pidcat'
-brew 'haskell-stack'
 brew 'gifsicle'
 brew 'imagemagick'
 brew 'ffmpeg'
@@ -71,7 +68,6 @@ cask 'bartender'
 cask 'font-fira-code'
 cask 'font-iosevka'
 cask 'imageoptim'
-cask 'kaleidoscope'
 cask 'paw'
 cask 'sketch'
 cask 'spillo'
@@ -103,6 +99,7 @@ cask 'charles'
 cask 'now'
 cask 'postico'
 cask 'docker'
+cask 'kaleidoscope'
 
 ### Quicklook ###
 cask 'qlvideo'
