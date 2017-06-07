@@ -111,14 +111,11 @@ mas 'Deckset', id: 847496013
 mas 'Deliveries', id: 924726344
 mas 'GIFs', id: 961850017
 mas 'Monosnap', id: 540348655
-mas 'PaintCode', id: 808809998
 mas 'Reeder', id: 880001334
 mas 'SnippetsLab', id: 1006087419
 mas 'Spark', id: 1176895641
 mas 'Tweetbot', id: 557168941
 mas 'Screens', id: 446107677
-mas 'Pocket', id: 568494494
 mas 'Bear', id: 1091189122
-mas 'Magnet', id: 441258766
 mas 'Giphy Capture', id: 668208984
-mas 'clearview', id: 557090104
+mas 'Clearview', id: 557090104
