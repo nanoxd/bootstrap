@@ -71,9 +71,6 @@ fancy_echo "Xcode: Use all cores to build"
 fancy_echo "Make Window animations faster"
   defaults write NSGlobalDomain NSAutomaticWindowAnimationsEnabled -bool false
 
-fancy_echo "Increase sound quality for bluetooth speakers/headsets"
-  defaults write com.apple.BluetoothAudioAgent "Apple Bitpool Min (editable)" -int 40
-
 fancy_echo "Show icons for hard drives, servers, and removable media on the desktop"
   defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool true
   defaults write com.apple.finder ShowHardDrivesOnDesktop -bool true
