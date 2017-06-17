@@ -106,3 +106,6 @@ fancy_echo "Print: Automatically quit printer app once the print jobs complete"
 
 fancy_echo "Time Machine: Prevent from prompting to use new hard drives as backup volume"
   defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
+
+fancy_echo "Photos: Prevent from opening automatically when devices are plugged in"
+  defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
