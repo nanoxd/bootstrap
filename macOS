@@ -103,3 +103,6 @@ fancy_echo "Xcode: Use all cores to build"
 
 fancy_echo "Print: Automatically quit printer app once the print jobs complete"
   defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
+
+fancy_echo "Time Machine: Prevent from prompting to use new hard drives as backup volume"
+  defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
