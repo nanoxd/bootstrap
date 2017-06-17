@@ -67,8 +67,8 @@ fancy_echo "Finder: Sort by name"
 fancy_echo "Finder: Use list view in windows"
   defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
 
-fancy_echo "Dock: Set the icon size of Dock items to 36 pixels"
-  defaults write com.apple.dock tilesize -int 36
+fancy_echo "Dock: Set the icon size of Dock items to 28 pixels"
+  defaults write com.apple.dock tilesize -int 28
 
 fancy_echo "Dock: Automatically hide and show"
   defaults write com.apple.dock autohide -bool true
