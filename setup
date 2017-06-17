@@ -102,6 +102,8 @@ generate_ssh_key() {
 }
 
 if ! command -v brew >/dev/null; then
+  # Empty out dock
+  defaults write com.apple.dock persistent-apps -array
   fancy_echo "Installing Homebrew ..."
     curl -fsS \
       'https://raw.githubusercontent.com/Homebrew/install/master/install' | ruby
