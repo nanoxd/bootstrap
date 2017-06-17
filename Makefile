@@ -7,8 +7,8 @@ atom:
 brew:
 	brew bundle --verbose --file=./Brewfile
 
-defaults:
-	./osx-defaults
+macOS:
+	./macOS
 
 go:
 	cat ./Gofile | xargs go get
