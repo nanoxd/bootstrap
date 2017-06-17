@@ -83,3 +83,6 @@ fancy_echo "Show icons for hard drives, servers, and removable media on the desk
 fancy_echo "Display all file extensions and disable rename warning"
   defaults write NSGlobalDomain AppleShowAllExtensions -bool true
   defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
+
+fancy_echo "Disable auto-correct"
+  defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
