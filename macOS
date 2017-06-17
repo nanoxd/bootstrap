@@ -82,7 +82,7 @@ fancy_echo "Safari: Set home page to about:blank for faster loading"
 fancy_echo "Safari: Make search banners default to Contains instead of Starts With"
   defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
 
-fancy_echo "Safari: Prevent opening ‘safe’ files automatically after downloading"
+fancy_echo "Safari: Prevent opening 'safe' files automatically after downloading"
   defaults write com.apple.Safari AutoOpenSafeDownloads -bool false
 
 fancy_echo "Safari: Enable debug menu"
