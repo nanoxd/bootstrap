@@ -70,7 +70,7 @@ fancy_echo "Xcode: Use all cores to build"
 
 fancy_echo "Make Window animations faster"
   defaults write NSGlobalDomain NSAutomaticWindowAnimationsEnabled -bool false
-  
+
 fancy_echo "Automatically quit printer app once the print jobs complete"
   defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
 
@@ -83,8 +83,3 @@ fancy_echo "Show icons for hard drives, servers, and removable media on the desk
 fancy_echo "Display all file extensions and disable rename warning"
   defaults write NSGlobalDomain AppleShowAllExtensions -bool true
   defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
-
-fancy_echo "Mail: Copy email addreses without names"
-  defaults write com.apple.mail AddressesIncludeNameOnPasteboard -bool false
-fancy_echo "Mail: Add the keyboard shortcut ⌘ + Enter to send an email"
-  defaults write com.apple.mail NSUserKeyEquivalents -dict-add "Send" -string "@\\U21a9"
