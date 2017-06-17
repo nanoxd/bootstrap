@@ -70,6 +70,9 @@ fancy_echo "Xcode: Use all cores to build"
 
 fancy_echo "Make Window animations faster"
   defaults write NSGlobalDomain NSAutomaticWindowAnimationsEnabled -bool false
+  
+fancy_echo "Automatically quit printer app once the print jobs complete"
+  defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
 
 fancy_echo "Show icons for hard drives, servers, and removable media on the desktop"
   defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool true
