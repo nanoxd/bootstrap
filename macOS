@@ -28,8 +28,9 @@ fancy_echo "Keyboard: Disable auto-correct"
 fancy_echo "Finder: allow text selection in Quick Look"
   defaults write com.apple.finder QLEnableTextSelection -bool true
 
-fancy_echo "Finder: Avoid creating .DS_Store files on network volumes"
+fancy_echo "Finder: Avoid creating .DS_Store files on external volumes"
   defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
+  defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
 
 fancy_echo "Finder: Show All Files"
   defaults write com.apple.finder AppleShowAllFiles YES
