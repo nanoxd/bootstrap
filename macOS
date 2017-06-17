@@ -114,3 +114,8 @@ fancy_echo "Photos: Prevent from opening automatically when devices are plugged 
 
 fancy_echo "Tweetbot: Bypass t.co URL shortener"
   defaults write com.tapbots.TweetbotMac OpenURLsDirectly -bool true
+
+fancy_echo "Itsycal: Configure display"
+  defaults write com.mowglii.ItsycalApp ClockFormat -string "h:mm a"
+  defaults write com.mowglii.ItsycalApp ShowMonthInIcon -bool true
+  defaults write com.mowglii.ItsycalApp ShowDayOfWeekInIcon -bool true
