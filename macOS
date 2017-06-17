@@ -92,6 +92,9 @@ fancy_echo "Safari: Enable debug menu"
   defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
   defaults write NSGlobalDomain WebKitDeveloperExtras -bool true
 
+fancy_echo "Safari: Enable 'Do Not Track'"
+  defaults write com.apple.Safari SendDoNotTrackHTTPHeader -bool true
+
 fancy_echo "Xcode: See how long a build takes"
   defaults write com.apple.dt.Xcode ShowBuildOperationDuration YES
 
