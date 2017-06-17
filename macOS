@@ -54,6 +54,11 @@ fancy_echo "Finder: Show icons for hard drives, servers, and removable media on 
   defaults write com.apple.finder ShowMountedServersOnDesktop -bool true
   defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool true
 
+fancy_echo "Finder: Show Info on icon views"
+  /usr/libexec/PlistBuddy -c "Set :DesktopViewSettings:IconViewSettings:showItemInfo true" ~/Library/Preferences/com.apple.finder.plist
+  /usr/libexec/PlistBuddy -c "Set :FK_StandardViewSettings:IconViewSettings:showItemInfo true" ~/Library/Preferences/com.apple.finder.plist
+  /usr/libexec/PlistBuddy -c "Set :StandardViewSettings:IconViewSettings:showItemInfo true" ~/Library/Preferences/com.apple.finder.plist
+
 fancy_echo "Dock: Set the icon size of Dock items to 36 pixels"
   defaults write com.apple.dock tilesize -int 36
 
