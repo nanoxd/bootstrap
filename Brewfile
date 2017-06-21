@@ -1,6 +1,7 @@
 tap "homebrew/services"
 tap "homebrew/devel-only"
 tap "thoughtbot/formulae"
+tap "vapor/homebrew-tap"
 tap "neovim/neovim"
 tap "ravenac95/sudolikeaboss"
 tap 'burntsushi/ripgrep', 'https://github.com/BurntSushi/ripgrep.git'
@@ -60,6 +61,7 @@ brew 'ffmpeg'
 brew 'exercism'
 brew 'elixir'
 brew 'swiftplate'
+brew 'vapor'
 
 ### Casks ###
 cask 'alfred'
