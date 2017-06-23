@@ -113,7 +113,6 @@ mas 'GIFs', id: 961850017
 mas 'Monosnap', id: 540348655
 mas 'Reeder', id: 880001334
 mas 'SnippetsLab', id: 1006087419
-mas 'Spark', id: 1176895641
 mas 'Tweetbot', id: 557168941
 mas 'Screens', id: 446107677
 mas 'Bear', id: 1091189122
