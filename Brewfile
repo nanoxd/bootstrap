@@ -3,7 +3,6 @@ tap "homebrew/devel-only"
 tap "thoughtbot/formulae"
 tap "vapor/homebrew-tap"
 tap "neovim/neovim"
-tap "ravenac95/sudolikeaboss"
 tap 'burntsushi/ripgrep', 'https://github.com/BurntSushi/ripgrep.git'
 
 tap 'caskroom/fonts'
@@ -48,7 +47,6 @@ brew 'rbenv'
 brew 'ruby-build'
 brew 'yarn'
 brew 'ctags'
-brew 'sudolikeaboss'
 brew 'sourcekitten'
 brew 'fzf'
 brew 'burntsushi/ripgrep/ripgrep-bin'
