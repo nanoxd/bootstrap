@@ -91,6 +91,7 @@ cask 'etcher'
 cask 'tripmode'
 cask 'viscosity'
 cask 'hyper'
+cask 'visual-studio-code'
 
 ### Dev Specific ###
 cask 'charles'
