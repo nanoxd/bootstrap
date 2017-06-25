@@ -119,3 +119,4 @@ mas 'Screens', id: 446107677
 mas 'Bear', id: 1091189122
 mas 'Giphy Capture', id: 668208984
 mas 'Clearview', id: 557090104
+mas 'Magnet', id: 441258766
