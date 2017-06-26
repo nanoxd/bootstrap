@@ -65,3 +65,4 @@ prettier-atom
 pane-layout-plus
 language-pug
 atom-typescript
+linter-tslint
