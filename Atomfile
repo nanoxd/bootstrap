@@ -66,3 +66,5 @@ pane-layout-plus
 language-pug
 atom-typescript
 linter-tslint
+build
+build-npm-apm
