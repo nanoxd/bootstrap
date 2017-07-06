@@ -68,3 +68,5 @@ atom-typescript
 linter-tslint
 build
 build-npm-apm
+rails-routes
+linter-rubocop
