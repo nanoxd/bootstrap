@@ -99,6 +99,7 @@ cask 'now'
 cask 'postico'
 cask 'docker'
 cask 'kaleidoscope'
+cask 'muzzle'
 
 ### Quicklook ###
 cask 'qlvideo'
