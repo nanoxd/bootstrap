@@ -64,7 +64,7 @@ brew 'vapor'
 ### Casks ###
 cask 'alfred'
 cask 'atom'
-cask 'bartender'
+cask 'vanilla'
 cask 'font-fira-code'
 cask 'font-iosevka'
 cask 'imageoptim'
@@ -92,6 +92,7 @@ cask 'tripmode'
 cask 'viscosity'
 cask 'hyper'
 cask 'visual-studio-code'
+cask 'now'
 
 ### Dev Specific ###
 cask 'charles'
