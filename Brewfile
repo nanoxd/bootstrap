@@ -40,6 +40,7 @@ brew 'tree'
 brew 'trash'
 brew 'mas'
 brew 'binutils'
+brew 'redis'
 
 # Languages
 brew 'carthage'
