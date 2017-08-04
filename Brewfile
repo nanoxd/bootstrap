@@ -42,6 +42,8 @@ brew 'mas'
 brew 'binutils'
 brew 'redis'
 brew 'exa'
+brew 'gnu-sed', args: ['with-default-names']
+brew 'fd'
 
 # Languages
 brew 'carthage'
