@@ -41,6 +41,7 @@ brew 'trash'
 brew 'mas'
 brew 'binutils'
 brew 'redis'
+brew 'exa'
 
 # Languages
 brew 'carthage'
