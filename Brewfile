@@ -97,6 +97,8 @@ cask 'viscosity'
 cask 'hyper'
 cask 'visual-studio-code'
 cask 'now'
+cask 'iina'
+cask 'kid3'
 
 ### Dev Specific ###
 cask 'charles'
