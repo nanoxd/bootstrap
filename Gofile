@@ -6,3 +6,4 @@ github.com/alecthomas/gometalinter
 github.com/zmb3/gogetdoc
 github.com/rogpeppe/godef
 golang.org/x/tools/cmd/guru
+github.com/FiloSottile/gvt
