@@ -126,3 +126,6 @@ fancy_echo "Itsycal: Configure display"
   defaults write com.mowglii.ItsycalApp ClockFormat -string "h:mm a"
   defaults write com.mowglii.ItsycalApp ShowMonthInIcon -bool true
   defaults write com.mowglii.ItsycalApp ShowDayOfWeekInIcon -bool true
+
+fancy_echo "VS Code: Allow key repeat for Vim"
+  defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
