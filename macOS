@@ -73,6 +73,10 @@ fancy_echo "Dock: Set the icon size of Dock items to 28 pixels"
 fancy_echo "Dock: Automatically hide and show"
   defaults write com.apple.dock autohide -bool true
 
+fancy_echo "Dock: Adjust hide/show animation timings"
+  defaults write com.apple.dock autohide-delay -int 0
+  defaults write com.apple.dock autohide-time-modifier -float 0.4
+
 fancy_echo "Mission Control: Don't rearrange by use"
   defaults write com.apple.dock mru-spaces -bool false
 
