@@ -1,7 +1,6 @@
 tap "homebrew/services"
 tap "homebrew/devel-only"
 tap "thoughtbot/formulae"
-tap "vapor/homebrew-tap"
 tap "neovim/neovim"
 tap 'burntsushi/ripgrep', 'https://github.com/BurntSushi/ripgrep.git'
 
@@ -25,15 +24,12 @@ brew 'pinentry-mac'
 brew "zsh"
 brew 'bash'
 brew 'fish'
-brew 'tmux'
-brew 'reattach-to-user-namespace'
 brew 'wget', args: ['with-iri']
 brew 'ack'
 brew 'neovim'
 brew 'jq'
 brew 'httpie'
 brew 'youtube-dl'
-brew 'dateutils'
 brew 'rcm'
 brew 'watchman'
 brew 'tree'
@@ -51,19 +47,14 @@ brew 'rbenv'
 brew 'ruby-build'
 brew 'yarn'
 brew 'ctags'
-brew 'sourcekitten'
 brew 'fzf'
 brew 'burntsushi/ripgrep/ripgrep-bin'
 brew 'z'
 brew 'editorconfig'
-brew 'pidcat'
 brew 'gifsicle'
 brew 'imagemagick'
 brew 'ffmpeg'
-brew 'exercism'
-brew 'elixir'
 brew 'swiftplate'
-brew 'vapor'
 
 ### Casks ###
 cask 'alfred'
