@@ -58,9 +58,7 @@ brew 'swiftplate'
 
 ### Casks ###
 cask 'alfred'
-cask 'atom'
-cask 'vanilla'
-cask 'font-fira-code'
+cask 'bartender'
 cask 'font-iosevka'
 cask 'imageoptim'
 cask 'paw'
@@ -72,32 +70,26 @@ cask 'graphiql'
 cask 'karabiner-elements'
 cask 'dash'
 cask 'spotify'
-cask 'rocket'
 cask 'slack'
 cask 'hazel'
 cask 'the-unarchiver'
-cask 'hex-fiend'
 cask 'gitscout'
 cask 'contexts'
 cask 'itsycal'
-cask 'postgres'
-cask 'forklift'
-cask 'etcher'
 cask 'tripmode'
 cask 'viscosity'
 cask 'hyper'
 cask 'visual-studio-code'
-cask 'now'
 cask 'iina'
-cask 'kid3'
+cask 'gifs'
 
 ### Dev Specific ###
 cask 'charles'
 cask 'now'
+cask 'postgres'
 cask 'postico'
 cask 'docker'
 cask 'kaleidoscope'
-cask 'muzzle'
 
 ### Quicklook ###
 cask 'qlvideo'
@@ -105,17 +97,15 @@ cask 'quicklook-json'
 
 ### MAS ###
 mas '1Blocker', id: 1107421413
-mas '2Do', id: 477670270
 mas 'Airmail 3', id: 918858936
 mas 'Deckset', id: 847496013
 mas 'Deliveries', id: 924726344
-mas 'GIFs', id: 961850017
 mas 'Monosnap', id: 540348655
 mas 'Reeder', id: 880001334
 mas 'SnippetsLab', id: 1006087419
 mas 'Tweetbot', id: 557168941
-mas 'Screens', id: 446107677
+mas 'Screens 4', id: 1224268771
 mas 'Bear', id: 1091189122
 mas 'Giphy Capture', id: 668208984
 mas 'Clearview', id: 557090104
-mas 'Magnet', id: 441258766
+mas 'Moom', id: 419330170
