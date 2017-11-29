@@ -134,7 +134,7 @@ fancy_echo "Checking for SSH key, generating one if it doesn't exist ..."
   fi
 
 fancy_echo "Checking for GPG Key, generating one if it doesn't exist ..."
-  if [[ ! -f ~/.gnupg/pubring.gpg ]]; then
+  if [[ ! -f ~/.gnupg/pubring.kbx ]]; then
     gpg --gen-key
     gpg_pub_key="$(gpg --list-keys --keyid-format LONG | grep pub | awk '{print $2}' | awk -F '/' '{print $2}' | xargs)"
     local_gitconfig="$HOME/.gitconfig.local"
