@@ -109,3 +109,4 @@ mas 'Bear', id: 1091189122
 mas 'Giphy Capture', id: 668208984
 mas 'Clearview', id: 557090104
 mas 'Moom', id: 419330170
+mas 'Twitterrific', id: 1289378661
