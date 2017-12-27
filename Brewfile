@@ -83,6 +83,9 @@ cask 'visual-studio-code'
 cask 'iina'
 cask 'gifs'
 
+### Media ###
+cask 'forecast'
+
 ### Dev Specific ###
 cask 'charles'
 cask 'now'
