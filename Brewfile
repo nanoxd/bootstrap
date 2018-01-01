@@ -3,6 +3,7 @@ tap "homebrew/devel-only"
 tap "thoughtbot/formulae"
 tap "neovim/neovim"
 tap 'burntsushi/ripgrep', 'https://github.com/BurntSushi/ripgrep.git'
+tap 'GoogleChrome/simplehttp2server', 'https://github.com/GoogleChrome/simplehttp2server'
 
 tap 'caskroom/fonts'
 
@@ -40,6 +41,7 @@ brew 'redis'
 brew 'exa'
 brew 'gnu-sed', args: ['with-default-names']
 brew 'fd'
+brew 'simplehttp2server'
 
 # Languages
 brew 'carthage'
