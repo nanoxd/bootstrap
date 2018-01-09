@@ -84,6 +84,8 @@ cask 'hyper'
 cask 'visual-studio-code'
 cask 'iina'
 cask 'gifs'
+cask 'firefox'
+cask 'google-chrome'
 
 ### Media ###
 cask 'forecast'
