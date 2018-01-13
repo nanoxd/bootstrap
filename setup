@@ -192,6 +192,7 @@ if [ ! -e "$HOME/.cargo/bin" ]; then
   rustup default nightly
   rustup component add rust-analysis
   rustup component add rust-src
+  rustup component add rls-preview
 fi
 
 make rust
