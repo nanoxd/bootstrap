@@ -90,6 +90,7 @@ cask 'irccloud'
 cask 'forecast'
 
 ### Dev Specific ###
+cask 'iterm2'
 cask 'charles'
 cask 'now'
 cask 'postgres'
