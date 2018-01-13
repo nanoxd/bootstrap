@@ -84,6 +84,7 @@ cask 'iina'
 cask 'gifs'
 cask 'firefox'
 cask 'google-chrome'
+cask 'irccloud'
 
 ### Media ###
 cask 'forecast'
