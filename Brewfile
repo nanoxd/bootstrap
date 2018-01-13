@@ -102,7 +102,6 @@ cask 'quicklook-json'
 
 ### MAS ###
 mas '1Blocker', id: 1107421413
-mas 'Airmail 3', id: 918858936
 mas 'Deckset', id: 847496013
 mas 'Deliveries', id: 924726344
 mas 'Monosnap', id: 540348655
