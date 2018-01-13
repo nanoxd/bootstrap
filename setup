@@ -167,7 +167,7 @@ bundle config --global jobs $((number_of_cores - 1))
 gem_install_or_update 'cocoapods'
 gem_install_or_update 'ripper-tags'
 gem_install_or_update 'ruby-debug-ide'
-gem_install_or_update 'debase' -v 0.2.2.beta10
+gem_install_or_update 'debase' -v 0.2.2.beta14
 gem_install_or_update 'rcodetools'
 gem_install_or_update 'fastri'
 gem_install_or_update 'update_xcode_plugins'
