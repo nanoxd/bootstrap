@@ -113,3 +113,4 @@ mas 'Giphy Capture', id: 668208984
 mas 'Clearview', id: 557090104
 mas 'Moom', id: 419330170
 mas 'Twitterrific', id: 1289378661
+mas 'Spark', id: 1176895641
