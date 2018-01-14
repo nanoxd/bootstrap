@@ -85,6 +85,8 @@ cask 'gifs'
 cask 'firefox'
 cask 'google-chrome'
 cask 'irccloud'
+cask 'screens'
+cask 'screens-connect'
 
 ### Media ###
 cask 'forecast'
@@ -109,7 +111,6 @@ mas 'Deliveries', id: 924726344
 mas 'Monosnap', id: 540348655
 mas 'Reeder', id: 880001334
 mas 'SnippetsLab', id: 1006087419
-mas 'Screens 4', id: 1224268771
 mas 'Bear', id: 1091189122
 mas 'Giphy Capture', id: 668208984
 mas 'Clearview', id: 557090104
