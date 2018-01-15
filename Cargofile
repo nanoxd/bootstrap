@@ -8,3 +8,5 @@ cargo_install 'cargo-update'
 cargo_install 'racer'
 cargo_install 'rustfmt'
 cargo_install 'clippy'
+cargo_install 'hyperfine'
+
