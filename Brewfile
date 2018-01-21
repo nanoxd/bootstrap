@@ -40,6 +40,7 @@ brew 'exa'
 brew 'gnu-sed', args: ['with-default-names']
 brew 'fd'
 brew 'simplehttp2server'
+brew 'awscli'
 
 # Languages
 brew 'carthage'
