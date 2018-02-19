@@ -39,6 +39,7 @@ brew 'redis'
 brew 'exa'
 brew 'gnu-sed', args: ['with-default-names']
 brew 'fd'
+brew 'tokei'
 brew 'simplehttp2server'
 brew 'awscli'
 
