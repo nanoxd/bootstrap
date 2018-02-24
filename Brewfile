@@ -92,6 +92,7 @@ cask 'screens-connect'
 
 ### Media ###
 cask 'forecast'
+cask 'soundsource'
 
 ### Dev Specific ###
 cask 'iterm2'
