@@ -57,6 +57,7 @@ brew 'gifsicle'
 brew 'imagemagick'
 brew 'ffmpeg'
 brew 'swiftplate'
+brew 'swiftlint'
 
 ### Casks ###
 cask 'alfred'
