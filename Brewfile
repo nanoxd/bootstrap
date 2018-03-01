@@ -42,6 +42,7 @@ brew 'fd'
 brew 'tokei'
 brew 'simplehttp2server'
 brew 'awscli'
+brew 'coreutils'
 
 # Languages
 brew 'carthage'
