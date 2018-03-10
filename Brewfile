@@ -2,7 +2,6 @@ tap "homebrew/services"
 tap "thoughtbot/formulae"
 tap "neovim/neovim"
 tap 'burntsushi/ripgrep', 'https://github.com/BurntSushi/ripgrep.git'
-tap 'GoogleChrome/simplehttp2server', 'https://github.com/GoogleChrome/simplehttp2server'
 
 tap 'caskroom/fonts'
 
@@ -39,7 +38,6 @@ brew 'exa'
 brew 'gnu-sed', args: ['with-default-names']
 brew 'fd'
 brew 'tokei'
-brew 'simplehttp2server'
 brew 'awscli'
 brew 'coreutils'
 
