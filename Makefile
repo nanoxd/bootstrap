@@ -15,3 +15,6 @@ rust:
 
 yarn:
 	cat ./Yarnfile | xargs yarn global add
+
+custom_bins:
+	./custom_bins

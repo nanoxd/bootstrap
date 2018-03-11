@@ -197,3 +197,4 @@ if [ ! -e "$HOME/.cargo/bin" ]; then
 fi
 
 make rust
+make custom_bins

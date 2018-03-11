@@ -1,0 +1,14 @@
+#!/bin/sh
+
+fancy_echo() {
+  local fmt="$1"; shift
+
+  printf "\n$fmt\n" "$@"
+}
+
+if ! command -v up >/dev/null; then
+  fancy_echo "Installing Up"
+  curl -sf https://up.apex.sh/install | sh
+else
+  fancy_echo "Skipping Up"
+fi
