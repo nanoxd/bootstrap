@@ -60,6 +60,7 @@ brew 'pngcrush'
 
 # Experiment
 brew 'ccat'
+brew 'zplug'
 
 ### Casks ###
 cask 'alfred'
