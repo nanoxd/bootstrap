@@ -58,6 +58,9 @@ brew 'swiftplate'
 brew 'swiftlint'
 brew 'pngcrush'
 
+# Experiment
+brew 'ccat'
+
 ### Casks ###
 cask 'alfred'
 cask 'bartender'
