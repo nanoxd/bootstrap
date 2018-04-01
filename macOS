@@ -89,6 +89,9 @@ fancy_echo "Finder: Sort by name"
 
 fancy_echo "Finder: Use list view in windows"
   defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
+
+fancy_echo "Finder: Save to disk instead of iCloud"
+  defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
 # }}}
 
 # Dock {{{
