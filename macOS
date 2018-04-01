@@ -7,11 +7,14 @@ fancy_echo() {
   printf "\n$fmt\n" "$@"
 }
 
+# Trackpad {{{
 fancy_echo "Trackpad: enable tap to click for this user and for the login screen"
   defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
   defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
   defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+# }}}
 
+# Keyboard {{{
 fancy_echo "Keyboard: Enable full access for all controls"
   defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
 
@@ -24,7 +27,9 @@ fancy_echo "Keyboard: Disable press-and-hold for keys in favor of key repeat"
 
 fancy_echo "Keyboard: Disable auto-correct"
   defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
+# }}}
 
+# Finder {{{
 fancy_echo "Finder: allow text selection in Quick Look"
   defaults write com.apple.finder QLEnableTextSelection -bool true
 
@@ -66,7 +71,9 @@ fancy_echo "Finder: Sort by name"
 
 fancy_echo "Finder: Use list view in windows"
   defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
+# }}}
 
+# Dock {{{
 fancy_echo "Dock: Set the icon size of Dock items to 28 pixels"
   defaults write com.apple.dock tilesize -int 28
 
@@ -79,10 +86,14 @@ fancy_echo "Dock: Adjust hide/show animation timings"
 
 fancy_echo "Dock: Only display open apps"
   defaults write com.apple.dock static-only -bool true
+# }}}
 
+# Mission Control {{{
 fancy_echo "Mission Control: Don't rearrange by use"
   defaults write com.apple.dock mru-spaces -bool false
+# }}}
 
+# Safari {{{
 fancy_echo "Safari: Set home page to about:blank for faster loading"
   defaults write com.apple.Safari HomePage -string "about:blank"
 
@@ -101,7 +112,9 @@ fancy_echo "Safari: Enable debug menu"
 
 fancy_echo "Safari: Enable 'Do Not Track'"
   defaults write com.apple.Safari SendDoNotTrackHTTPHeader -bool true
+# }}}
 
+# Xcode {{{
 fancy_echo "Xcode: See how long a build takes"
   defaults write com.apple.dt.Xcode ShowBuildOperationDuration YES
 
@@ -113,25 +126,38 @@ fancy_echo "Xcode: Increase number of concurrent tasks"
   
 fancy_echo "Xcode: Use Focused Editor"
   defaults write com.apple.dt.Xcode IDEEditorCoordinatorTarget_Click -string "FocusedEditor"
+# }}}
 
+# Print {{{
 fancy_echo "Print: Automatically quit printer app once the print jobs complete"
   defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
+# }}}
 
+# Time Machine {{{
 fancy_echo "Time Machine: Prevent from prompting to use new hard drives as backup volume"
   defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
+# }}}
 
+# Photos {{{
 fancy_echo "Photos: Prevent from opening automatically when devices are plugged in"
   defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
+# }}}
 
 ### Third Party Apps ###
 
+# Tweetbot {{{
 fancy_echo "Tweetbot: Bypass t.co URL shortener"
   defaults write com.tapbots.TweetbotMac OpenURLsDirectly -bool true
+# }}}
 
+# Itsycal {{{
 fancy_echo "Itsycal: Configure display"
   defaults write com.mowglii.ItsycalApp ClockFormat -string "h:mm a"
   defaults write com.mowglii.ItsycalApp ShowMonthInIcon -bool true
   defaults write com.mowglii.ItsycalApp ShowDayOfWeekInIcon -bool true
+# }}}
 
+# VS Code {{{
 fancy_echo "VS Code: Allow key repeat for Vim"
   defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
+# }}}
