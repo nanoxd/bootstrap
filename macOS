@@ -182,3 +182,19 @@ fancy_echo "Itsycal: Configure display"
 fancy_echo "VS Code: Allow key repeat for Vim"
   defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
 # }}}
+
+for app in "cfprefsd" \
+	"Dock" \
+	"Finder" \
+	"Itsycal" \
+	"Mail" \
+	"Messages" \
+	"Photos" \
+	"Safari" \
+	"SystemUIServer" \
+	"Terminal" \
+	"Tweetbot" \
+	"iCal"; do
+	killall "${app}" &> /dev/null
+done
+echo "Done. Note that some of these changes require a logout/restart to take effect."
