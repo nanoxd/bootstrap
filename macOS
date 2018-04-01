@@ -41,6 +41,10 @@ fancy_echo "Keyboard: Disable press-and-hold for keys in favor of key repeat"
 
 fancy_echo "Keyboard: Disable auto-correct"
   defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
+
+fancy_echo "Keyboard: Disable smart quotes and dashes"
+  defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
+  defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
 # }}}
 
 # Finder {{{
