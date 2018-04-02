@@ -1,11 +1,6 @@
 #!/bin/sh
 
-fancy_echo() {
-  local fmt="$1"; shift
-
-  # shellcheck disable=SC2059
-  printf "\n$fmt\n" "$@"
-}
+. ./shared.sh
 
 # Close any open System Preferences panes
 osascript -e 'tell application "System Preferences" to quit'
@@ -17,169 +12,186 @@ sudo -v
 while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 
 # System {{{
-fancy_echo "System: Restart automatically if the computer freezes"
+info "System"
+
+substep_info "Restart automatically if the computer freezes"
   sudo systemsetup -setrestartfreeze on
 # }}}
 
 # Trackpad {{{
-fancy_echo "Trackpad: enable tap to click for this user and for the login screen"
+info "Trackpad"
+
+substep_info "Enable tap to click for this user and for the login screen"
   defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
   defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
   defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 # }}}
 
 # Keyboard {{{
-fancy_echo "Keyboard: Enable full access for all controls"
+info "Keyboard"
+substep_info "Enable full access for all controls"
   defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
 
-fancy_echo "Keyboard: Set a blazingly fast repeat rate"
+substep_info "Set a blazingly fast repeat rate"
   defaults write NSGlobalDomain KeyRepeat -int 0
   defaults write NSGlobalDomain InitialKeyRepeat -int 10
 
-fancy_echo "Keyboard: Disable press-and-hold for keys in favor of key repeat"
+substep_info "Disable press-and-hold for keys in favor of key repeat"
   defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
 
-fancy_echo "Keyboard: Disable auto-correct"
+substep_info "Disable auto-correct"
   defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
 
-fancy_echo "Keyboard: Disable smart quotes and dashes"
+substep_info "Disable smart quotes and dashes"
   defaults write NSGlobalDomain NSAutomaticQuoteSubstitutionEnabled -bool false
   defaults write NSGlobalDomain NSAutomaticDashSubstitutionEnabled -bool false
 # }}}
 
 # Finder {{{
-fancy_echo "Finder: allow text selection in Quick Look"
+info "Finder"
+
+substep_info "Allow text selection in Quick Look"
   defaults write com.apple.finder QLEnableTextSelection -bool true
 
-fancy_echo "Finder: Avoid creating .DS_Store files on external volumes"
+substep_info "Avoid creating .DS_Store files on external volumes"
   defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
   defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
 
-fancy_echo "Finder: Show All Files"
+substep_info "Show All Files"
   defaults write com.apple.finder AppleShowAllFiles YES
 
-fancy_echo "Finder: Show Status Bar"
+substep_info "Show Status Bar"
   defaults write com.apple.finder ShowStatusBar -bool true
 
-fancy_echo "Finder: Show Path Bar"
+substep_info "Show Path Bar"
   defaults write com.apple.finder ShowPathbar -bool true
 
-fancy_echo "Finder: Search Current Folder By Default"
+substep_info "Search Current Folder By Default"
   defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"
 
-fancy_echo "Finder: Display all file extensions and disable rename warning"
+substep_info "Display all file extensions and disable rename warning"
   defaults write NSGlobalDomain AppleShowAllExtensions -bool true
   defaults write com.apple.finder FXEnableExtensionChangeWarning -bool false
 
-fancy_echo "Finder: Show icons for hard drives, servers, and removable media on the desktop"
+substep_info "Show icons for hard drives, servers, and removable media on the desktop"
   defaults write com.apple.finder ShowExternalHardDrivesOnDesktop -bool true
   defaults write com.apple.finder ShowHardDrivesOnDesktop -bool true
   defaults write com.apple.finder ShowMountedServersOnDesktop -bool true
   defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool true
 
-fancy_echo "Finder: Show Info on icon views"
+substep_info "Show Info on icon views"
   /usr/libexec/PlistBuddy -c "Set :DesktopViewSettings:IconViewSettings:showItemInfo true" ~/Library/Preferences/com.apple.finder.plist
   /usr/libexec/PlistBuddy -c "Set :FK_StandardViewSettings:IconViewSettings:showItemInfo true" ~/Library/Preferences/com.apple.finder.plist
   /usr/libexec/PlistBuddy -c "Set :StandardViewSettings:IconViewSettings:showItemInfo true" ~/Library/Preferences/com.apple.finder.plist
 
-fancy_echo "Finder: Sort by name"
+substep_info "Sort by name"
   /usr/libexec/PlistBuddy -c "Set :DesktopViewSettings:IconViewSettings:arrangeBy name" ~/Library/Preferences/com.apple.finder.plist
   /usr/libexec/PlistBuddy -c "Set :FK_StandardViewSettings:IconViewSettings:arrangeBy name" ~/Library/Preferences/com.apple.finder.plist
   /usr/libexec/PlistBuddy -c "Set :StandardViewSettings:IconViewSettings:arrangeBy name" ~/Library/Preferences/com.apple.finder.plist
 
-fancy_echo "Finder: Use list view in windows"
+substep_info "Use list view in windows"
   defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
 
-fancy_echo "Finder: Save to disk instead of iCloud"
+substep_info "Save to disk instead of iCloud"
   defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
 # }}}
 
 # Dock {{{
-fancy_echo "Dock: Set the icon size of Dock items to 28 pixels"
+info "Dock"
+substep_info "Set the icon size of Dock items to 28 pixels"
   defaults write com.apple.dock tilesize -int 28
 
-fancy_echo "Dock: Automatically hide and show"
+substep_info "Automatically hide and show"
   defaults write com.apple.dock autohide -bool true
 
-fancy_echo "Dock: Adjust hide/show animation timings"
+substep_info "Adjust hide/show animation timings"
   defaults write com.apple.dock autohide-delay -int 0
   defaults write com.apple.dock autohide-time-modifier -float 0.4
 
-fancy_echo "Dock: Only display open apps"
+substep_info "Only display open apps"
   defaults write com.apple.dock static-only -bool true
 # }}}
 
 # Mission Control {{{
-fancy_echo "Mission Control: Don't rearrange by use"
+info "Mission Control"
+substep_info "Don't rearrange by use"
   defaults write com.apple.dock mru-spaces -bool false
 # }}}
 
 # Safari {{{
-fancy_echo "Safari: Set home page to about:blank for faster loading"
+info "Safari"
+substep_info "Set home page to about:blank for faster loading"
   defaults write com.apple.Safari HomePage -string "about:blank"
 
-fancy_echo "Safari: Make search banners default to Contains instead of Starts With"
+substep_info "Make search banners default to Contains instead of Starts With"
   defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
 
-fancy_echo "Safari: Prevent opening 'safe' files automatically after downloading"
+substep_info "Prevent opening 'safe' files automatically after downloading"
   defaults write com.apple.Safari AutoOpenSafeDownloads -bool false
 
-fancy_echo "Safari: Enable debug menu"
+substep_info "Enable debug menu"
   defaults write com.apple.Safari IncludeInternalDebugMenu -bool true
   defaults write com.apple.Safari IncludeDevelopMenu -bool true
   defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
   defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
   defaults write NSGlobalDomain WebKitDeveloperExtras -bool true
 
-fancy_echo "Safari: Enable 'Do Not Track'"
+substep_info "Enable 'Do Not Track'"
   defaults write com.apple.Safari SendDoNotTrackHTTPHeader -bool true
 # }}}
 
 # Xcode {{{
-fancy_echo "Xcode: See how long a build takes"
+info "Xcode"
+substep_info "See how long a build takes"
   defaults write com.apple.dt.Xcode ShowBuildOperationDuration YES
 
-fancy_echo "Xcode: Use all cores to build"
+substep_info "Use all cores to build"
   defaults write com.apple.dt.Xcode IDEBuildOperationMaxNumberOfConcurrentCompileTasks `sysctl -n hw.ncpu`
 
-fancy_echo "Xcode: Increase number of concurrent tasks"
+substep_info "Increase number of concurrent tasks"
   defaults write com.apple.dt.Xcode BuildSystemScheduleInherentlyParallelCommandsExclusively -bool NO
   
-fancy_echo "Xcode: Use Focused Editor"
+substep_info "Use Focused Editor"
   defaults write com.apple.dt.Xcode IDEEditorCoordinatorTarget_Click -string "FocusedEditor"
 # }}}
 
 # Print {{{
-fancy_echo "Print: Automatically quit printer app once the print jobs complete"
+info "Print"
+substep_info "Automatically quit printer app once the print jobs complete"
   defaults write com.apple.print.PrintingPrefs "Quit When Finished" -bool true
 # }}}
 
 # Time Machine {{{
-fancy_echo "Time Machine: Prevent from prompting to use new hard drives as backup volume"
+info "Time Machine"
+substep_info "Prevent from prompting to use new hard drives as backup volume"
   defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
 # }}}
 
 # Photos {{{
-fancy_echo "Photos: Prevent from opening automatically when devices are plugged in"
+info "Photos"
+substep_info "Prevent from opening automatically when devices are plugged in"
   defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
 # }}}
 
 ### Third Party Apps ###
 
 # Tweetbot {{{
-fancy_echo "Tweetbot: Bypass t.co URL shortener"
+info "Tweetbot"
+substep_info "Bypass t.co URL shortener"
   defaults write com.tapbots.TweetbotMac OpenURLsDirectly -bool true
 # }}}
 
 # Itsycal {{{
-fancy_echo "Itsycal: Configure display"
+info "Itsycal"
+substep_info "Configure display"
   defaults write com.mowglii.ItsycalApp ClockFormat -string "h:mm a"
   defaults write com.mowglii.ItsycalApp ShowMonthInIcon -bool true
   defaults write com.mowglii.ItsycalApp ShowDayOfWeekInIcon -bool true
 # }}}
 
 # VS Code {{{
-fancy_echo "VS Code: Allow key repeat for Vim"
+info "VS Code"
+substep_info "Allow key repeat for Vim"
   defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
 # }}}
 
@@ -197,4 +209,5 @@ for app in "cfprefsd" \
 	"iCal"; do
 	killall "${app}" &> /dev/null
 done
-echo "Done. Note that some of these changes require a logout/restart to take effect."
+
+success "Done. Note that some of these changes require a logout/restart to take effect."
