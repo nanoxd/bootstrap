@@ -4,6 +4,7 @@ tap "neovim/neovim"
 tap 'burntsushi/ripgrep', 'https://github.com/BurntSushi/ripgrep.git'
 
 tap 'caskroom/fonts'
+tap 'caskroom/drivers'
 
 # Git formulas
 brew "git"
@@ -105,6 +106,7 @@ cask 'postgres'
 cask 'postico'
 cask 'docker'
 cask 'kaleidoscope'
+cask 'oni'
 
 ### Quicklook ###
 cask 'qlvideo'
