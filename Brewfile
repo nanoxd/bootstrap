@@ -62,6 +62,7 @@ brew 'pngcrush'
 # Experiment
 brew 'ccat'
 brew 'zplug'
+brew 'grc'
 
 ### Casks ###
 cask 'alfred'
