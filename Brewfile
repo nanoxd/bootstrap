@@ -54,7 +54,17 @@ brew 'z'
 brew 'editorconfig'
 brew 'gifsicle'
 brew 'imagemagick'
-brew 'ffmpeg'
+brew 'ffmpeg', args: [
+  'with-fdk-aac', 
+  'with-sdl2', 
+  'with-freetype',
+  'with-libass',
+  'with-libquvi',
+  'with-libvorbis',
+  'with-libvpx',
+  'with-opus',
+  'with-x265'
+]
 brew 'swiftplate'
 brew 'swiftlint'
 brew 'pngcrush'
@@ -63,6 +73,7 @@ brew 'pngcrush'
 brew 'ccat'
 brew 'zplug'
 brew 'grc'
+brew 'mp4v2'
 
 ### Casks ###
 cask 'alfred'
