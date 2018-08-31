@@ -81,7 +81,6 @@ cask 'bartender'
 cask 'font-iosevka'
 cask 'imageoptim'
 cask 'paw'
-cask 'sketch'
 cask 'spillo'
 cask 'tower'
 cask 'shortcat'
@@ -108,7 +107,6 @@ cask 'screens-connect'
 
 ### Media ###
 cask 'forecast'
-cask 'soundsource'
 
 ### Dev Specific ###
 cask 'iterm2'
