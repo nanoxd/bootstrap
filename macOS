@@ -153,6 +153,10 @@ substep_info "Increase number of concurrent tasks"
   
 substep_info "Use Focused Editor"
   defaults write com.apple.dt.Xcode IDEEditorCoordinatorTarget_Click -string "FocusedEditor"
+
+substep_info "Trim whitespace"
+  defaults write com.apple.dt.Xcode DVTTextEditorTrimTrailingWhitespace -bool true
+  defaults write com.apple.dt.Xcode DVTTextEditorTrimWhitespaceOnlyLines -bool true
 # }}}
 
 # Print {{{
