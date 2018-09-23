@@ -41,6 +41,7 @@ brew 'fd'
 brew 'tokei'
 brew 'awscli'
 brew 'coreutils'
+brew 'rename'
 
 # Languages
 brew 'carthage'
