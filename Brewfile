@@ -45,6 +45,7 @@ brew 'rename'
 
 # Languages
 brew 'carthage'
+brew 'artemnovichkov/projects/carting'
 brew 'rbenv'
 brew 'ruby-build'
 brew 'yarn'
