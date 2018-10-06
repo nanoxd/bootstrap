@@ -194,6 +194,7 @@ if [ ! -e "$HOME/.cargo/bin" ]; then
   rustup component add rust-src
   rustup component add rls-preview
   rustup component add rustfmt-preview
+  rustup component add clippy-preview
 fi
 
 make rust
