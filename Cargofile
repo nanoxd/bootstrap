@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 cargo_install() {
   cargo install "$1" --force

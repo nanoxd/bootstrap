@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 fancy_echo() {
   local fmt="$1"; shift
