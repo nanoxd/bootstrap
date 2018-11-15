@@ -70,6 +70,7 @@ brew 'ffmpeg', args: [
 brew 'swiftplate'
 brew 'swiftlint'
 brew 'pngcrush'
+brew 'reattach-to-user-namespace'
 
 # Experiment
 brew 'ccat'
