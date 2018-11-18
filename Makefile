@@ -18,3 +18,6 @@ yarn:
 
 custom_bins:
 	./custom_bins
+
+gems:
+	./Gemsfile

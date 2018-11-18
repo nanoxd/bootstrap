@@ -1,0 +1,26 @@
+#!/usr/bin/env zsh
+
+set -e
+
+source ./shared.sh
+
+gem_install_or_update() {
+  if gem list "$1" --installed > /dev/null; then
+    colored_echo "Updating $1 ..." "cyan"
+    gem update "$@"
+  else
+    colored_echo "Installing $1 ..." "blue"
+    gem install "$@" --no-document
+  fi
+}
+
+gem update --system
+
+gem_install_or_update 'bundler'
+gem_install_or_update 'cocoapods'
+gem_install_or_update 'ripper-tags'
+gem_install_or_update 'ruby-debug-ide'
+gem_install_or_update 'debase'
+gem_install_or_update 'rcodetools'
+gem_install_or_update 'fastri'
+gem_install_or_update 'update_xcode_plugins'
