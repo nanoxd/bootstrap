@@ -71,6 +71,7 @@ brew 'swiftplate'
 brew 'swiftlint'
 brew 'pngcrush'
 brew 'reattach-to-user-namespace'
+brew 'tealdeer'
 
 # Experiment
 brew 'ccat'
