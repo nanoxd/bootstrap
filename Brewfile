@@ -2,6 +2,7 @@ tap "homebrew/services"
 tap "thoughtbot/formulae"
 tap "neovim/neovim"
 tap 'burntsushi/ripgrep', 'https://github.com/BurntSushi/ripgrep.git'
+tap 'dral3x/dral3x'
 
 tap 'caskroom/fonts'
 tap 'caskroom/drivers'
@@ -67,8 +68,6 @@ brew 'ffmpeg', args: [
   'with-opus',
   'with-x265'
 ]
-brew 'swiftplate'
-brew 'swiftlint'
 brew 'pngcrush'
 brew 'reattach-to-user-namespace'
 brew 'tealdeer'
@@ -78,6 +77,11 @@ brew 'ccat'
 brew 'zplug'
 brew 'grc'
 brew 'mp4v2'
+
+# Swift/Xcode tooling
+brew 'swiftplate'
+brew 'swiftlint'
+brew 'stringslint'
 
 ### Casks ###
 cask 'alfred'
