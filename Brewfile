@@ -122,6 +122,7 @@ cask 'now'
 cask 'postgres'
 cask 'postico'
 cask 'docker'
+cask 'sloth'
 
 ### Quicklook ###
 cask 'qlvideo'
