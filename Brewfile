@@ -79,6 +79,7 @@ brew 'grc'
 brew 'mp4v2'
 
 # Swift/Xcode tooling
+brew 'mint'
 brew 'swiftplate'
 brew 'swiftlint'
 brew 'stringslint'
