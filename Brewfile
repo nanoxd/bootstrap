@@ -39,14 +39,12 @@ brew 'redis'
 brew 'exa'
 brew 'gnu-sed', args: ['with-default-names']
 brew 'fd'
-brew 'tokei'
 brew 'awscli'
 brew 'coreutils'
 brew 'rename'
 
 # Languages
 brew 'carthage'
-brew 'artemnovichkov/projects/carting'
 brew 'rbenv'
 brew 'ruby-build'
 brew 'yarn'
@@ -74,7 +72,6 @@ brew 'tealdeer'
 
 # Experiment
 brew 'ccat'
-brew 'zplug'
 brew 'grc'
 brew 'mp4v2'
 
@@ -82,7 +79,6 @@ brew 'mp4v2'
 brew 'mint'
 brew 'swiftplate'
 brew 'swiftlint'
-brew 'stringslint'
 
 ### Casks ###
 cask 'alfred'
@@ -92,11 +88,8 @@ cask 'imageoptim'
 cask 'paw'
 cask 'spillo'
 cask 'fork'
-cask 'shortcat'
 cask 'karabiner-elements'
 cask 'dash'
-cask 'spotify'
-cask 'slack'
 cask 'hazel'
 cask 'the-unarchiver'
 cask 'contexts'
@@ -105,7 +98,6 @@ cask 'tripmode'
 cask 'viscosity'
 cask 'hyper'
 cask 'visual-studio-code'
-cask 'iina'
 cask 'gifs'
 cask 'firefox'
 cask 'google-chrome'
@@ -114,7 +106,8 @@ cask 'screens'
 cask 'screens-connect'
 
 ### Media ###
-cask 'forecast'
+cask 'spotify'
+cask 'iina'
 
 ### Dev Specific ###
 cask 'iterm2'
@@ -123,7 +116,6 @@ cask 'now'
 cask 'postgres'
 cask 'postico'
 cask 'docker'
-cask 'sloth'
 
 ### Quicklook ###
 cask 'qlvideo'
@@ -134,7 +126,6 @@ mas '1Blocker', id: 1107421413
 mas 'Deckset', id: 847496013
 mas 'Deliveries', id: 924726344
 mas 'Monosnap', id: 540348655
-mas 'Reeder', id: 880001334
 mas 'SnippetsLab', id: 1006087419
 mas 'Bear', id: 1091189122
 mas 'Giphy Capture', id: 668208984
@@ -144,4 +135,3 @@ mas 'Twitterrific', id: 1289378661
 mas 'Spark', id: 1176895641
 mas 'Pocket', id: 568494494
 mas 'Gifski', id: 1351639930
-mas "iRamDisk", id: 492615400
