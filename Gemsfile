@@ -17,12 +17,10 @@ gem_install_or_update() {
 gem update --system
 
 gem_install_or_update 'bundler'
-gem_install_or_update 'cocoapods'
 gem_install_or_update 'ripper-tags'
 gem_install_or_update 'ruby-debug-ide'
 gem_install_or_update 'debase'
 gem_install_or_update 'rcodetools'
 gem_install_or_update 'fastri'
-gem_install_or_update 'update_xcode_plugins'
 gem_install_or_update 'neovim'
 gem_install_or_update 'gist'
