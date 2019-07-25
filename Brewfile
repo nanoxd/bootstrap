@@ -2,7 +2,6 @@ tap "homebrew/services"
 tap "thoughtbot/formulae"
 tap "neovim/neovim"
 tap 'burntsushi/ripgrep', 'https://github.com/BurntSushi/ripgrep.git'
-tap 'dral3x/dral3x'
 
 tap 'caskroom/fonts'
 tap 'caskroom/drivers'
