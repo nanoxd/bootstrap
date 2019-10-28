@@ -12,3 +12,5 @@ cargo_install 'uq'
 cargo_install 'lagraph'
 cargo_install 'sd'
 cargo_install 'sheldon'
+# simple calculator REPL, similar to bc(1), with syntax highlighting and persistent history
+cargo_install 'eva'
