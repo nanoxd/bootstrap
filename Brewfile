@@ -43,6 +43,7 @@ brew 'awscli'
 brew 'coreutils'
 brew 'rename'
 brew 'uptech/oss/alt'
+brew 'hexyl'
 
 # Languages
 brew 'carthage'
