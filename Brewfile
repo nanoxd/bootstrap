@@ -2,6 +2,7 @@ tap "homebrew/services"
 tap "thoughtbot/formulae"
 tap "neovim/neovim"
 tap 'burntsushi/ripgrep', 'https://github.com/BurntSushi/ripgrep.git'
+tap "uptech/homebrew-oss"
 
 tap 'caskroom/fonts'
 tap 'caskroom/drivers'
@@ -41,6 +42,7 @@ brew 'fd'
 brew 'awscli'
 brew 'coreutils'
 brew 'rename'
+brew 'uptech/oss/alt'
 
 # Languages
 brew 'carthage'
