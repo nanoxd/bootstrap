@@ -4,8 +4,8 @@ tap "neovim/neovim"
 tap 'burntsushi/ripgrep', 'https://github.com/BurntSushi/ripgrep.git'
 tap "uptech/homebrew-oss"
 
-tap 'caskroom/fonts'
-tap 'caskroom/drivers'
+tap 'homebrew/cask-fonts'
+tap 'homebrew/cask-drivers'
 
 # Git formulas
 brew "git"
@@ -18,14 +18,13 @@ brew "openssl"
 
 # GPG stuff
 brew 'gnupg2'
-brew 'gpg-agent'
 brew 'pinentry-mac'
 
 # Tools
 brew "zsh"
 brew 'bash'
 brew 'fish'
-brew 'wget', args: ['with-iri']
+brew 'wget'
 brew 'ack'
 brew 'neovim'
 brew 'jq'
@@ -57,20 +56,13 @@ brew 'z'
 brew 'editorconfig'
 brew 'gifsicle'
 brew 'imagemagick'
-brew 'ffmpeg', args: [
-  'with-fdk-aac', 
-  'with-sdl2', 
-  'with-freetype',
-  'with-libass',
-  'with-libquvi',
-  'with-libvorbis',
-  'with-libvpx',
-  'with-opus',
-  'with-x265'
-]
+brew 'ffmpeg'
 brew 'pngcrush'
 brew 'reattach-to-user-namespace'
 brew 'tealdeer'
+
+# Haskell
+brew 'stack'
 
 # Experiment
 brew 'ccat'
