@@ -110,6 +110,7 @@ cask 'now'
 cask 'postgres'
 cask 'postico'
 cask 'docker'
+cask 'vimr'
 
 ### Quicklook ###
 cask 'qlvideo'
@@ -129,3 +130,4 @@ mas 'Twitterrific', id: 1289378661
 mas 'Spark', id: 1176895641
 mas 'Pocket', id: 568494494
 mas 'Gifski', id: 1351639930
+mas 'Save to Pocket', id: 1477385213
