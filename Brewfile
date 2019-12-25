@@ -36,7 +36,7 @@ brew 'mas'
 brew 'binutils'
 brew 'redis'
 brew 'exa'
-brew 'gnu-sed', args: ['with-default-names']
+brew 'gnu-sed'
 brew 'fd'
 brew 'awscli'
 brew 'coreutils'
