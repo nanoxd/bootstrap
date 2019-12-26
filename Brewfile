@@ -115,6 +115,7 @@ cask 'iconizer'
 ### Quicklook ###
 cask 'qlvideo'
 cask 'quicklook-json'
+cask 'webpquicklook'
 
 ### MAS ###
 mas '1Blocker', id: 1107421413
