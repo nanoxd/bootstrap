@@ -110,7 +110,6 @@ cask 'now'
 cask 'postgres'
 cask 'postico'
 cask 'docker'
-cask 'vimr'
 cask 'iconizer'
 
 ### Quicklook ###
