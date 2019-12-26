@@ -100,6 +100,10 @@ cask 'screens'
 cask 'screens-connect'
 cask 'keycastr'
 
+### New ###
+cask 'istat-menus'
+cask 'intel-power-gadget'
+
 ### Media ###
 cask 'spotify'
 cask 'iina'
