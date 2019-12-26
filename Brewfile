@@ -98,6 +98,7 @@ cask 'google-chrome'
 cask 'irccloud'
 cask 'screens'
 cask 'screens-connect'
+cask 'keycastr'
 
 ### Media ###
 cask 'spotify'
