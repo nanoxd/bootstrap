@@ -161,7 +161,7 @@ rbenv shell "$ruby_version"
 make gems
 
 if [ ! -d "$HOME/.dotfiles/" ]; then
-  git clone git@github.com:NanoXD/dotfiles.git ~/.dotfiles
+  git clone git@github.com:nanoxd/dotfiles.git ~/.dotfiles
   rcup -x apps
 fi
 
