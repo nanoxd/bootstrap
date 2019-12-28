@@ -160,17 +160,6 @@ rbenv shell "$ruby_version"
 # Gems
 make gems
 
-if [ ! -d "$HOME/.dotfiles/" ]; then
-  git clone git@github.com:nanoxd/dotfiles.git ~/.dotfiles
-  rcup -x apps
-fi
-
-pip_install_or_update 'diff-highlight'
-pip_install_or_update 'pynvim'
-pip_install_or_update 'neovim'
-
-make yarn
-
 fancy_echo "Installing Rust"
 if [ ! -e "$HOME/.cargo/bin" ]; then
   curl https://sh.rustup.rs -sSf | sh
@@ -179,12 +168,21 @@ if [ ! -e "$HOME/.cargo/bin" ]; then
   source $HOME/.cargo/env
   rustup install nightly
   rustup default nightly
-  rustup component add rust-analysis
-  rustup component add rust-src
-  rustup component add rls-preview
-  rustup component add rustfmt-preview
-  rustup component add clippy-preview
+  rustup component add rust-analysis rust-src rls
+  rustup component add rustfmt
+  rustup component add clippy
 fi
 
 make rust
+
+if [ ! -d "$HOME/.dotfiles/" ]; then
+  cargo install --git https://github.com/ubnt-intrepid/dot.git
+  dot init nanoxd/dotfiles
+fi
+
+pip_install_or_update 'diff-highlight'
+pip_install_or_update 'pynvim'
+pip_install_or_update 'neovim'
+
+make yarn
 make custom_bins
