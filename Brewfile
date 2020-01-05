@@ -25,7 +25,6 @@ brew 'pinentry-mac'
 brew 'mas'
 brew 'carthage'
 
-
 # Languages
 brew 'rbenv'
 brew 'ruby-build'
@@ -38,6 +37,7 @@ brew 'bash'
 brew 'fish'
 
 # Tools
+brew 'tmux'
 brew 'cmake'
 brew 'wget'
 brew 'ack'
