@@ -3,7 +3,8 @@ tap "thoughtbot/formulae"
 tap "neovim/neovim"
 tap 'burntsushi/ripgrep', 'https://github.com/BurntSushi/ripgrep.git'
 tap "uptech/homebrew-oss"
-
+tap 'getsentry/tools'
+tap 'yqrashawn/goku'
 tap 'homebrew/cask-fonts'
 tap 'homebrew/cask-drivers'
 
@@ -71,6 +72,7 @@ brew 'yarn'
 brew 'ccat'
 brew 'grc'
 brew 'mp4v2'
+brew 'getsentry/tools/sentry-cli'
 
 # Swift/Xcode tooling
 brew 'mint'
