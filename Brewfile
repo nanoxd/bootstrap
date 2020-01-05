@@ -59,6 +59,7 @@ brew 'ffmpeg'
 brew 'pngcrush'
 brew 'reattach-to-user-namespace'
 brew 'tealdeer'
+brew 'yqrashawn/goku/goku', restart_service: :changed
 
 # Haskell
 brew 'stack'
@@ -115,6 +116,7 @@ cask 'postgres'
 cask 'postico'
 cask 'docker'
 cask 'iconizer'
+cask 'swiftformat-for-xcode'
 
 ### Quicklook ###
 cask 'qlvideo'
