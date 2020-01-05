@@ -76,8 +76,9 @@ brew 'getsentry/tools/sentry-cli'
 
 # Swift/Xcode tooling
 brew 'mint'
-brew 'swiftplate'
+brew 'swiftformat'
 brew 'swiftlint'
+brew 'swiftplate'
 
 ### Casks ###
 cask 'alfred'
