@@ -20,10 +20,24 @@ brew "openssl"
 brew 'gnupg2'
 brew 'pinentry-mac'
 
-# Tools
+# Package Manager
+brew 'mas'
+brew 'carthage'
+
+
+# Languages
+brew 'rbenv'
+brew 'ruby-build'
+brew 'stack'
+brew 'go'
+
+# Shells
 brew "zsh"
 brew 'bash'
 brew 'fish'
+
+# Tools
+brew 'cmake'
 brew 'wget'
 brew 'ack'
 brew 'neovim'
@@ -31,7 +45,6 @@ brew 'jq'
 brew 'httpie'
 brew 'youtube-dl'
 brew 'trash'
-brew 'mas'
 brew 'binutils'
 brew 'redis'
 brew 'exa'
@@ -42,12 +55,6 @@ brew 'coreutils'
 brew 'rename'
 brew 'uptech/oss/alt'
 brew 'hexyl'
-
-# Languages
-brew 'carthage'
-brew 'rbenv'
-brew 'ruby-build'
-brew 'yarn'
 brew 'ctags'
 brew 'fzf'
 brew 'burntsushi/ripgrep/ripgrep-bin'
@@ -60,11 +67,7 @@ brew 'pngcrush'
 brew 'reattach-to-user-namespace'
 brew 'tealdeer'
 brew 'yqrashawn/goku/goku', restart_service: :changed
-
-# Haskell
-brew 'stack'
-
-# Experiment
+brew 'yarn'
 brew 'ccat'
 brew 'grc'
 brew 'mp4v2'
