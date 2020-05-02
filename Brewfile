@@ -24,12 +24,14 @@ brew 'pinentry-mac'
 # Package Manager
 brew 'mas'
 brew 'carthage'
+brew 'luarocks'
 
 # Languages
 brew 'rbenv'
 brew 'ruby-build'
 brew 'stack'
 brew 'go'
+brew 'lua'
 
 # Shells
 brew "zsh"
@@ -115,6 +117,7 @@ cask 'spotify'
 cask 'iina'
 
 ### Dev Specific ###
+cask 'hammerspoon'
 cask 'iterm2'
 cask 'charles'
 cask 'now'
