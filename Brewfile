@@ -113,7 +113,6 @@ cask 'istat-menus'
 cask 'intel-power-gadget'
 
 ### Media ###
-cask 'spotify'
 cask 'iina'
 
 ### Dev Specific ###
@@ -134,12 +133,10 @@ cask 'webpquicklook'
 
 ### MAS ###
 mas '1Blocker', id: 1107421413
-mas 'Deckset', id: 847496013
 mas 'Deliveries', id: 924726344
 mas 'Monosnap', id: 540348655
 mas 'SnippetsLab', id: 1006087419
 mas 'Bear', id: 1091189122
-mas 'Giphy Capture', id: 668208984
 mas 'Clearview', id: 557090104
 mas 'Moom', id: 419330170
 mas 'Twitterrific', id: 1289378661
@@ -147,4 +144,10 @@ mas 'Spark', id: 1176895641
 mas 'Pocket', id: 568494494
 mas 'Gifski', id: 1351639930
 mas 'Save to Pocket', id: 1477385213
+
 mas 'NepTunes', id: 1006739057
+mas 'Key Codes', id: 414568915
+mas 'RocketSim', id: 1504940162
+mas 'X-SwiftFormat', id: 1509655496
+mas 'Core Data Lab', id: 1460684638
+mas 'Popclip', id: 445189367 
