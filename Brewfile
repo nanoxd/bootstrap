@@ -70,10 +70,10 @@ brew 'reattach-to-user-namespace'
 brew 'tealdeer'
 brew 'yqrashawn/goku/goku', restart_service: :changed
 brew 'yarn'
-brew 'ccat'
 brew 'grc'
 brew 'mp4v2'
 brew 'getsentry/tools/sentry-cli'
+brew 'bat'
 
 # Swift/Xcode tooling
 brew 'mint'
