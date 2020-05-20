@@ -5,6 +5,7 @@ cargo_install() {
 }
 
 cargo_install 'cargo-update'
+cargo_install 'cargo-whatfeatures'
 cargo_install 'hyperfine'
 cargo_install 'cargo-edit'
 cargo_install 'cargo-asm'
