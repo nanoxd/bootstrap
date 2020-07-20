@@ -184,5 +184,4 @@ pip_install_or_update 'diff-highlight'
 pip_install_or_update 'pynvim'
 pip_install_or_update 'neovim'
 
-make yarn
 make custom_bins
