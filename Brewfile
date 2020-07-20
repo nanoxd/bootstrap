@@ -12,10 +12,8 @@ tap 'homebrew/cask-drivers'
 brew "git"
 brew "hub"
 brew 'git-extras'
-brew 'git-lfs'
 brew "tig"
-brew "libgit2"
-brew "openssl"
+brew 'openssl'
 
 # GPG stuff
 brew 'gnupg2'
@@ -29,18 +27,14 @@ brew 'luarocks'
 # Languages
 brew 'rbenv'
 brew 'ruby-build'
-brew 'stack'
 brew 'go'
 brew 'lua'
 
 # Shells
-brew "zsh"
-brew 'bash'
 brew 'fish'
 
 # Tools
 brew 'tmux'
-brew 'cmake'
 brew 'wget'
 brew 'ack'
 brew 'neovim'
@@ -50,9 +44,7 @@ brew 'youtube-dl'
 brew 'trash'
 brew 'binutils'
 brew 'redis'
-brew 'exa'
 brew 'gnu-sed'
-brew 'fd'
 brew 'awscli'
 brew 'coreutils'
 brew 'rename'
@@ -64,7 +56,6 @@ brew 'burntsushi/ripgrep/ripgrep-bin'
 brew 'editorconfig'
 brew 'gifsicle'
 brew 'imagemagick'
-brew 'ffmpeg'
 brew 'pngcrush'
 brew 'reattach-to-user-namespace'
 brew 'tealdeer'
@@ -83,40 +74,27 @@ brew 'swiftplate'
 
 ### Casks ###
 cask 'alfred'
-cask 'bartender'
+cask 'font-victor-mono'
 cask 'font-iosevka'
 cask 'imageoptim'
-cask 'paw'
 cask 'spillo'
 cask 'fork'
 cask 'karabiner-elements'
 cask 'dash'
 cask 'hazel'
-cask 'the-unarchiver'
-cask 'contexts'
 cask 'itsycal'
 cask 'tripmode'
-cask 'viscosity'
-cask 'hyper'
 cask 'visual-studio-code'
 cask 'gifs'
 cask 'firefox'
 cask 'google-chrome'
-cask 'irccloud'
-cask 'screens'
-cask 'screens-connect'
 cask 'keycastr'
-
-### New ###
-cask 'istat-menus'
-cask 'intel-power-gadget'
 
 ### Media ###
 cask 'iina'
 
 ### Dev Specific ###
 cask 'hammerspoon'
-cask 'iterm2'
 cask 'charles'
 cask 'now'
 cask 'postgres'
@@ -143,7 +121,6 @@ mas 'Pocket', id: 568494494
 mas 'Gifski', id: 1351639930
 mas 'Save to Pocket', id: 1477385213
 
-mas 'NepTunes', id: 1006739057
 mas 'Key Codes', id: 414568915
 mas 'RocketSim', id: 1504940162
 mas 'X-SwiftFormat', id: 1509655496
