@@ -94,6 +94,7 @@ cask 'keycastr'
 cask 'iina'
 
 ### Dev Specific ###
+cask 'syncthing'
 cask 'hammerspoon'
 cask 'charles'
 cask 'now'
