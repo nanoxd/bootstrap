@@ -12,6 +12,7 @@ tap 'homebrew/cask-drivers'
 brew 'git'
 brew 'hub'
 brew 'git-extras'
+brew 'git-delta'
 brew 'tig'
 brew 'openssl'
 
