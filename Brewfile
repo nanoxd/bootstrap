@@ -7,6 +7,7 @@ tap 'getsentry/tools'
 tap 'yqrashawn/goku'
 tap 'homebrew/cask-fonts'
 tap 'homebrew/cask-drivers'
+tap 'federico-terzi/espanso'
 
 # Git formulas
 brew 'git'
@@ -66,6 +67,7 @@ brew 'grc'
 brew 'mp4v2'
 brew 'getsentry/tools/sentry-cli'
 brew 'bat'
+brew 'espanso'
 
 # Swift/Xcode tooling
 brew 'mint'
