@@ -131,4 +131,3 @@ mas 'Key Codes', id: 414_568_915
 mas 'RocketSim', id: 1_504_940_162
 mas 'X-SwiftFormat', id: 1_509_655_496
 mas 'Core Data Lab', id: 1_460_684_638
-mas 'Popclip', id: 445_189_367
