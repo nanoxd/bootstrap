@@ -99,6 +99,7 @@ cask 'keycastr'
 cask 'iina'
 
 ### Dev Specific ###
+cask 'kitty'
 cask 'syncthing'
 cask 'hammerspoon'
 cask 'charles'
