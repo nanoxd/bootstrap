@@ -12,7 +12,6 @@ tap 'schollz/tap'
 
 # Git formulas
 brew 'git'
-brew 'hub'
 brew 'git-extras'
 brew 'git-delta'
 brew 'tig'
@@ -24,7 +23,6 @@ brew 'pinentry-mac'
 
 # Package Manager
 brew 'mas'
-brew 'carthage'
 brew 'luarocks'
 
 # Languages
@@ -79,56 +77,47 @@ brew 'swiftplate'
 
 ### Casks ###
 cask 'alfred'
-cask 'font-victor-mono'
-cask 'font-iosevka'
-cask 'imageoptim'
-cask 'spillo'
-cask 'fork'
-cask 'karabiner-elements'
 cask 'dash'
-cask 'hazel'
-cask 'itsycal'
-cask 'tripmode'
-cask 'visual-studio-code'
-cask 'gifs'
+cask 'docker'
 cask 'firefox'
+cask 'font-iosevka-nerd-font'
+cask 'font-victor-mono-nerd-font'
+cask 'fork'
 cask 'google-chrome'
-cask 'keycastr'
-
-### Media ###
-cask 'iina'
-
-### Dev Specific ###
-cask 'kitty'
-cask 'syncthing'
 cask 'hammerspoon'
-cask 'charles'
+cask 'iina'
+cask 'imageoptim'
+cask 'itsycal'
+cask 'karabiner-elements'
+cask 'keycastr'
+cask 'kitty'
 cask 'now'
 cask 'postgres'
 cask 'postico'
-cask 'docker'
-cask 'iconizer'
-cask 'swiftformat-for-xcode'
-
-### Quicklook ###
+cask 'proxyman'
 cask 'qlvideo'
 cask 'quicklook-json'
+cask 'syncthing'
+cask 'visual-studio-code'
 cask 'webpquicklook'
+cask 'xcodes'
 
 ### MAS ###
-mas '1Blocker', id: 1_107_421_413
-mas 'Deliveries', id: 924_726_344
-mas 'Monosnap', id: 540_348_655
-mas 'SnippetsLab', id: 1_006_087_419
+mas 'Actions', id: 1_586_435_171
+mas 'AdGuard', id: 1_440_147_259
 mas 'Bear', id: 1_091_189_122
 mas 'Clearview', id: 557_090_104
-mas 'Twitterrific', id: 1_289_378_661
-mas 'Spark', id: 1_176_895_641
-mas 'Pocket', id: 568_494_494
-mas 'Gifski', id: 1_351_639_930
-mas 'Save to Pocket', id: 1_477_385_213
-
-mas 'Key Codes', id: 414_568_915
-mas 'RocketSim', id: 1_504_940_162
-mas 'X-SwiftFormat', id: 1_509_655_496
 mas 'Core Data Lab', id: 1_460_684_638
+mas 'Deliveries', id: 924_726_344
+mas 'Gifski', id: 1_351_639_930
+mas 'Key Codes', id: 414_568_915
+mas 'Monosnap', id: 540_348_655
+mas 'Pins', id: 1_547_106_997
+mas 'Pocket', id: 568_494_494
+mas 'RocketSim', id: 1_504_940_162
+mas 'Save to Pocket', id: 1_477_385_213
+mas 'SnippetsLab', id: 1_006_087_419
+mas 'Spark', id: 1_176_895_641
+mas 'TestFlight', id:  899_247_664
+mas 'Twitterrific', id: 1_289_378_661
+mas 'X-SwiftFormat', id: 1_509_655_496
