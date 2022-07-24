@@ -1,5 +1,10 @@
 #!/usr/bin/env sh
 
+arch=`arch`
+is_apple_silicon() {
+  [[ "$(arch)" == "arm64" ]] || return 1
+}
+
 fancy_echo() {
   local fmt="$1"; shift
 
@@ -109,9 +114,13 @@ if ! command -v brew >/dev/null; then
       'https://raw.githubusercontent.com/Homebrew/install/master/install' | ruby
 
     append_to_zshrc '# recommended by brew doctor'
-    append_to_zshrc 'export PATH="/usr/local/bin:$PATH"' 1
-
-    export PATH="/usr/local/bin:$PATH"
+    if is_apple_silicon; then
+        append_to_zshrc 'export PATH="/opt/homebrew/bin:$PATH"' 1
+        export PATH="/opt/homebrew/bin:$PATH"
+      else
+        append_to_zshrc 'export PATH="/usr/local/bin:$PATH"' 1
+        export PATH="/usr/local/bin:$PATH"
+    fi
 else
   fancy_echo "Homebrew already installed. Skipping ..."
 fi
@@ -124,7 +133,8 @@ make brew
 
 if ! cat /etc/shells | grep -Fq fish; then
   fancy_echo "Adding fish to /etc/shells"
-  echo "/usr/local/bin/fish" | sudo tee -a /etc/shells
+
+  echo "$(which fish)" | sudo tee -a /etc/shells
 fi
 
 fancy_echo "Checking for SSH key, generating one if it doesn't exist ..."
@@ -144,21 +154,6 @@ fancy_echo "Checking for GPG Key, generating one if it doesn't exist ..."
     git config --file="$local_gitconfig" commit.gpgsign true
     wait_for_input "Please add the GPG key to GitHub"
   fi
-
-# Ruby Install
-ruby_version="$(find_latest_ruby)"
-append_to_zshrc 'eval "$(rbenv init - --no-rehash)"' 1
-eval "$(rbenv init -)"
-
-if ! rbenv versions | grep -Fq "$ruby_version"; then
-  RUBY_CONFIGURE_OPTS=--with-openssl-dir=/usr/local/opt/openssl rbenv install -s "$ruby_version"
-fi
-
-rbenv global $ruby_version
-rbenv shell "$ruby_version"
-
-# Gems
-make gems
 
 fancy_echo "Installing Rust"
 if [ ! -e "$HOME/.cargo/bin" ]; then

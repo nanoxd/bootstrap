@@ -1,13 +1,8 @@
 tap 'homebrew/services'
-tap 'thoughtbot/formulae'
 tap 'neovim/neovim'
-tap 'burntsushi/ripgrep', 'https://github.com/BurntSushi/ripgrep.git'
 tap 'uptech/homebrew-oss'
-tap 'getsentry/tools'
 tap 'yqrashawn/goku'
 tap 'homebrew/cask-fonts'
-tap 'homebrew/cask-drivers'
-tap 'federico-terzi/espanso'
 tap 'schollz/tap'
 
 # Git formulas
@@ -26,8 +21,6 @@ brew 'mas'
 brew 'luarocks'
 
 # Languages
-brew 'rbenv'
-brew 'ruby-build'
 brew 'go'
 brew 'lua'
 
@@ -41,19 +34,17 @@ brew 'ack'
 brew 'neovim'
 brew 'jq'
 brew 'httpie'
-brew 'youtube-dl'
+brew 'yt-dlp'
 brew 'trash'
 brew 'binutils'
-brew 'redis'
 brew 'gnu-sed'
 brew 'awscli'
 brew 'coreutils'
 brew 'rename'
 brew 'uptech/oss/alt'
-brew 'hexyl'
 brew 'ctags'
 brew 'fzf'
-brew 'burntsushi/ripgrep/ripgrep-bin'
+brew 'ripgrep'
 brew 'editorconfig'
 brew 'gifsicle'
 brew 'imagemagick'
@@ -64,16 +55,12 @@ brew 'yqrashawn/goku/goku', restart_service: :changed
 brew 'yarn'
 brew 'grc'
 brew 'mp4v2'
-brew 'getsentry/tools/sentry-cli'
 brew 'bat'
-brew 'espanso'
 brew 'croc'
 
 # Swift/Xcode tooling
-brew 'mint'
 brew 'swiftformat'
 brew 'swiftlint'
-brew 'swiftplate'
 
 ### Casks ###
 cask 'alfred'
@@ -81,7 +68,6 @@ cask 'dash'
 cask 'docker'
 cask 'firefox'
 cask 'font-iosevka-nerd-font'
-cask 'font-victor-mono-nerd-font'
 cask 'fork'
 cask 'google-chrome'
 cask 'hammerspoon'
@@ -91,8 +77,6 @@ cask 'itsycal'
 cask 'karabiner-elements'
 cask 'keycastr'
 cask 'kitty'
-cask 'now'
-cask 'postgres'
 cask 'postico'
 cask 'proxyman'
 cask 'qlvideo'
@@ -103,7 +87,6 @@ cask 'webpquicklook'
 cask 'xcodes'
 
 ### MAS ###
-mas 'Actions', id: 1_586_435_171
 mas 'AdGuard', id: 1_440_147_259
 mas 'Bear', id: 1_091_189_122
 mas 'Clearview', id: 557_090_104
@@ -111,10 +94,8 @@ mas 'Core Data Lab', id: 1_460_684_638
 mas 'Deliveries', id: 924_726_344
 mas 'Gifski', id: 1_351_639_930
 mas 'Key Codes', id: 414_568_915
-mas 'Monosnap', id: 540_348_655
 mas 'Pins', id: 1_547_106_997
 mas 'Pocket', id: 568_494_494
-mas 'RocketSim', id: 1_504_940_162
 mas 'Save to Pocket', id: 1_477_385_213
 mas 'SnippetsLab', id: 1_006_087_419
 mas 'Spark', id: 1_176_895_641
