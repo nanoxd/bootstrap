@@ -96,10 +96,6 @@ pip_is_installed() {
   pip3 list | grep "$1"
 }
 
-find_latest_ruby() {
-  rbenv install -l | grep -v - | tail -1 | sed -e 's/^ *//'
-}
-
 generate_ssh_key() {
   ssh-keygen -a 100 -t ed25519
   ssh-add ~/.ssh/id_ed25519
@@ -110,8 +106,7 @@ if ! command -v brew >/dev/null; then
   # Empty out dock
   defaults write com.apple.dock persistent-apps -array
   fancy_echo "Installing Homebrew ..."
-    curl -fsS \
-      'https://raw.githubusercontent.com/Homebrew/install/master/install' | ruby
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
     append_to_zshrc '# recommended by brew doctor'
     if is_apple_silicon; then
