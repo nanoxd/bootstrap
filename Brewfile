@@ -4,6 +4,7 @@ tap 'uptech/homebrew-oss'
 tap 'yqrashawn/goku'
 tap 'homebrew/cask-fonts'
 tap 'schollz/tap'
+tap 'alienator88/homebrew-cask'
 
 # Git formulas
 brew 'git'
@@ -85,6 +86,9 @@ cask 'syncthing'
 cask 'visual-studio-code'
 cask 'webpquicklook'
 cask 'xcodes'
+
+# New
+cask 'alienator88/homebrew-cask/pearcleaner'
 
 ### MAS ###
 mas 'AdGuard', id: 1_440_147_259
