@@ -89,6 +89,7 @@ cask 'xcodes'
 
 # New
 cask 'alienator88/homebrew-cask/pearcleaner'
+cask 'jordanbaird-ice'
 
 ### MAS ###
 mas 'AdGuard', id: 1_440_147_259
