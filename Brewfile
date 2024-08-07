@@ -21,8 +21,10 @@ brew 'pinentry-mac'
 brew 'mas'
 brew 'luarocks'
 
-# Languages
+# Go
 brew 'go'
+brew 'golangci-lint'
+
 brew 'lua'
 
 # Shells
