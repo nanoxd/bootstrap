@@ -26,6 +26,7 @@ brew 'go'
 brew 'golangci-lint'
 
 brew 'lua'
+brew 'stylua'
 
 # Shells
 brew 'fish'
