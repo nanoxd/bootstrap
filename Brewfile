@@ -66,6 +66,7 @@ brew 'starship'
 # Swift/Xcode tooling
 brew 'swiftformat'
 brew 'swiftlint'
+brew 'marta'
 
 ### Casks ###
 cask 'alfred'
