@@ -61,6 +61,7 @@ brew 'grc'
 brew 'mp4v2'
 brew 'bat'
 brew 'croc'
+brew 'starship'
 
 # Swift/Xcode tooling
 brew 'swiftformat'
