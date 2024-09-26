@@ -24,6 +24,7 @@ brew 'luarocks'
 # Go
 brew 'go'
 brew 'golangci-lint'
+brew 'go-task'
 
 brew 'lua'
 brew 'stylua'
