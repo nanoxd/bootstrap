@@ -100,13 +100,15 @@ cask 'jordanbaird-ice'
 
 ### MAS ###
 mas 'AdGuard', id: 1_440_147_259
-mas 'Bear', id: 1_091_189_122
-mas 'Clearview', id: 557_090_104
-mas 'Core Data Lab', id: 1_460_684_638
 mas 'Gifski', id: 1_351_639_930
-mas 'Key Codes', id: 414_568_915
+mas 'Ivory', id: 6444602274
+mas 'Kagi', id: 1622835804
+mas 'Monosnap', id: 540348655
+mas 'NordVPN', id: 905953485
+mas 'Parcel', id: 639968404
 mas 'Pins', id: 1_547_106_997
-mas 'Pocket', id: 568_494_494
-mas 'Save to Pocket', id: 1_477_385_213
-mas 'Spark', id: 1_176_895_641
+mas 'Spark', id: 6445813049
+mas 'Speedtest', id: 1153157709
+mas 'Tailscale', id: 1475387142
 mas 'TestFlight', id:  899_247_664
+mas 'Things', id: 904280696
