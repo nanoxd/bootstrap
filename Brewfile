@@ -95,6 +95,7 @@ cask 'visual-studio-code'
 cask 'webpquicklook'
 cask 'xcodes'
 cask 'wezterm'
+cask 'localsend'
 
 # New
 cask 'alienator88/homebrew-cask/pearcleaner'
