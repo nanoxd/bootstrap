@@ -71,29 +71,15 @@ case "$SHELL" in
     update_shell
 esac
 
-gem_install_or_update() {
-  if gem list "$1" --installed > /dev/null; then
-    fancy_echo "Updating %s ..." "$1"
-    gem update "$@"
-  else
-    fancy_echo "Installing %s ..." "$1"
-    gem install "$@" --no-document
-  fi
-}
-
 pip_install_or_update() {
   local package="$1"
-  if pip_is_installed $package > /dev/null; then
+  if pip3 show "$package" > /dev/null 2>&1; then
     fancy_echo "Updating %s ..." "$package"
-    pip3 install --upgrade $package
+    pip3 install --upgrade "$package"
   else
     fancy_echo "Installing %s ..." "$package"
-    pip3 install $package
+    pip3 install "$package"
   fi
-}
-
-pip_is_installed() {
-  pip3 list | grep "$1"
 }
 
 generate_ssh_key() {
