@@ -179,12 +179,6 @@ substep_info "Prevent from opening automatically when devices are plugged in"
 
 ### Third Party Apps ###
 
-# Tweetbot {{{
-info "Tweetbot"
-substep_info "Bypass t.co URL shortener"
-  defaults write com.tapbots.TweetbotMac OpenURLsDirectly -bool true
-# }}}
-
 # Itsycal {{{
 info "Itsycal"
 substep_info "Configure display"
@@ -199,28 +193,13 @@ substep_info "Allow key repeat for Vim"
   defaults write com.microsoft.VSCode ApplePressAndHoldEnabled -bool false
 # }}}
 
-# Moom {{{
-info "Moom"
-substep_info "Set Arrows + Option"
- defaults write com.manytricks.Moom "Key Control: Arrow: Option" -int 41
-
-substep_info "Setting Keyboard Control"
- defaults write com.manytricks.Moom "Hide Keyboard Controls Logo" -bool true
- defaults write com.manytricks.Moom "Show Cheat Sheet" -bool true
-# }}}
-
 for app in "cfprefsd" \
 	"Dock" \
 	"Finder" \
 	"Itsycal" \
-	"Mail" \
-	"Messages" \
 	"Photos" \
 	"Safari" \
-	"SystemUIServer" \
-	"Terminal" \
-	"Tweetbot" \
-	"iCal"; do
+	"SystemUIServer"; do
 	killall "${app}" &> /dev/null
 done
 
