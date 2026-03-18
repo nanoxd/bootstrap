@@ -6,18 +6,37 @@ fancy_echo() {
   printf "\n$fmt\n" "$@"
 }
 
-function install_binary() {
-    local command=$1
-    local install_command=$2
+TEMP_DIR=$(mktemp -d)
+trap "rm -rf $TEMP_DIR" EXIT
 
-    if ! command -v $command >/dev/null; then
-        fancy_echo "Installing $command"
-        eval $install_command
+download_and_run() {
+    local name=$1
+    local url=$2
+    local shell=${3:-sh}
+    local script_path="$TEMP_DIR/${name}_install.sh"
+
+    fancy_echo "Downloading $name installer..."
+    if ! curl -fsSL "$url" -o "$script_path"; then
+        fancy_echo "Failed to download $name installer"
+        return 1
+    fi
+
+    fancy_echo "Installing $name..."
+    $shell "$script_path"
+}
+
+install_binary() {
+    local command=$1
+    local url=$2
+    local shell=${3:-sh}
+
+    if ! command -v "$command" >/dev/null; then
+        download_and_run "$command" "$url" "$shell"
     else
-        fancy_echo "Skipping $command"
+        fancy_echo "Skipping $command (already installed)"
     fi
 }
 
-install_binary "mise" "curl https://mise.run | sh"
-install_binary "bun" "curl -fsSL https://bun.sh/install | bash"
-install_binary "deno" "curl -fsSL https://deno.land/install.sh | sh"
+install_binary "mise" "https://mise.run"
+install_binary "bun" "https://bun.sh/install" "bash"
+install_binary "deno" "https://deno.land/install.sh"
