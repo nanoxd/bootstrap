@@ -19,7 +19,6 @@ make install           # Same as above - full installation
 make brew              # Install Homebrew packages from Brewfile
 make macOS             # Apply macOS system preferences
 make rust              # Install Rust packages from Cargofile
-make custom_bins       # Install custom binaries (mise, bun, deno)
 ```
 
 ### Testing Changes
@@ -34,7 +33,6 @@ brew bundle check      # Verify Brewfile dependencies
 ### Core Scripts
 - **setup**: Main orchestrator script that runs the complete bootstrap process. Handles SSH/GPG key generation, GitHub integration, and coordinates all installation steps.
 - **macOS**: Applies extensive macOS system preferences including Trackpad, Finder, Dock, and application-specific settings.
-- **custom_bins**: Installs binaries not available through Homebrew or Cargo (mise, bun, deno).
 - **shared.sh**: Utility functions for colored output and logging used across all scripts.
 
 ### Configuration Files
@@ -58,7 +56,7 @@ The scripts automatically detect Apple Silicon vs Intel Macs and adjust Homebrew
 ### Adding New Packages
 - **Homebrew packages**: Add to appropriate section in `Brewfile` (tap, brew, cask, or mas)
 - **Rust tools**: Add package name to `Cargofile`
-- **Other binaries**: Update `custom_bins` script with installation logic
+- **Other binaries**: Add install logic directly in `setup`
 
 ### Testing Changes
 Always test scripts in isolation before running full bootstrap:
