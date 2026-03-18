@@ -1,4 +1,3 @@
-tap 'homebrew/services'
 tap 'yqrashawn/goku'
 tap 'alienator88/homebrew-cask'
 
