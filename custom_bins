@@ -38,5 +38,3 @@ install_binary() {
 }
 
 install_binary "mise" "https://mise.run"
-install_binary "bun" "https://bun.sh/install" "bash"
-install_binary "deno" "https://deno.land/install.sh"

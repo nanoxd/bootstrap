@@ -26,6 +26,10 @@ brew 'go-task'
 brew 'lua'
 brew 'stylua'
 
+# JS/TS Runtimes
+brew 'bun'
+brew 'deno'
+
 # Shells
 brew 'fish'
 
