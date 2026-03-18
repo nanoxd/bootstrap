@@ -154,7 +154,6 @@ if [ ! -e "$HOME/.cargo/bin" ]; then
   append_to_zshrc 'export PATH="$HOME/.cargo/bin:$PATH"' 1
 
   source $HOME/.cargo/env
-  rustup install stable
   rustup default stable
   rustup component add rust-analyzer rustfmt clippy
 fi
