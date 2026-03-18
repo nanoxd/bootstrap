@@ -121,10 +121,15 @@ fi
 
 fancy_echo "Checking for GPG Key, generating one if it doesn't exist ..."
 if [[ ! -f ~/.gnupg/pubring.kbx ]]; then
-  fancy_echo "Please enter your name for the GPG key:"
-  read gpg_name
-  fancy_echo "Please enter your email for the GPG key:"
-  read gpg_email
+  gpg_name="$(gh api user --jq '.name')"
+  gpg_email="$(gh api user --jq '.email // empty')"
+
+  if [ -z "$gpg_email" ]; then
+    fancy_echo "GitHub email is private. Please enter your email for the GPG key:"
+    read gpg_email
+  fi
+
+  fancy_echo "Generating GPG key for %s <%s>" "$gpg_name" "$gpg_email"
 
   # Generate GPG key non-interactively
   gpg --batch --generate-key <<EOF
