@@ -9,6 +9,3 @@ macOS:
 
 rust:
 	./Cargofile
-
-custom_bins:
-	./custom_bins
