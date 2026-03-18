@@ -35,7 +35,6 @@ brew 'fish'
 # Tools
 brew 'tmux'
 brew 'wget'
-brew 'ack'
 brew 'neovim'
 brew 'jq'
 brew 'httpie'
