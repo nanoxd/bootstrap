@@ -1,8 +1,5 @@
 tap 'homebrew/services'
-tap 'neovim/neovim'
 tap 'yqrashawn/goku'
-tap 'homebrew/cask-fonts'
-tap 'schollz/tap'
 tap 'alienator88/homebrew-cask'
 
 # Git formulas
@@ -14,7 +11,7 @@ brew 'tig'
 brew 'openssl'
 
 # GPG stuff
-brew 'gnupg2'
+brew 'gnupg'
 brew 'pinentry-mac'
 
 # Package Manager
@@ -49,7 +46,6 @@ brew 'ctags'
 brew 'fzf'
 brew 'ripgrep'
 brew 'editorconfig'
-brew 'reattach-to-user-namespace'
 brew 'tealdeer'
 brew 'yqrashawn/goku/goku', restart_service: :changed
 brew 'grc'
@@ -74,7 +70,7 @@ cask 'alfred'
 cask 'arc'
 cask 'claude'
 cask 'discord'
-cask 'docker'
+cask 'docker-desktop'
 cask 'firefox'
 cask 'font-iosevka-nerd-font'
 cask 'fork'
@@ -90,7 +86,7 @@ cask 'qlvideo'
 cask 'quicklook-json'
 cask 'screens'
 cask 'spotify'
-cask 'syncthing'
+cask 'syncthing-app'
 cask 'visual-studio-code'
 cask 'webpquicklook'
 cask 'xcodes'
@@ -102,16 +98,16 @@ cask 'alienator88/homebrew-cask/pearcleaner'
 cask 'jordanbaird-ice'
 
 ### MAS ###
-mas 'AdGuard', id: 1_440_147_259
-mas 'Gifski', id: 1_351_639_930
+mas 'AdGuard', id: 1440147259
+mas 'Gifski', id: 1351639930
 mas 'Ivory', id: 6444602274
 mas 'Kagi', id: 1622835804
 mas 'Monosnap', id: 540348655
 mas 'NordVPN', id: 905953485
 mas 'Parcel', id: 639968404
-mas 'Pins', id: 1_547_106_997
+mas 'Pins', id: 1547106997
 mas 'Spark', id: 6445813049
 mas 'Speedtest', id: 1153157709
 mas 'Tailscale', id: 1475387142
-mas 'TestFlight', id:  899_247_664
+mas 'TestFlight', id: 899247664
 mas 'Things', id: 904280696
