@@ -69,6 +69,3 @@ Always test scripts in isolation before running full bootstrap:
 - Check architecture with `uname -m` for Apple Silicon compatibility
 - Preserve idempotency - scripts should be safe to run multiple times
 - Use `set -e` for fail-fast behavior in shell scripts
-
-## Known Issues
-- GPG generation needs fixing (see TODO file)
