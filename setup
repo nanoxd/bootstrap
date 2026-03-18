@@ -1,6 +1,5 @@
-#!/usr/bin/env sh
+#!/bin/bash
 
-arch=`arch`
 is_apple_silicon() {
   [[ "$(arch)" == "arm64" ]] || return 1
 }
@@ -157,9 +156,7 @@ if [ ! -e "$HOME/.cargo/bin" ]; then
   source $HOME/.cargo/env
   rustup install stable
   rustup default stable
-  rustup component add rust-analyzer
-  rustup component add rustfmt
-  rustup component add clippy
+  rustup component add rust-analyzer rustfmt clippy
 fi
 
 make rust
@@ -178,4 +175,9 @@ fi
 fancy_echo "Installing pynvim ..."
 "$(brew --prefix python3)/libexec/bin/python" -m pip install --upgrade pynvim
 
-make custom_bins
+if ! command -v mise >/dev/null; then
+  fancy_echo "Installing mise ..."
+  curl -fsSL https://mise.run | sh
+else
+  fancy_echo "Skipping mise (already installed)"
+fi
