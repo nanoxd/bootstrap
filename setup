@@ -61,15 +61,22 @@ update_shell() {
   chsh -s "$shell_path"
 }
 
-case "$SHELL" in
-  */zsh)
-    if [ "$(which zsh)" != '/bin/zsh' ]; then
-      update_shell
-    fi
-    ;;
-  *)
+homebrew_zsh() {
+  if is_apple_silicon; then
+    echo "/opt/homebrew/bin/zsh"
+  else
+    echo "/usr/local/bin/zsh"
+  fi
+}
+
+# Update shell to Homebrew zsh if available, otherwise ensure zsh is set
+if [ -x "$(homebrew_zsh)" ]; then
+  if [ "$SHELL" != "$(homebrew_zsh)" ]; then
     update_shell
-esac
+  fi
+elif [ "${SHELL##*/}" != "zsh" ]; then
+  update_shell
+fi
 
 pip_install_or_update() {
   local package="$1"
@@ -126,14 +133,32 @@ fancy_echo "Checking for SSH key, generating one if it doesn't exist ..."
 
 fancy_echo "Checking for GPG Key, generating one if it doesn't exist ..."
   if [[ ! -f ~/.gnupg/pubring.kbx ]]; then
-    gpg --gen-key
+    fancy_echo "Please enter your name for the GPG key:"
+    read gpg_name
+    fancy_echo "Please enter your email for the GPG key:"
+    read gpg_email
+
+    # Generate GPG key non-interactively
+    gpg --batch --generate-key <<EOF
+%no-protection
+Key-Type: EdDSA
+Key-Curve: ed25519
+Key-Usage: sign
+Subkey-Type: ECDH
+Subkey-Curve: cv25519
+Subkey-Usage: encrypt
+Name-Real: $gpg_name
+Name-Email: $gpg_email
+Expire-Date: 0
+EOF
+
     gpg_pub_key="$(gpg --list-keys --keyid-format LONG | grep pub | awk '{print $2}' | awk -F '/' '{print $2}' | xargs)"
     local_gitconfig="$HOME/.gitconfig.local"
 
     git config --file="$local_gitconfig" user.signingkey "$gpg_pub_key"
-    gpg --armor --export | pbcopy
+    gpg --armor --export "$gpg_email" | pbcopy
     git config --file="$local_gitconfig" commit.gpgsign true
-    wait_for_input "Please add the GPG key to GitHub"
+    wait_for_input "Please add the GPG key to GitHub (copied to clipboard)"
   fi
 
 fancy_echo "Installing Rust"
@@ -142,9 +167,9 @@ if [ ! -e "$HOME/.cargo/bin" ]; then
   append_to_zshrc 'export PATH="$HOME/.cargo/bin:$PATH"' 1
 
   source $HOME/.cargo/env
-  rustup install nightly
-  rustup default nightly
-  rustup component add rust-analysis rust-src rls
+  rustup install stable
+  rustup default stable
+  rustup component add rust-analyzer
   rustup component add rustfmt
   rustup component add clippy
 fi
