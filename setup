@@ -10,11 +10,6 @@ fancy_echo() {
   printf "\n$fmt\n" "$@"
 }
 
-wait_for_input() {
-  fancy_echo "$1"
-  read -n 1
-}
-
 append_to_zshrc() {
   local text="$1" zshrc
   local skip_new_line="${2:-0}"
@@ -80,7 +75,6 @@ fi
 generate_ssh_key() {
   ssh-keygen -a 100 -t ed25519
   ssh-add ~/.ssh/id_ed25519
-  pbcopy < ~/.ssh/id_ed25519.pub
 }
 
 if ! command -v brew >/dev/null; then
@@ -112,21 +106,26 @@ if ! cat /etc/shells | grep -Fq fish; then
   echo "$(which fish)" | sudo tee -a /etc/shells
 fi
 
+fancy_echo "Authenticating with GitHub ..."
+if ! gh auth status >/dev/null 2>&1; then
+  gh auth login --git-protocol ssh --web
+fi
+
 fancy_echo "Checking for SSH key, generating one if it doesn't exist ..."
-  if [[ ! -f ~/.ssh/id_ed25519.pub ]]; then
-    generate_ssh_key
-    wait_for_input "Please add the SSH key to GitHub"
-  fi
+if [[ ! -f ~/.ssh/id_ed25519.pub ]]; then
+  generate_ssh_key
+  gh ssh-key add ~/.ssh/id_ed25519.pub --title "$(scutil --get ComputerName)"
+fi
 
 fancy_echo "Checking for GPG Key, generating one if it doesn't exist ..."
-  if [[ ! -f ~/.gnupg/pubring.kbx ]]; then
-    fancy_echo "Please enter your name for the GPG key:"
-    read gpg_name
-    fancy_echo "Please enter your email for the GPG key:"
-    read gpg_email
+if [[ ! -f ~/.gnupg/pubring.kbx ]]; then
+  fancy_echo "Please enter your name for the GPG key:"
+  read gpg_name
+  fancy_echo "Please enter your email for the GPG key:"
+  read gpg_email
 
-    # Generate GPG key non-interactively
-    gpg --batch --generate-key <<EOF
+  # Generate GPG key non-interactively
+  gpg --batch --generate-key <<EOF
 %no-protection
 Key-Type: EdDSA
 Key-Curve: ed25519
@@ -139,14 +138,13 @@ Name-Email: $gpg_email
 Expire-Date: 0
 EOF
 
-    gpg_pub_key="$(gpg --list-keys --keyid-format LONG | grep pub | awk '{print $2}' | awk -F '/' '{print $2}' | xargs)"
-    local_gitconfig="$HOME/.gitconfig.local"
+  gpg_pub_key="$(gpg --list-keys --keyid-format LONG | grep pub | awk '{print $2}' | awk -F '/' '{print $2}' | xargs)"
+  local_gitconfig="$HOME/.gitconfig.local"
 
-    git config --file="$local_gitconfig" user.signingkey "$gpg_pub_key"
-    gpg --armor --export "$gpg_email" | pbcopy
-    git config --file="$local_gitconfig" commit.gpgsign true
-    wait_for_input "Please add the GPG key to GitHub (copied to clipboard)"
-  fi
+  git config --file="$local_gitconfig" user.signingkey "$gpg_pub_key"
+  gpg --armor --export "$gpg_email" | gh gpg-key add -
+  git config --file="$local_gitconfig" commit.gpgsign true
+fi
 
 fancy_echo "Installing Rust"
 if [ ! -e "$HOME/.cargo/bin" ]; then
