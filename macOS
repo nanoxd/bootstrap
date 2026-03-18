@@ -15,7 +15,7 @@ while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 info "System"
 
 substep_info "Restart automatically if the computer freezes"
-  sudo systemsetup -setrestartfreeze on
+  sudo defaults write /Library/Preferences/com.apple.loginwindow RestartFreeze -bool true
 # }}}
 
 # Trackpad {{{
@@ -33,7 +33,7 @@ substep_info "Enable full access for all controls"
   defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
 
 substep_info "Set a blazingly fast repeat rate"
-  defaults write NSGlobalDomain KeyRepeat -int 0
+  defaults write NSGlobalDomain KeyRepeat -int 1
   defaults write NSGlobalDomain InitialKeyRepeat -int 10
 
 substep_info "Disable press-and-hold for keys in favor of key repeat"
@@ -150,7 +150,7 @@ substep_info "Use all cores to build"
 
 substep_info "Increase number of concurrent tasks"
   defaults write com.apple.dt.Xcode BuildSystemScheduleInherentlyParallelCommandsExclusively -bool NO
-  
+
 substep_info "Use Focused Editor"
   defaults write com.apple.dt.Xcode IDEEditorCoordinatorTarget_Click -string "FocusedEditor"
 
@@ -202,7 +202,7 @@ substep_info "Allow key repeat for Vim"
 # Moom {{{
 info "Moom"
 substep_info "Set Arrows + Option"
- defaults write com.manytricks.Moom "Key Control: Arrow: Option" -int 41 
+ defaults write com.manytricks.Moom "Key Control: Arrow: Option" -int 41
 
 substep_info "Setting Keyboard Control"
  defaults write com.manytricks.Moom "Hide Keyboard Controls Logo" -bool true
