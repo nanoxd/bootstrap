@@ -78,17 +78,6 @@ elif [ "${SHELL##*/}" != "zsh" ]; then
   update_shell
 fi
 
-pip_install_or_update() {
-  local package="$1"
-  if pip3 show "$package" > /dev/null 2>&1; then
-    fancy_echo "Updating %s ..." "$package"
-    pip3 install --upgrade "$package"
-  else
-    fancy_echo "Installing %s ..." "$package"
-    pip3 install "$package"
-  fi
-}
-
 generate_ssh_key() {
   ssh-keygen -a 100 -t ed25519
   ssh-add ~/.ssh/id_ed25519
@@ -180,8 +169,13 @@ if [ ! -d "$HOME/.dotfiles/" ]; then
   dot init nanoxd/dotfiles
 fi
 
-pip_install_or_update 'diff-highlight'
-pip_install_or_update 'pynvim'
-pip_install_or_update 'neovim'
+fancy_echo "Symlinking diff-highlight from brew git ..."
+diff_hl="$(brew --prefix git)/share/git-core/contrib/diff-highlight/diff-highlight"
+if [ -x "$diff_hl" ] && [ ! -e "$HOME/.bin/diff-highlight" ]; then
+  ln -sf "$diff_hl" "$HOME/.bin/diff-highlight"
+fi
+
+fancy_echo "Installing pynvim ..."
+"$(brew --prefix python3)/libexec/bin/python" -m pip install --upgrade pynvim
 
 make custom_bins
