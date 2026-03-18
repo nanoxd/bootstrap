@@ -50,9 +50,6 @@ substep_info "Disable smart quotes and dashes"
 # Finder {{{
 info "Finder"
 
-substep_info "Allow text selection in Quick Look"
-  defaults write com.apple.finder QLEnableTextSelection -bool true
-
 substep_info "Avoid creating .DS_Store files on external volumes"
   defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
   defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
@@ -136,8 +133,6 @@ substep_info "Enable debug menu"
   defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
   defaults write NSGlobalDomain WebKitDeveloperExtras -bool true
 
-substep_info "Enable 'Do Not Track'"
-  defaults write com.apple.Safari SendDoNotTrackHTTPHeader -bool true
 # }}}
 
 # Xcode {{{
