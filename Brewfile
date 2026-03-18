@@ -29,6 +29,9 @@ brew 'stylua'
 brew 'bun'
 brew 'deno'
 
+# Version Manager
+brew 'mise'
+
 # Shells
 brew 'fish'
 
