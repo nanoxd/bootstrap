@@ -39,29 +39,6 @@ fi
 
 append_to_zshrc 'export PATH="$HOME/.bin:$PATH"'
 
-update_shell() {
-  local shell_path;
-  shell_path="$(which zsh)"
-
-  fancy_echo "Changing your shell to zsh ..."
-  if ! grep "$shell_path" /etc/shells > /dev/null 2>&1 ; then
-    fancy_echo "Adding '$shell_path' to /etc/shells"
-    sudo sh -c "echo $shell_path >> /etc/shells"
-  fi
-  chsh -s "$shell_path"
-}
-
-brew_zsh="/opt/homebrew/bin/zsh"
-
-# Update shell to Homebrew zsh if available, otherwise ensure zsh is set
-if [ -x "$brew_zsh" ]; then
-  if [ "$SHELL" != "$brew_zsh" ]; then
-    update_shell
-  fi
-elif [ "${SHELL##*/}" != "zsh" ]; then
-  update_shell
-fi
-
 generate_ssh_key() {
   ssh-keygen -a 100 -t ed25519
   ssh-add ~/.ssh/id_ed25519
@@ -85,10 +62,15 @@ brew update
 
 make brew
 
-if ! cat /etc/shells | grep -Fq fish; then
+fish_path="$(which fish)"
+if ! grep -Fq "$fish_path" /etc/shells; then
   fancy_echo "Adding fish to /etc/shells"
+  echo "$fish_path" | sudo tee -a /etc/shells
+fi
 
-  echo "$(which fish)" | sudo tee -a /etc/shells
+if [ "$SHELL" != "$fish_path" ]; then
+  fancy_echo "Changing your shell to fish ..."
+  chsh -s "$fish_path"
 fi
 
 fancy_echo "Authenticating with GitHub ..."
