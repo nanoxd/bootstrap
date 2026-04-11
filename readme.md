@@ -4,9 +4,17 @@ Automating Mac configuration to be as reproducible as possible.
 
 ## Usage
 
-1. `git clone https://github.com/nanoxd/bootstrap.git`
-2. `cd bootstrap`
-3. `make`
+On a fresh Mac, run:
+
+```sh
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/nanoxd/bootstrap/main/install)"
+```
+
+The `install` script takes care of Xcode Command Line Tools, clones (or
+updates) this repo into `~/dev/bootstrap`, and then runs `make install`.
+Re-running it is the canonical "update my machine" path — everything
+downstream is idempotent. Override the clone location with `BOOTSTRAP_DIR`
+if you want it somewhere else.
 
 To only run homebrew: `make brew`
 

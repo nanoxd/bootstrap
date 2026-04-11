@@ -1,0 +1,30 @@
+#!/bin/bash
+set -e
+
+REPO_URL="https://github.com/nanoxd/bootstrap.git"
+BOOTSTRAP_DIR="${BOOTSTRAP_DIR:-$HOME/dev/bootstrap}"
+
+say() {
+  printf "\n==> %s\n" "$*"
+}
+
+# Xcode Command Line Tools — needed for git, make, and everything after
+if ! xcode-select -p >/dev/null 2>&1; then
+  say "Installing Xcode Command Line Tools"
+  xcode-select --install
+  until xcode-select -p >/dev/null 2>&1; do
+    sleep 5
+  done
+fi
+
+if [ ! -d "$BOOTSTRAP_DIR/.git" ]; then
+  say "Cloning bootstrap to $BOOTSTRAP_DIR"
+  mkdir -p "$(dirname "$BOOTSTRAP_DIR")"
+  git clone "$REPO_URL" "$BOOTSTRAP_DIR"
+else
+  say "Updating bootstrap in $BOOTSTRAP_DIR"
+  git -C "$BOOTSTRAP_DIR" pull --ff-only
+fi
+
+cd "$BOOTSTRAP_DIR"
+exec make install
