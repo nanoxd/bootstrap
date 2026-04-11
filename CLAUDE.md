@@ -40,11 +40,6 @@ brew bundle check      # Verify Brewfile dependencies
 - **Cargofile**: Rust tools to install via cargo. Each line is a package name passed to `cargo install`.
 - **Makefile**: Build automation defining installation targets and dependencies.
 
-### Multi-Architecture Support
-The scripts automatically detect Apple Silicon vs Intel Macs and adjust Homebrew paths:
-- Apple Silicon: `/opt/homebrew`
-- Intel: `/usr/local`
-
 ### Security & Authentication
 - Generates ED25519 SSH keys with user-provided email
 - Sets up GPG keys for Git commit signing
@@ -66,6 +61,5 @@ Always test scripts in isolation before running full bootstrap:
 
 ### Script Conventions
 - Use functions from `shared.sh` for consistent output formatting
-- Check architecture with `uname -m` for Apple Silicon compatibility
 - Preserve idempotency - scripts should be safe to run multiple times
 - Use `set -e` for fail-fast behavior in shell scripts

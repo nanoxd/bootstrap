@@ -1,9 +1,5 @@
 #!/bin/bash
 
-is_apple_silicon() {
-  [[ "$(arch)" == "arm64" ]] || return 1
-}
-
 fancy_echo() {
   local fmt="$1"; shift
 
@@ -55,17 +51,11 @@ update_shell() {
   chsh -s "$shell_path"
 }
 
-homebrew_zsh() {
-  if is_apple_silicon; then
-    echo "/opt/homebrew/bin/zsh"
-  else
-    echo "/usr/local/bin/zsh"
-  fi
-}
+brew_zsh="/opt/homebrew/bin/zsh"
 
 # Update shell to Homebrew zsh if available, otherwise ensure zsh is set
-if [ -x "$(homebrew_zsh)" ]; then
-  if [ "$SHELL" != "$(homebrew_zsh)" ]; then
+if [ -x "$brew_zsh" ]; then
+  if [ "$SHELL" != "$brew_zsh" ]; then
     update_shell
   fi
 elif [ "${SHELL##*/}" != "zsh" ]; then
@@ -84,13 +74,8 @@ if ! command -v brew >/dev/null; then
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
     append_to_zshrc '# recommended by brew doctor'
-    if is_apple_silicon; then
-        append_to_zshrc 'export PATH="/opt/homebrew/bin:$PATH"' 1
-        export PATH="/opt/homebrew/bin:$PATH"
-      else
-        append_to_zshrc 'export PATH="/usr/local/bin:$PATH"' 1
-        export PATH="/usr/local/bin:$PATH"
-    fi
+    append_to_zshrc 'export PATH="/opt/homebrew/bin:$PATH"' 1
+    export PATH="/opt/homebrew/bin:$PATH"
 else
   fancy_echo "Homebrew already installed. Skipping ..."
 fi
