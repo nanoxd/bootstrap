@@ -74,9 +74,11 @@ brew 'handbrake'
 brew 'pngcrush'
 
 # Swift/Xcode tooling
+brew 'aria2'
 brew 'swiftformat'
 brew 'swiftlint'
 brew 'xcbeautify'
+brew 'xcodesorg/made/xcodes'
 
 # Hardware / microcontrollers
 brew 'beads'

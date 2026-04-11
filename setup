@@ -66,6 +66,13 @@ brew update
 
 make brew
 
+fancy_echo "Installing latest Xcode ..."
+if [ -z "$(xcodes installed 2>/dev/null)" ]; then
+  xcodes install --latest --experimental-unxip --select
+else
+  fancy_echo "Xcode already installed. Skipping ..."
+fi
+
 fish_path="$(which fish)"
 if ! grep -Fq "$fish_path" /etc/shells; then
   fancy_echo "Adding fish to /etc/shells"

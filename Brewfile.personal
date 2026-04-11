@@ -25,7 +25,6 @@ cask 'screens'
 cask 'spotify'
 cask 'visual-studio-code'
 cask 'webpquicklook'
-cask 'xcodes'
 cask 'wezterm'
 cask 'localsend'
 
