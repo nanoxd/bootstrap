@@ -42,6 +42,7 @@ if [ ! -f "$HOME/.zshrc" ]; then
 fi
 
 append_to_zshrc 'export PATH="$HOME/.bin:$PATH"'
+export PATH="$HOME/.bin:$PATH"
 
 generate_ssh_key() {
   ssh-keygen -a 100 -t ed25519
@@ -65,6 +66,19 @@ fancy_echo "Updating Homebrew formulas ..."
 brew update
 
 make brew
+
+if [ ! -x "$HOME/.bin/xcodes" ]; then
+  fancy_echo "Installing xcodes CLI ..."
+  xcodes_url="$(curl -fsSL https://api.github.com/repos/XcodesOrg/xcodes/releases/latest \
+    | grep browser_download_url \
+    | grep 'macos.arm64.tar.gz' \
+    | cut -d'"' -f4)"
+  curl -fsSL "$xcodes_url" -o /tmp/xcodes.tar.gz
+  tar -xzf /tmp/xcodes.tar.gz -C /tmp/
+  mv /tmp/xcodes/*/bin/xcodes "$HOME/.bin/xcodes"
+  chmod +x "$HOME/.bin/xcodes"
+  /bin/rm -rf /tmp/xcodes.tar.gz /tmp/xcodes
+fi
 
 fancy_echo "Installing latest Xcode ..."
 if [ -z "$(xcodes installed 2>/dev/null)" ]; then
