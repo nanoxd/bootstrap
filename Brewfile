@@ -82,3 +82,9 @@ brew 'xcbeautify'
 brew 'beads'
 brew 'dfu-util'
 brew 'esptool'
+
+# Headless-friendly casks — services and background daemons safe on servers
+cask '1password-cli'
+cask 'docker-desktop'
+cask 'maestral'
+cask 'syncthing-app'
