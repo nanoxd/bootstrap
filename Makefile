@@ -1,3 +1,5 @@
+.PHONY: install brew macOS rust
+
 install:
 	./setup
 
