@@ -33,7 +33,6 @@ brew bundle check      # Verify Brewfile dependencies
 ### Core Scripts
 - **setup**: Main orchestrator script that runs the complete bootstrap process. Handles SSH/GPG key generation, GitHub integration, and coordinates all installation steps.
 - **macOS**: Applies extensive macOS system preferences including Trackpad, Finder, Dock, and application-specific settings.
-- **shared.sh**: Utility functions for colored output and logging used across all scripts.
 
 ### Configuration Files
 - **Brewfile**: Homebrew package definitions including CLI tools, GUI applications, and Mac App Store apps. Uses tap/brew/cask/mas syntax.
@@ -60,6 +59,5 @@ Always test scripts in isolation before running full bootstrap:
 3. Use `brew bundle check` to validate Brewfile syntax
 
 ### Script Conventions
-- Use functions from `shared.sh` for consistent output formatting
 - Preserve idempotency - scripts should be safe to run multiple times
 - Use `set -e` for fail-fast behavior in shell scripts
