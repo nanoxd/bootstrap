@@ -31,6 +31,15 @@ cask 'xcodes'
 cask 'wezterm'
 cask 'localsend'
 
+cask '1password-cli'
+cask 'cleanshot'
+cask 'dockdoor'
+cask 'maestral'
+cask 'thaw'
+cask 'tuist'
+cask 'typewhisper'
+cask 'zed'
+
 # New
 cask 'alienator88/homebrew-cask/pearcleaner'
 cask 'jordanbaird-ice'
