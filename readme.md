@@ -1,6 +1,6 @@
 # Bootstrap
 
-Automating CPU configuration to be as reproducible as possible.
+Automating Mac configuration to be as reproducible as possible.
 
 ## Usage
 
@@ -17,19 +17,19 @@ I'd recommend dumping out your own configurations on your existing PC.
 
 ### Brew
 
-[homebrew-bundle](https://github.com/Homebrew/homebrew-bundle) is a bundler for
-your `brew` dependencies. Installing it is can be done via `brew tap
-Homebrew/bundle`.
+`brew bundle` ships with Homebrew and reads dependencies from a `Brewfile`.
+To snapshot your current setup:
 
 ```sh
-# Creates your Brewfile
 brew bundle dump --file=./Brewfile
 ```
 
 ### Dotfiles
 
-Change to point to where you keep your dotfiles and how you install them
-[here](https://github.com/nanoxd/bootstrap/blob/master/setup#L185-L188)
+The `setup` script installs dotfiles from
+[nanoxd/dotfiles](https://github.com/nanoxd/dotfiles) via
+[dot](https://github.com/ubnt-intrepid/dot). Edit the `dot init` call in
+`setup` to point at your own repo.
 
 ## Acknowledgments
 
