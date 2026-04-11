@@ -61,6 +61,7 @@ brew 'ack'
 brew 'just'
 brew 'd2'
 brew 'awscli'
+brew 'hey'
 
 # Media
 brew 'fonttools'
