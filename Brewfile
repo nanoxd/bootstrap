@@ -35,6 +35,7 @@ brew 'fish'
 
 # Tools
 brew 'tmux'
+brew 'reattach-to-user-namespace'
 brew 'wget'
 brew 'neovim'
 brew 'jq'
@@ -56,14 +57,27 @@ brew 'bat'
 brew 'croc'
 brew 'starship'
 brew 'restic'
+brew 'ack'
+brew 'just'
+brew 'd2'
+brew 'awscli'
 
 # Media
 brew 'fonttools'
 brew 'ttfautohint'
 brew 'gifsicle'
 brew 'imagemagick'
+brew 'librsvg'
+brew 'ffmpeg'
+brew 'handbrake'
 brew 'pngcrush'
 
 # Swift/Xcode tooling
 brew 'swiftformat'
 brew 'swiftlint'
+brew 'xcbeautify'
+
+# Hardware / microcontrollers
+brew 'beads'
+brew 'dfu-util'
+brew 'esptool'
