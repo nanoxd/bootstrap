@@ -24,7 +24,7 @@ brew 'lua'
 brew 'stylua'
 
 # JS/TS Runtimes
-brew 'bun'
+brew 'oven-sh/bun/bun'
 brew 'deno'
 
 # Version Manager
