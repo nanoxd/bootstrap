@@ -16,7 +16,19 @@ Re-running it is the canonical "update my machine" path — everything
 downstream is idempotent. Override the clone location with `BOOTSTRAP_DIR`
 if you want it somewhere else.
 
-To only run homebrew: `make brew`
+### Profiles
+
+The bootstrap has two profiles, selected via `BOOTSTRAP_PROFILE`:
+
+- `personal` (default) — installs the base `Brewfile` plus `Brewfile.personal`,
+  which adds casks, Mac App Store apps, and other GUI-shaped stuff
+- `server` — installs only the base `Brewfile` (CLI formulas)
+
+```sh
+BOOTSTRAP_PROFILE=server /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/nanoxd/bootstrap/main/install)"
+```
+
+To only run homebrew: `make brew` (honors `BOOTSTRAP_PROFILE`)
 
 ## Customization
 
