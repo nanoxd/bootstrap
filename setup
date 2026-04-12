@@ -185,6 +185,3 @@ if [ -x "$diff_hl" ] && [ ! -e "$HOME/.bin/diff-highlight" ]; then
   ln -sf "$diff_hl" "$HOME/.bin/diff-highlight"
 fi
 
-fancy_echo "Installing pynvim ..."
-"$(brew --prefix python3)/libexec/bin/python" -m pip install --upgrade pynvim
-
