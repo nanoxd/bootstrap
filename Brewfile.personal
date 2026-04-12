@@ -1,5 +1,4 @@
 tap 'alienator88/homebrew-cask'
-tap 'typewhisper/tap'
 
 # Package Manager
 brew 'mas'
@@ -33,7 +32,7 @@ cask 'cleanshot'
 cask 'dockdoor'
 cask 'thaw'
 cask 'tuist'
-cask 'typewhisper'
+cask 'typewhisper/tap/typewhisper'
 cask 'zed'
 
 # New
