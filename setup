@@ -49,6 +49,8 @@ generate_ssh_key() {
   ssh-add ~/.ssh/id_ed25519
 }
 
+softwareupdate --install-rosetta --agree-to-license 2>/dev/null || true
+
 if [ ! -x /opt/homebrew/bin/brew ]; then
   # Empty out dock
   defaults write com.apple.dock persistent-apps -array
