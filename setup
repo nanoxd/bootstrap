@@ -154,11 +154,11 @@ Name-Email: $gpg_email
 Expire-Date: 0
 EOF
 
-  gpg_pub_key="$(gpg --list-keys --keyid-format LONG | grep pub | awk '{print $2}' | awk -F '/' '{print $2}' | xargs)"
+  gpg_pub_key="$(gpg --list-keys --with-colons | awk -F: '/^pub/{print $5}')"
   local_gitconfig="$HOME/.gitconfig.local"
 
   git config --file="$local_gitconfig" user.signingkey "$gpg_pub_key"
-  gpg --armor --export "$gpg_email" | gh gpg-key add - || fancy_echo "GPG key already exists on GitHub, skipping ..."
+  gpg --armor --export "$gpg_pub_key" | gh gpg-key add - || fancy_echo "GPG key already exists on GitHub, skipping ..."
   git config --file="$local_gitconfig" commit.gpgsign true
 fi
 
