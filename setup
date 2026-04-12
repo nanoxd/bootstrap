@@ -67,6 +67,8 @@ brew update
 
 make brew
 
+brew services restart goku 2>/dev/null || true
+
 if [ ! -x "$HOME/.bin/xcodes" ]; then
   fancy_echo "Installing xcodes CLI ..."
   xcodes_url="$(curl -fsSL https://api.github.com/repos/XcodesOrg/xcodes/releases/latest \

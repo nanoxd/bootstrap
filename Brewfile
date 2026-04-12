@@ -51,7 +51,7 @@ brew 'fzf'
 brew 'ripgrep'
 brew 'editorconfig'
 brew 'tealdeer'
-brew 'yqrashawn/goku/goku', restart_service: :changed
+brew 'yqrashawn/goku/goku'
 brew 'grc'
 brew 'bat'
 brew 'croc'
