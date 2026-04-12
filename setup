@@ -145,7 +145,7 @@ EOF
   local_gitconfig="$HOME/.gitconfig.local"
 
   git config --file="$local_gitconfig" user.signingkey "$gpg_pub_key"
-  gpg --armor --export "$gpg_email" | gh gpg-key add -
+  gpg --armor --export "$gpg_email" | gh gpg-key add - || fancy_echo "GPG key already exists on GitHub, skipping ..."
   git config --file="$local_gitconfig" commit.gpgsign true
 fi
 
