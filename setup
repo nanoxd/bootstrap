@@ -29,6 +29,13 @@ trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
 
 set -e
 
+RM_GPG=false
+for arg in "$@"; do
+  case "$arg" in
+    --rm-gpg) RM_GPG=true ;;
+  esac
+done
+
 BOOTSTRAP_PROFILE="${BOOTSTRAP_PROFILE:-personal}"
 export BOOTSTRAP_PROFILE
 fancy_echo "Bootstrapping with profile: $BOOTSTRAP_PROFILE"
@@ -113,6 +120,11 @@ if [[ ! -f ~/.ssh/id_ed25519.pub ]]; then
   fancy_echo "Enter a title for this SSH key (e.g. 'Personal MacBook'):"
   read ssh_key_title
   gh ssh-key add ~/.ssh/id_ed25519.pub --title "$ssh_key_title"
+fi
+
+if [ "$RM_GPG" = true ]; then
+  fancy_echo "Removing existing GPG keys ..."
+  rm -rf ~/.gnupg
 fi
 
 fancy_echo "Checking for GPG Key, generating one if it doesn't exist ..."
