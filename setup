@@ -137,6 +137,7 @@ Subkey-Type: ECDH
 Subkey-Curve: cv25519
 Subkey-Usage: encrypt
 Name-Real: $gpg_name
+Name-Comment: $(hostname -s)
 Name-Email: $gpg_email
 Expire-Date: 0
 EOF
