@@ -26,7 +26,6 @@ cask 'wezterm'
 cask 'localsend'
 
 cask 'cleanshot'
-cask 'dockdoor'
 cask 'thaw'
 cask 'tuist'
 cask 'typewhisper/tap/typewhisper'
