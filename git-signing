@@ -1,0 +1,304 @@
+#!/bin/bash
+#
+# Ensure SSH commit signing on this machine. Safe to run repeatedly: every step
+# checks its own state first and skips when there is nothing to do.
+#
+#   1. GitHub CLI is logged in with the scopes needed to manage SSH keys
+#   2. An ED25519 key exists on disk
+#   3. The key is loaded in the SSH agent and stored in the Apple Keychain
+#   4. ~/.ssh/config includes a managed snippet for github.com
+#   5. The public key is registered with GitHub for authentication and signing
+#   6. Git signs with the key, configured in ~/.gitconfig.local
+#   7. The key is listed in ~/.ssh/allowed_signers so local verification works
+#
+# Existing GPG keys are never touched. ~/.gitconfig is never touched either;
+# dotfiles own it and include ~/.gitconfig.local.
+
+fancy_echo() {
+  local fmt="$1"; shift
+
+  printf "\n$fmt\n" "$@"
+}
+
+trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
+
+set -euo pipefail
+
+SSH_KEY="${BOOTSTRAP_SSH_KEY:-$HOME/.ssh/id_ed25519}"
+SSH_PUBLIC_KEY="${SSH_KEY}.pub"
+LOCAL_GITCONFIG="${BOOTSTRAP_GITCONFIG:-$HOME/.gitconfig.local}"
+SSH_CONFIG="$HOME/.ssh/config"
+SSH_CONFIG_DIR="$HOME/.ssh/config.d"
+MANAGED_SSH_CONFIG="$SSH_CONFIG_DIR/bootstrap-github.conf"
+ALLOWED_SIGNERS="$HOME/.ssh/allowed_signers"
+GITHUB_SCOPES="admin:public_key admin:ssh_signing_key"
+
+require_command() {
+  local command_name="$1"
+
+  if ! command -v "$command_name" >/dev/null 2>&1; then
+    printf "Missing required command: %s\n" "$command_name" >&2
+    return 1
+  fi
+}
+
+git_email() {
+  git config --get user.email 2>/dev/null || true
+}
+
+github_email() {
+  gh api user --jq '.email // empty' 2>/dev/null || true
+}
+
+default_key_comment() {
+  local email login
+
+  email="$(git_email)"
+  if [ -n "$email" ]; then
+    printf "%s" "$email"
+    return
+  fi
+
+  login="$(gh api user --jq '.login' 2>/dev/null || whoami)"
+  printf "%s@%s" "$login" "$(hostname -s)"
+}
+
+public_key_material() {
+  awk '{ print $1 " " $2 }' "$SSH_PUBLIC_KEY"
+}
+
+public_key_blob() {
+  awk '{ print $2 }' "$SSH_PUBLIC_KEY"
+}
+
+ensure_github_auth() {
+  fancy_echo "Checking GitHub authentication ..."
+
+  if gh auth status >/dev/null 2>&1; then
+    return
+  fi
+
+  # Request the key-management scopes up front so the whole bootstrap needs a
+  # single browser round trip. Key upload is handled below, not by gh login.
+  gh auth login --git-protocol ssh --web --skip-ssh-key \
+    --scopes "$(printf "%s" "$GITHUB_SCOPES" | tr ' ' ',')"
+}
+
+token_scopes() {
+  { gh api -i /user 2>/dev/null || true; } \
+    | awk -F': ' 'tolower($1) == "x-oauth-scopes" { print $2 }' \
+    | tr -d '\r '
+}
+
+ensure_github_scopes() {
+  local have scope missing=""
+
+  have=",$(token_scopes),"
+  for scope in $GITHUB_SCOPES; do
+    if ! printf "%s" "$have" | grep -Fq ",$scope,"; then
+      missing="${missing:+$missing,}$scope"
+    fi
+  done
+
+  if [ -z "$missing" ]; then
+    return
+  fi
+
+  fancy_echo "GitHub token is missing scopes (%s). Refreshing ..." "$missing"
+  gh auth refresh --hostname github.com --scopes "$missing"
+}
+
+ensure_ssh_key() {
+  local key_comment
+
+  mkdir -p "$HOME/.ssh"
+  chmod 700 "$HOME/.ssh"
+
+  if [ ! -f "$SSH_KEY" ] && [ ! -f "$SSH_PUBLIC_KEY" ]; then
+    key_comment="$(default_key_comment)"
+    fancy_echo "Generating SSH key at %s ..." "$SSH_KEY"
+    ssh-keygen -a 100 -t ed25519 -C "$key_comment" -f "$SSH_KEY"
+  elif [ -f "$SSH_KEY" ] && [ ! -f "$SSH_PUBLIC_KEY" ]; then
+    fancy_echo "Recreating missing public key at %s ..." "$SSH_PUBLIC_KEY"
+    ssh-keygen -y -f "$SSH_KEY" > "$SSH_PUBLIC_KEY"
+  fi
+
+  if [ ! -f "$SSH_PUBLIC_KEY" ]; then
+    printf "Missing SSH public key: %s\n" "$SSH_PUBLIC_KEY" >&2
+    return 1
+  fi
+
+  chmod 600 "$SSH_KEY" 2>/dev/null || true
+  chmod 644 "$SSH_PUBLIC_KEY"
+}
+
+ensure_key_in_agent() {
+  # -T asks the agent to sign a challenge with this key. Success means the key
+  # is already loaded, so there is nothing to add and no passphrase to prompt for.
+  if ssh-add -T "$SSH_PUBLIC_KEY" >/dev/null 2>&1; then
+    fancy_echo "SSH key already loaded in the agent. Skipping ..."
+    return
+  fi
+
+  fancy_echo "Adding SSH key to the agent and Apple Keychain ..."
+  if ssh-add --apple-use-keychain "$SSH_KEY" 2>/dev/null; then
+    return
+  fi
+
+  ssh-add "$SSH_KEY"
+}
+
+ensure_ssh_config() {
+  local include_line tmp_config
+
+  include_line='Include ~/.ssh/config.d/*.conf'
+
+  mkdir -p "$SSH_CONFIG_DIR"
+  chmod 700 "$SSH_CONFIG_DIR"
+  touch "$SSH_CONFIG"
+  chmod 600 "$SSH_CONFIG"
+
+  # Include must precede any Host block to apply globally, so prepend it.
+  if ! grep -Fqs "$include_line" "$SSH_CONFIG"; then
+    tmp_config="$SSH_CONFIG.tmp.$$"
+    {
+      printf "%s\n" "$include_line"
+      if [ -s "$SSH_CONFIG" ]; then
+        cat "$SSH_CONFIG"
+      fi
+    } > "$tmp_config"
+    mv "$tmp_config" "$SSH_CONFIG"
+    chmod 600 "$SSH_CONFIG"
+  fi
+
+  cat > "$MANAGED_SSH_CONFIG" <<EOF
+Host github.com
+  AddKeysToAgent yes
+  UseKeychain yes
+  IdentityFile $SSH_KEY
+EOF
+  chmod 600 "$MANAGED_SSH_CONFIG"
+}
+
+prompt_key_title() {
+  local default_title key_title
+
+  if [ -n "${BOOTSTRAP_SSH_KEY_TITLE:-}" ]; then
+    printf "%s" "$BOOTSTRAP_SSH_KEY_TITLE"
+    return
+  fi
+
+  default_title="$(hostname -s)"
+  key_title=""
+  if [ -t 0 ]; then
+    fancy_echo "Enter a title for this SSH key on GitHub [%s]:" "$default_title" >&2
+    read -r key_title
+  fi
+
+  printf "%s" "${key_title:-$default_title}"
+}
+
+github_has_key() {
+  local key_type="$1" endpoint
+
+  case "$key_type" in
+    authentication) endpoint="user/keys" ;;
+    signing) endpoint="user/ssh_signing_keys" ;;
+    *) printf "Unknown key type: %s\n" "$key_type" >&2; return 1 ;;
+  esac
+
+  { gh api --paginate "$endpoint" --jq '.[].key' 2>/dev/null || true; } \
+    | grep -Fq "$(public_key_blob)"
+}
+
+register_github_key() {
+  local key_type="$1" key_title="$2" output
+
+  fancy_echo "Registering SSH %s key with GitHub ..." "$key_type"
+  if output="$(gh ssh-key add "$SSH_PUBLIC_KEY" --type "$key_type" --title "$key_title" 2>&1)"; then
+    printf "%s\n" "$output"
+    return
+  fi
+
+  if printf "%s" "$output" | grep -Fiq "already"; then
+    fancy_echo "GitHub already has this SSH %s key. Skipping ..." "$key_type"
+    return
+  fi
+
+  printf "%s\n" "$output" >&2
+  return 1
+}
+
+ensure_github_keys() {
+  local key_type key_title missing=""
+
+  for key_type in authentication signing; do
+    if github_has_key "$key_type"; then
+      fancy_echo "GitHub already has this SSH %s key. Skipping ..." "$key_type"
+    else
+      missing="$missing $key_type"
+    fi
+  done
+
+  if [ -z "$missing" ]; then
+    return
+  fi
+
+  # Only ask for a title when there is actually something to upload.
+  key_title="$(prompt_key_title)"
+  for key_type in $missing; do
+    register_github_key "$key_type" "$key_title"
+  done
+}
+
+configure_git_signing() {
+  fancy_echo "Configuring Git to sign commits with SSH ..."
+
+  git config --file="$LOCAL_GITCONFIG" gpg.format ssh
+  git config --file="$LOCAL_GITCONFIG" user.signingkey "$SSH_PUBLIC_KEY"
+  git config --file="$LOCAL_GITCONFIG" commit.gpgsign true
+  git config --file="$LOCAL_GITCONFIG" gpg.ssh.allowedSignersFile "$ALLOWED_SIGNERS"
+}
+
+ensure_allowed_signers() {
+  local principal
+
+  touch "$ALLOWED_SIGNERS"
+  chmod 644 "$ALLOWED_SIGNERS"
+
+  if grep -Fq "$(public_key_blob)" "$ALLOWED_SIGNERS"; then
+    return
+  fi
+
+  principal="$(git_email)"
+  if [ -z "$principal" ]; then
+    principal="$(github_email)"
+  fi
+  if [ -z "$principal" ]; then
+    fancy_echo "No git or GitHub email found. Skipping %s; add a line for this key once user.email is set." "$ALLOWED_SIGNERS"
+    return
+  fi
+
+  fancy_echo "Adding key to %s for %s ..." "$ALLOWED_SIGNERS" "$principal"
+  printf '%s namespaces="git" %s\n' "$principal" "$(public_key_material)" >> "$ALLOWED_SIGNERS"
+}
+
+main() {
+  require_command git
+  require_command gh
+  require_command ssh-add
+  require_command ssh-keygen
+
+  ensure_github_auth
+  ensure_github_scopes
+  ensure_ssh_key
+  ensure_key_in_agent
+  ensure_ssh_config
+  ensure_github_keys
+  configure_git_signing
+  ensure_allowed_signers
+
+  fancy_echo "SSH commit signing is set up."
+}
+
+main "$@"

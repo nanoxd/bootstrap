@@ -29,13 +29,6 @@ trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
 
 set -e
 
-RM_GPG=false
-for arg in "$@"; do
-  case "$arg" in
-    --rm-gpg) RM_GPG=true ;;
-  esac
-done
-
 BOOTSTRAP_PROFILE="${BOOTSTRAP_PROFILE:-personal}"
 export BOOTSTRAP_PROFILE
 fancy_echo "Bootstrapping with profile: $BOOTSTRAP_PROFILE"
@@ -50,11 +43,6 @@ fi
 
 append_to_zshrc 'export PATH="$HOME/.bin:$PATH"'
 export PATH="$HOME/.bin:$PATH"
-
-generate_ssh_key() {
-  ssh-keygen -a 100 -t ed25519
-  ssh-add ~/.ssh/id_ed25519
-}
 
 softwareupdate --install-rosetta --agree-to-license 2>/dev/null || true
 
@@ -109,58 +97,9 @@ if [ "$SHELL" != "$fish_path" ]; then
   chsh -s "$fish_path"
 fi
 
-fancy_echo "Authenticating with GitHub ..."
-if ! gh auth status >/dev/null 2>&1; then
-  gh auth login --git-protocol ssh --web
-fi
-
-fancy_echo "Checking for SSH key, generating one if it doesn't exist ..."
-if [[ ! -f ~/.ssh/id_ed25519.pub ]]; then
-  generate_ssh_key
-  fancy_echo "Enter a title for this SSH key (e.g. 'Personal MacBook'):"
-  read ssh_key_title
-  gh ssh-key add ~/.ssh/id_ed25519.pub --title "$ssh_key_title"
-fi
-
-if [ "$RM_GPG" = true ]; then
-  fancy_echo "Removing existing GPG keys ..."
-  rm -rf ~/.gnupg
-fi
-
-fancy_echo "Checking for GPG Key, generating one if it doesn't exist ..."
-if [[ ! -f ~/.gnupg/pubring.kbx ]]; then
-  gpg_name="$(gh api user --jq '.name')"
-  gpg_email="$(gh api user --jq '.email // empty')"
-
-  if [ -z "$gpg_email" ]; then
-    fancy_echo "GitHub email is private. Please enter your email for the GPG key:"
-    read gpg_email
-  fi
-
-  fancy_echo "Generating GPG key for %s <%s>" "$gpg_name" "$gpg_email"
-
-  # Generate GPG key non-interactively
-  gpg --batch --generate-key <<EOF
-%no-protection
-Key-Type: EdDSA
-Key-Curve: ed25519
-Key-Usage: sign
-Subkey-Type: ECDH
-Subkey-Curve: cv25519
-Subkey-Usage: encrypt
-Name-Real: $gpg_name
-Name-Comment: $(hostname -s)
-Name-Email: $gpg_email
-Expire-Date: 0
-EOF
-
-  gpg_pub_key="$(gpg --list-keys --with-colons | awk -F: '/^pub/{print $5}')"
-  local_gitconfig="$HOME/.gitconfig.local"
-
-  git config --file="$local_gitconfig" user.signingkey "$gpg_pub_key"
-  gpg --armor --export "$gpg_pub_key" | gh gpg-key add - || fancy_echo "GPG key already exists on GitHub, skipping ..."
-  git config --file="$local_gitconfig" commit.gpgsign true
-fi
+# Logs in to GitHub, generates the SSH key if needed, registers it, and
+# configures SSH commit signing. Must run before dotfiles, which clone over SSH.
+./git-signing
 
 fancy_echo "Installing Rust"
 if [ ! -e "$HOME/.cargo/bin" ]; then
@@ -184,4 +123,3 @@ diff_hl="$(brew --prefix git)/share/git-core/contrib/diff-highlight/diff-highlig
 if [ -x "$diff_hl" ] && [ ! -e "$HOME/.bin/diff-highlight" ]; then
   ln -sf "$diff_hl" "$HOME/.bin/diff-highlight"
 fi
-

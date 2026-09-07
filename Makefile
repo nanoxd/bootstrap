@@ -1,4 +1,4 @@
-.PHONY: install brew macOS rust
+.PHONY: install brew macOS rust git-signing
 
 BOOTSTRAP_PROFILE ?= personal
 
@@ -16,3 +16,6 @@ macOS:
 
 rust:
 	./Cargofile
+
+git-signing:
+	./git-signing

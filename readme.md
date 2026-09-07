@@ -30,6 +30,25 @@ BOOTSTRAP_PROFILE=server /bin/bash -c "$(curl -fsSL https://raw.githubuserconten
 
 To only run homebrew: `make brew` (honors `BOOTSTRAP_PROFILE`)
 
+### Git commit signing
+
+Commits are signed with SSH, not GPG. `make install` sets this up, and it can
+also run on its own:
+
+```sh
+make git-signing
+```
+
+The script is safe to re-run. It generates an ED25519 key if one is missing,
+loads it into the macOS Keychain-backed SSH agent, registers the public key
+with GitHub as both an authentication key and a signing key, adds it to
+`~/.ssh/allowed_signers` so local verification works, and configures
+`~/.gitconfig.local` to sign with it. Steps that are already done are skipped,
+and existing GPG keys are left untouched.
+
+`BOOTSTRAP_SSH_KEY` overrides the key path and `BOOTSTRAP_SSH_KEY_TITLE` skips
+the prompt for the key's title on GitHub.
+
 ## Customization
 
 The scripts as is favor my needs. To avoid installing packages you don't need,
