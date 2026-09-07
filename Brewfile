@@ -6,6 +6,7 @@ brew 'git-extras'
 brew 'git-delta'
 brew 'gh'
 brew 'tig'
+brew 'lazygit'
 brew 'openssl'
 
 # Package Manager
@@ -58,6 +59,13 @@ brew 'just'
 brew 'd2'
 brew 'awscli'
 brew 'hey'
+brew 'actionlint'
+brew 'cmake'
+brew 'mosh'
+brew 'nmap'
+brew 'oha'
+brew 'playwright-cli'
+brew 'steipete/tap/sag'
 
 # Media
 brew 'fonttools'
@@ -68,12 +76,17 @@ brew 'librsvg'
 brew 'ffmpeg'
 brew 'handbrake'
 brew 'pngcrush'
+brew 'oxipng'
+brew 'potrace'
 
 # Swift/Xcode tooling
 brew 'aria2'
 brew 'swiftformat'
+brew 'swiftlint'
 brew 'xcbeautify'
+brew 'create-dmg'
 brew 'xcodesorg/made/xcodes'
+brew 'getsentry/xcodebuildmcp/xcodebuildmcp'
 
 # Hardware / microcontrollers
 brew 'beads'
