@@ -18,7 +18,6 @@ cask 'karabiner-elements'
 cask 'postico'
 cask 'proxyman'
 cask 'quicklook-video'
-cask 'screens'
 cask 'spotify'
 cask 'visual-studio-code'
 cask 'webpquicklook'
@@ -42,6 +41,7 @@ mas 'Kagi', id: 1622835804
 mas 'NordVPN', id: 905953485
 mas 'Parcel', id: 375589283
 mas 'Pins', id: 1547106997
+mas 'Screens 5', id: 1663047912
 mas 'Spark Classic', id: 1176895641
 mas 'Speedtest', id: 1153157709
 mas 'Things', id: 904280696
