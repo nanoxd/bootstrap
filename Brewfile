@@ -73,6 +73,7 @@ brew 'pngcrush'
 brew 'aria2'
 brew 'swiftformat'
 brew 'xcbeautify'
+brew 'xcodesorg/made/xcodes'
 
 # Hardware / microcontrollers
 brew 'beads'
