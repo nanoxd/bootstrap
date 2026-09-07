@@ -3,46 +3,72 @@ brew 'mas'
 
 ### Casks ###
 cask 'alfred'
+cask 'android-file-transfer'
+cask 'android-studio'
 cask 'arc'
+cask 'bambu-studio'
+cask 'chatgpt'
 cask 'claude'
+cask 'cleanshot'
+cask 'cmux'
 cask 'discord'
+cask 'elgato-stream-deck'
+cask 'elgato-wave-link'
 cask 'firefox'
 cask 'font-iosevka-nerd-font'
 cask 'fork'
+cask 'forklift'
+cask 'ghostty'
 cask 'google-chrome'
 cask 'hammerspoon'
+cask 'handy'
 cask 'iina'
 cask 'imageoptim'
 cask 'itsycal'
 cask 'karabiner-elements'
+cask 'keepingyouawake'
+cask 'linearmouse'
+cask 'little-snitch'
+cask 'localsend'
+cask 'muesli'
+cask 'notion'
+cask 'openlogi'
+cask 'stablyai/orca/orca'
 cask 'postico'
 cask 'proxyman'
+cask 'prusaslicer'
 cask 'quicklook-video'
 cask 'spotify'
-cask 'visual-studio-code'
-cask 'webpquicklook'
-cask 'wezterm'
-cask 'localsend'
-
-cask 'cleanshot'
 cask 'tailscale-app'
 cask 'thaw'
 cask 'tuist'
+cask 'tuna'
+cask 'visual-studio-code'
+cask 'webpquicklook'
+cask 'wezterm'
+cask 'darrylmorley/whatcable/whatcable'
 cask 'zed'
+cask 'zoom'
 
 ### MAS ###
 mas '1Password for Safari', id: 1569813296
 mas 'AdGuard', id: 1440147259
+mas 'Blackmagic Disk Speed Test', id: 425264550
+mas 'Brother P-touch Editor', id: 1453365242
+mas 'Brother Transfer Express', id: 1627217996
+mas 'brrr', id: 6755617665
 mas 'DaftMusic', id: 6748985865
 mas 'Flighty', id: 1358823008
 mas 'Gifski', id: 1351639930
+mas 'Infuse', id: 1136220934
 mas 'Ivory', id: 6444602274
 mas 'Kagi', id: 1622835804
 mas 'NordVPN', id: 905953485
+mas 'Panels', id: 1236567663
 mas 'Parcel', id: 375589283
 mas 'Pins', id: 1547106997
+mas 'RocketSim', id: 1504940162
 mas 'Screens 5', id: 1663047912
 mas 'Spark Classic', id: 1176895641
 mas 'Speedtest', id: 1153157709
 mas 'Things', id: 904280696
-mas 'brrr', id: 6755617665
