@@ -8,10 +8,6 @@ brew 'gh'
 brew 'tig'
 brew 'openssl'
 
-# GPG stuff
-brew 'gnupg'
-brew 'pinentry-mac'
-
 # Package Manager
 brew 'luarocks'
 
