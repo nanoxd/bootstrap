@@ -26,9 +26,9 @@ cask 'wezterm'
 cask 'localsend'
 
 cask 'cleanshot'
+cask 'tailscale-app'
 cask 'thaw'
 cask 'tuist'
-cask 'typewhisper/tap/typewhisper'
 cask 'zed'
 
 ### MAS ###
@@ -39,12 +39,10 @@ mas 'Flighty', id: 1358823008
 mas 'Gifski', id: 1351639930
 mas 'Ivory', id: 6444602274
 mas 'Kagi', id: 1622835804
-mas 'Monosnap', id: 540348655
 mas 'NordVPN', id: 905953485
-mas 'Parcel', id: 639968404
+mas 'Parcel', id: 375589283
 mas 'Pins', id: 1547106997
-mas 'Spark', id: 6445813049
+mas 'Spark Classic', id: 1176895641
 mas 'Speedtest', id: 1153157709
-mas 'Tailscale', id: 1475387142
 mas 'Things', id: 904280696
 mas 'brrr', id: 6755617665
