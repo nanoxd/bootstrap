@@ -6,14 +6,8 @@ cargo_install() {
 
 cargo_install 'cargo-update'
 cargo_install 'cargo-whatfeatures'
-cargo_install 'cargo-edit'
-cargo_install 'cargo-asm'
-cargo_install 'cargo-watch'
-cargo_install 'cargo-docserver'
 
 cargo_install 'hyperfine'
-cargo_install 'uq'
-cargo_install 'lagraph'
 cargo_install 'sd'
 cargo_install 'sheldon'
 
@@ -22,5 +16,4 @@ cargo_install 'zoxide'
 cargo_install 'rusty-tags'
 cargo_install 'fd-find'
 cargo_install 'grex'
-cargo_install 'diskonaut'
 cargo_install 'proximity-sort'
