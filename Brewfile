@@ -17,6 +17,9 @@ brew 'go'
 brew 'golangci-lint'
 brew 'go-task'
 
+# Rust
+brew 'cargo-update'
+
 brew 'lua'
 brew 'stylua'
 
@@ -29,6 +32,7 @@ brew 'mise'
 
 # Shells
 brew 'fish'
+brew 'sheldon'
 
 # Tools
 brew 'tmux'
@@ -45,6 +49,12 @@ brew 'rename'
 brew 'ctags'
 brew 'fzf'
 brew 'ripgrep'
+brew 'fd'
+brew 'eza'
+brew 'zoxide'
+brew 'sd'
+brew 'grex'
+brew 'hyperfine'
 brew 'editorconfig'
 brew 'tealdeer'
 brew 'yqrashawn/goku/goku'

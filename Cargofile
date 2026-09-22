@@ -1,19 +1,13 @@
 #!/usr/bin/env sh
 
+# Only crates Homebrew has no formula for belong here. Anything bottled goes
+# in the Brewfile so a fresh bootstrap doesn't compile it from source.
+
 cargo_install() {
   cargo install "$1"
 }
 
-cargo_install 'cargo-update'
 cargo_install 'cargo-whatfeatures'
 
-cargo_install 'hyperfine'
-cargo_install 'sd'
-cargo_install 'sheldon'
-
-cargo_install 'eza'
-cargo_install 'zoxide'
 cargo_install 'rusty-tags'
-cargo_install 'fd-find'
-cargo_install 'grex'
 cargo_install 'proximity-sort'

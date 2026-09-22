@@ -39,7 +39,7 @@ brew bundle check      # Verify Brewfile dependencies
 
 ### Configuration Files
 - **Brewfile**: Homebrew package definitions including CLI tools, GUI applications, and Mac App Store apps. Uses tap/brew/cask/mas syntax.
-- **Cargofile**: Rust tools to install via cargo. Each line is a package name passed to `cargo install`.
+- **Cargofile**: Rust tools to install via cargo. Each line is a package name passed to `cargo install`. Only for crates Homebrew has no formula for, so a fresh bootstrap doesn't compile from source.
 - **Makefile**: Build automation defining installation targets and dependencies.
 
 ### Security & Authentication
@@ -52,7 +52,7 @@ brew bundle check      # Verify Brewfile dependencies
 
 ### Adding New Packages
 - **Homebrew packages**: Add to appropriate section in `Brewfile` (tap, brew, cask, or mas)
-- **Rust tools**: Add package name to `Cargofile`
+- **Rust tools**: Prefer a Homebrew formula in `Brewfile`. Add to `Cargofile` only if `brew info <name>` finds nothing.
 - **Other binaries**: Add install logic directly in `setup`
 
 ### Testing Changes
