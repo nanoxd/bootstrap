@@ -32,7 +32,6 @@ brew 'fish'
 
 # Tools
 brew 'tmux'
-brew 'reattach-to-user-namespace'
 brew 'wget'
 brew 'neovim'
 brew 'jq'
@@ -96,5 +95,3 @@ brew 'esptool'
 # Headless-friendly casks — services and background daemons safe on servers
 cask '1password-cli'
 cask 'docker-desktop'
-cask 'maestral'
-cask 'syncthing-app'
