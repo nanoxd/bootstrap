@@ -38,19 +38,6 @@ substep_info() {
 # Close System Settings so it can't overwrite what we write
 osascript -e 'tell application "System Settings" to quit'
 
-# Ask for the administrator password upfront
-sudo -v
-
-# # Keep-alive: update existing `sudo` time stamp until `macOS` has finished
-while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
-
-# System {{{
-info "System"
-
-substep_info "Restart automatically if the computer freezes"
-  sudo defaults write /Library/Preferences/com.apple.loginwindow RestartFreeze -bool true
-# }}}
-
 # Trackpad {{{
 info "Trackpad"
 
