@@ -35,8 +35,8 @@ substep_info() {
     colored_echo "$1" yellow "======"
 }
 
-# Close any open System Preferences panes
-osascript -e 'tell application "System Preferences" to quit'
+# Close System Settings so it can't overwrite what we write
+osascript -e 'tell application "System Settings" to quit'
 
 # Ask for the administrator password upfront
 sudo -v
