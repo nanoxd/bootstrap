@@ -148,26 +148,6 @@ substep_info "Don't rearrange by use"
   defaults write com.apple.dock mru-spaces -bool false
 # }}}
 
-# Safari {{{
-info "Safari"
-substep_info "Set home page to about:blank for faster loading"
-  defaults write com.apple.Safari HomePage -string "about:blank"
-
-substep_info "Make search banners default to Contains instead of Starts With"
-  defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
-
-substep_info "Prevent opening 'safe' files automatically after downloading"
-  defaults write com.apple.Safari AutoOpenSafeDownloads -bool false
-
-substep_info "Enable debug menu"
-  defaults write com.apple.Safari IncludeInternalDebugMenu -bool true
-  defaults write com.apple.Safari IncludeDevelopMenu -bool true
-  defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
-  defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
-  defaults write NSGlobalDomain WebKitDeveloperExtras -bool true
-
-# }}}
-
 # Xcode {{{
 info "Xcode"
 substep_info "See how long a build takes"
@@ -226,7 +206,6 @@ for app in "cfprefsd" \
 	"Finder" \
 	"Itsycal" \
 	"Photos" \
-	"Safari" \
 	"SystemUIServer"; do
 	killall "${app}" &> /dev/null
 done
