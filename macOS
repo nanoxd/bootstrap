@@ -54,8 +54,8 @@ substep_info "Enable full access for all controls"
   defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
 
 substep_info "Set a blazingly fast repeat rate"
-  defaults write NSGlobalDomain KeyRepeat -int 1
-  defaults write NSGlobalDomain InitialKeyRepeat -int 10
+  defaults write NSGlobalDomain KeyRepeat -int 2
+  defaults write NSGlobalDomain InitialKeyRepeat -int 15
 
 substep_info "Disable press-and-hold for keys in favor of key repeat"
   defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
