@@ -110,6 +110,13 @@ substep_info "Sort by name"
 substep_info "Use list view in windows"
   defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
 
+substep_info "Keep folders on top when sorting"
+  defaults write com.apple.finder _FXSortFoldersFirst -bool true
+
+substep_info "Empty the Trash after 30 days and skip the confirmation"
+  defaults write com.apple.finder FXRemoveOldTrashItems -bool true
+  defaults write com.apple.finder WarnOnEmptyTrash -bool false
+
 substep_info "Save to disk instead of iCloud"
   defaults write NSGlobalDomain NSDocumentSaveNewDocumentsToCloud -bool false
 # }}}
