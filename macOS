@@ -1,11 +1,11 @@
-#!/usr/bin/env sh
+#!/bin/bash
 
 # Took these printing functions from https://github.com/Sajjadhosn/dotfiles
 colored_echo() {
     local exp="$1";
     local color="$2";
     local arrow="$3";
-    if ! [[ $color =~ '^[0-9]$' ]] ; then
+    if ! [[ $color =~ ^[0-9]$ ]] ; then
        case $(echo $color | tr '[:upper:]' '[:lower:]') in
         black) color=0 ;;
         red) color=1 ;;
@@ -33,6 +33,22 @@ success() {
 
 substep_info() {
     colored_echo "$1" yellow "======"
+}
+
+# Set a nested key in a plist, creating its parent dictionaries first. Finder
+# only writes these on first use, so PlistBuddy's Set fails on a fresh machine.
+plist_set() {
+    local file="$1" key="$2" type="$3" value="$4" parent="" part
+    local IFS=':'
+
+    for part in ${key#:}; do
+        parent="$parent:$part"
+        [ "$parent" = "$key" ] && break
+        /usr/libexec/PlistBuddy -c "Add $parent dict" "$file" >/dev/null 2>&1 || true
+    done
+
+    /usr/libexec/PlistBuddy -c "Set $key $value" "$file" 2>/dev/null \
+        || /usr/libexec/PlistBuddy -c "Add $key $type $value" "$file"
 }
 
 # Close System Settings so it can't overwrite what we write
@@ -98,14 +114,14 @@ substep_info "Show icons for hard drives, servers, and removable media on the de
   defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool true
 
 substep_info "Show Info on icon views"
-  /usr/libexec/PlistBuddy -c "Set :DesktopViewSettings:IconViewSettings:showItemInfo true" ~/Library/Preferences/com.apple.finder.plist
-  /usr/libexec/PlistBuddy -c "Set :FK_StandardViewSettings:IconViewSettings:showItemInfo true" ~/Library/Preferences/com.apple.finder.plist
-  /usr/libexec/PlistBuddy -c "Set :StandardViewSettings:IconViewSettings:showItemInfo true" ~/Library/Preferences/com.apple.finder.plist
+  plist_set ~/Library/Preferences/com.apple.finder.plist :DesktopViewSettings:IconViewSettings:showItemInfo bool true
+  plist_set ~/Library/Preferences/com.apple.finder.plist :FK_StandardViewSettings:IconViewSettings:showItemInfo bool true
+  plist_set ~/Library/Preferences/com.apple.finder.plist :StandardViewSettings:IconViewSettings:showItemInfo bool true
 
 substep_info "Sort by name"
-  /usr/libexec/PlistBuddy -c "Set :DesktopViewSettings:IconViewSettings:arrangeBy name" ~/Library/Preferences/com.apple.finder.plist
-  /usr/libexec/PlistBuddy -c "Set :FK_StandardViewSettings:IconViewSettings:arrangeBy name" ~/Library/Preferences/com.apple.finder.plist
-  /usr/libexec/PlistBuddy -c "Set :StandardViewSettings:IconViewSettings:arrangeBy name" ~/Library/Preferences/com.apple.finder.plist
+  plist_set ~/Library/Preferences/com.apple.finder.plist :DesktopViewSettings:IconViewSettings:arrangeBy string name
+  plist_set ~/Library/Preferences/com.apple.finder.plist :FK_StandardViewSettings:IconViewSettings:arrangeBy string name
+  plist_set ~/Library/Preferences/com.apple.finder.plist :StandardViewSettings:IconViewSettings:arrangeBy string name
 
 substep_info "Use list view in windows"
   defaults write com.apple.finder FXPreferredViewStyle -string "Nlsv"
@@ -149,7 +165,7 @@ substep_info "See how long a build takes"
   defaults write com.apple.dt.Xcode ShowBuildOperationDuration YES
 
 substep_info "Use all cores to build"
-  defaults write com.apple.dt.Xcode IDEBuildOperationMaxNumberOfConcurrentCompileTasks `sysctl -n hw.ncpu`
+  defaults write com.apple.dt.Xcode IDEBuildOperationMaxNumberOfConcurrentCompileTasks "$(sysctl -n hw.ncpu)"
 
 substep_info "Increase number of concurrent tasks"
   defaults write com.apple.dt.Xcode BuildSystemScheduleInherentlyParallelCommandsExclusively -bool NO
