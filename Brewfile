@@ -109,4 +109,6 @@ cask 'orbstack'
 # Apps installed on every machine, servers included
 cask 'font-iosevka-nerd-font'
 cask 'google-chrome'
+cask 'screens-connect'
+cask 'tailscale-app'
 cask 'zed'
