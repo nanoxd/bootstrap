@@ -75,6 +75,7 @@ brew 'nmap'
 brew 'oha'
 brew 'playwright-cli'
 brew 'steipete/tap/sag'
+brew 'beads'
 
 # Media
 brew 'fonttools'
@@ -98,10 +99,9 @@ brew 'xcodes'
 brew 'getsentry/xcodebuildmcp/xcodebuildmcp'
 
 # Hardware / microcontrollers
-brew 'beads'
 brew 'dfu-util'
 brew 'esptool'
 
 # Headless-friendly casks — services and background daemons safe on servers
 cask '1password-cli'
-cask 'docker-desktop'
+cask 'orbstack'
