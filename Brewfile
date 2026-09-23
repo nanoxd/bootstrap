@@ -94,7 +94,7 @@ brew 'swiftformat'
 brew 'swiftlint'
 brew 'xcbeautify'
 brew 'create-dmg'
-brew 'xcodesorg/made/xcodes'
+brew 'xcodes'
 brew 'getsentry/xcodebuildmcp/xcodebuildmcp'
 
 # Hardware / microcontrollers
