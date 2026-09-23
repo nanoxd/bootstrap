@@ -34,7 +34,7 @@ cask 'mole-app'
 cask 'muesli'
 cask 'notion'
 cask 'openlogi'
-cask 'stablyai/orca/orca'
+cask 'stablyai/orca/orca', trusted: true
 cask 'postico'
 cask 'proxyman'
 cask 'prusaslicer'
@@ -46,7 +46,7 @@ cask 'thaw'
 cask 'tuist'
 cask 'tuna'
 cask 'visual-studio-code'
-cask 'darrylmorley/whatcable/whatcable'
+cask 'darrylmorley/whatcable/whatcable', trusted: true
 cask 'zed'
 cask 'zoom'
 

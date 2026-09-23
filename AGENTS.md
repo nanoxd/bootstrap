@@ -58,7 +58,7 @@ brew bundle check      # Verify Brewfile dependencies
 ## Development Guidelines
 
 ### Adding New Packages
-- **Homebrew packages**: Add to appropriate section in `Brewfile` (tap, brew, cask, or mas)
+- **Homebrew packages**: Add to appropriate section in `Brewfile` (tap, brew, cask, or mas). Entries from a non-Homebrew tap use the full `user/tap/name` and `trusted: true`, since Homebrew 7 refuses to load untrusted taps.
 - **Rust tools**: Prefer a Homebrew formula in `Brewfile`. Add to `Cargofile` only if `brew info <name>` finds nothing.
 - **Other binaries**: Add install logic directly in `setup`
 

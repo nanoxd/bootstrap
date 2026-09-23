@@ -24,7 +24,7 @@ brew 'lua'
 brew 'stylua'
 
 # JS/TS Runtimes
-brew 'oven-sh/bun/bun'
+brew 'oven-sh/bun/bun', trusted: true
 brew 'deno'
 
 # Version Manager
@@ -57,7 +57,7 @@ brew 'grex'
 brew 'hyperfine'
 brew 'editorconfig'
 brew 'tealdeer'
-brew 'yqrashawn/goku/goku'
+brew 'yqrashawn/goku/goku', trusted: true
 brew 'grc'
 brew 'bat'
 brew 'croc'
@@ -74,7 +74,7 @@ brew 'mosh'
 brew 'nmap'
 brew 'oha'
 brew 'playwright-cli'
-brew 'steipete/tap/sag'
+brew 'steipete/tap/sag', trusted: true
 brew 'beads'
 
 # Media
@@ -96,7 +96,7 @@ brew 'swiftlint'
 brew 'xcbeautify'
 brew 'create-dmg'
 brew 'xcodes'
-brew 'getsentry/xcodebuildmcp/xcodebuildmcp'
+brew 'getsentry/xcodebuildmcp/xcodebuildmcp', trusted: true
 
 # Hardware / microcontrollers
 brew 'dfu-util'
