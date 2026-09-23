@@ -20,13 +20,17 @@ if you want it somewhere else.
 
 The bootstrap has two profiles, selected via `BOOTSTRAP_PROFILE`:
 
-- `personal` (default) — installs the base `Brewfile` plus `Brewfile.personal`,
-  which adds casks, Mac App Store apps, and other GUI-shaped stuff
-- `server` — installs only the base `Brewfile` (CLI formulas)
+- `server` (default) — installs only the base `Brewfile`: CLI tools plus the
+  apps every machine gets, like Chrome, Zed, Tailscale and Screens Connect
+- `personal` — also installs `Brewfile.personal`, which adds the rest of the
+  casks and the Mac App Store apps
 
 ```sh
-BOOTSTRAP_PROFILE=server /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/nanoxd/bootstrap/main/install)"
+BOOTSTRAP_PROFILE=personal /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/nanoxd/bootstrap/main/install)"
 ```
+
+From an existing checkout, pass it to make the same way:
+`BOOTSTRAP_PROFILE=personal make`.
 
 To only run homebrew: `make brew` (honors `BOOTSTRAP_PROFILE`)
 
@@ -67,7 +71,7 @@ brew bundle dump --file=./Brewfile
 
 The `setup` script installs dotfiles from
 [nanoxd/dotfiles](https://github.com/nanoxd/dotfiles) via
-[dot](https://github.com/ubnt-intrepid/dot). Edit the `dot init` call in
+[dot](https://github.com/ubnt-intrepid/dot). Change `DOTFILES_REPO` in
 `setup` to point at your own repo.
 
 ## Acknowledgments

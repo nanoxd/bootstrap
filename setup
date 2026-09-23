@@ -10,7 +10,12 @@ trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
 
 set -e
 
-BOOTSTRAP_PROFILE="${BOOTSTRAP_PROFILE:-personal}"
+# server installs the base Brewfile only. personal adds Brewfile.personal.
+BOOTSTRAP_PROFILE="${BOOTSTRAP_PROFILE:-server}"
+case "$BOOTSTRAP_PROFILE" in
+  server|personal) ;;
+  *) printf "Unknown BOOTSTRAP_PROFILE: %s (use server or personal)\n" "$BOOTSTRAP_PROFILE" >&2; exit 1 ;;
+esac
 export BOOTSTRAP_PROFILE
 fancy_echo "Bootstrapping with profile: $BOOTSTRAP_PROFILE"
 

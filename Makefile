@@ -1,6 +1,6 @@
 .PHONY: install brew macOS rust git-signing
 
-BOOTSTRAP_PROFILE ?= personal
+BOOTSTRAP_PROFILE ?= server
 
 install:
 	./setup
