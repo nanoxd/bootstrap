@@ -6,25 +6,6 @@ fancy_echo() {
   printf "\n$fmt\n" "$@"
 }
 
-append_to_zshrc() {
-  local text="$1" zshrc
-  local skip_new_line="${2:-0}"
-
-  if [ -w "$HOME/.zshrc.local" ]; then
-    zshrc="$HOME/.zshrc.local"
-  else
-    zshrc="$HOME/.zshrc"
-  fi
-
-  if ! grep -Fqs "$text" "$zshrc"; then
-    if [ "$skip_new_line" -eq 1 ]; then
-      printf "%s\n" "$text" >> "$zshrc"
-    else
-      printf "\n%s\n" "$text" >> "$zshrc"
-    fi
-  fi
-}
-
 trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
 
 set -e
@@ -33,16 +14,12 @@ BOOTSTRAP_PROFILE="${BOOTSTRAP_PROFILE:-personal}"
 export BOOTSTRAP_PROFILE
 fancy_echo "Bootstrapping with profile: $BOOTSTRAP_PROFILE"
 
-if [ ! -d "$HOME/.bin/" ]; then
-  mkdir "$HOME/.bin"
-fi
+DOTFILES="$HOME/.dotfiles"
+DOTFILES_REPO="nanoxd/dotfiles"
 
-if [ ! -f "$HOME/.zshrc" ]; then
-  touch "$HOME/.zshrc"
-fi
-
-append_to_zshrc 'export PATH="$HOME/.bin:$PATH"'
-export PATH="$HOME/.bin:$PATH"
+# Shell startup files belong to the dotfiles, so this script only sets PATH for
+# itself and never writes to ~/.zshrc or the fish config.
+export PATH="$HOME/.bin:$HOME/.cargo/bin:$PATH"
 
 softwareupdate --install-rosetta --agree-to-license 2>/dev/null || true
 
@@ -50,14 +27,114 @@ if [ ! -x /opt/homebrew/bin/brew ]; then
   # Empty out dock
   defaults write com.apple.dock persistent-apps -array
   fancy_echo "Installing Homebrew ..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-
-    append_to_zshrc '# recommended by brew doctor'
-    append_to_zshrc 'export PATH="/opt/homebrew/bin:$PATH"' 1
-    export PATH="/opt/homebrew/bin:$PATH"
+  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 else
   fancy_echo "Homebrew already installed. Skipping ..."
 fi
+eval "$(/opt/homebrew/bin/brew shellenv)"
+brew analytics off
+
+fancy_echo "Enabling the application firewall ..."
+socketfilterfw=/usr/libexec/ApplicationFirewall/socketfilterfw
+if ! "$socketfilterfw" --getglobalstate | grep -q 'State = [12]'; then
+  sudo "$socketfilterfw" --setglobalstate on
+fi
+
+# Homebrew's installer only brings the Command Line Tools. Some formulas need
+# full Xcode to build or link, so switch to it before the Brewfile runs.
+fancy_echo "Installing latest Xcode ..."
+for formula in xcodes aria2; do
+  if ! brew list --formula "$formula" >/dev/null 2>&1; then
+    brew install "$formula"
+  fi
+done
+
+if [ -z "$(xcodes installed 2>/dev/null)" ]; then
+  xcodes install --latest --experimental-unxip --select
+else
+  fancy_echo "Xcode already installed. Skipping ..."
+fi
+
+# An Xcode installed some other way, such as the App Store, leaves the Command
+# Line Tools selected. Pick the newest release, falling back to a beta.
+if xcode-select -p 2>/dev/null | grep -Fq CommandLineTools; then
+  xcode_path="$(xcodes installed | grep -vi beta | tail -1 | awk -F'\t' '{ print $NF }')"
+  if [ -z "$xcode_path" ]; then
+    xcode_path="$(xcodes installed | tail -1 | awk -F'\t' '{ print $NF }')"
+  fi
+  fancy_echo "Selecting %s ..." "$xcode_path"
+  sudo xcode-select --switch "$xcode_path"
+fi
+
+if ! xcodebuild -license check >/dev/null 2>&1; then
+  fancy_echo "Accepting the Xcode license ..."
+  sudo xcodebuild -license accept
+fi
+
+if ! xcodebuild -checkFirstLaunchStatus >/dev/null 2>&1; then
+  fancy_echo "Installing Xcode first-launch components ..."
+  sudo xcodebuild -runFirstLaunch
+fi
+
+fancy_echo "Installing Rust ..."
+if [ ! -x "$HOME/.cargo/bin/rustup" ]; then
+  # --no-modify-path keeps rustup out of the shell startup files, which the
+  # dotfiles own and have not been linked yet.
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+    | sh -s -- -y --no-modify-path --default-toolchain stable
+else
+  fancy_echo "rustup already installed. Skipping ..."
+fi
+rustup component add rust-analyzer rustfmt clippy
+
+# Prints "name<TAB>target" for each link the dotfiles make on macOS.
+dotfile_mappings() {
+  awk -F' = ' '
+    /^\[/ { section = $0; next }
+    /^#/ || NF != 2 { next }
+    section == "[general]" || section == "[darwin]" {
+      gsub(/"/, "", $1); gsub(/"/, "", $2); print $1 "\t" $2
+    }' "$DOTFILES/.mappings"
+}
+
+# dot link renames anything already sitting at a link target, so a ~/.config
+# that an app created first would lose its contents, such as gh's login.
+# Merge those directories into the repo without overwriting tracked files, then
+# move the originals aside so dot can link in their place.
+make_room_for_dotfiles() {
+  local name target source backup
+
+  dotfile_mappings | while IFS="$(printf '\t')" read -r name target; do
+    target="$HOME/${target#\~/}"
+    source="$DOTFILES/$name"
+
+    if [ -L "$target" ] || [ ! -e "$target" ] || [ ! -e "$source" ]; then
+      continue
+    fi
+
+    if [ -d "$target" ] && [ -d "$source" ]; then
+      fancy_echo "Merging existing %s into the dotfiles ..." "$target"
+      rsync -a --ignore-existing "$target/" "$source/"
+    fi
+
+    backup="$target.pre-dotfiles.$(date +%Y%m%d%H%M%S)"
+    fancy_echo "Moving existing %s to %s ..." "$target" "$backup"
+    mv "$target" "$backup"
+  done
+}
+
+# Cloned over HTTPS because the SSH key isn't on GitHub yet. git-signing needs
+# user.email from these dotfiles, so it runs later and the remote switches to
+# SSH afterwards.
+fancy_echo "Linking dotfiles ..."
+if [ ! -d "$DOTFILES" ]; then
+  git clone "https://github.com/$DOTFILES_REPO.git" "$DOTFILES"
+fi
+if ! command -v dot >/dev/null 2>&1; then
+  cargo install --git https://github.com/ubnt-intrepid/dot.git
+fi
+make_room_for_dotfiles
+dot link
 
 fancy_echo "Updating Homebrew formulas ..."
 brew update
@@ -65,13 +142,6 @@ brew update
 make brew
 
 brew services restart goku 2>/dev/null || true
-
-fancy_echo "Installing latest Xcode ..."
-if [ -z "$(xcodes installed 2>/dev/null)" ]; then
-  xcodes install --latest --experimental-unxip --select
-else
-  fancy_echo "Xcode already installed. Skipping ..."
-fi
 
 fish_path="$(which fish)"
 if ! grep -Fq "$fish_path" /etc/shells; then
@@ -85,28 +155,12 @@ if [ "$SHELL" != "$fish_path" ]; then
 fi
 
 # Logs in to GitHub, generates the SSH key if needed, registers it, and
-# configures SSH commit signing. Must run before dotfiles, which clone over SSH.
+# configures SSH commit signing.
 ./git-signing
 
-fancy_echo "Installing Rust"
-if [ ! -e "$HOME/.cargo/bin" ]; then
-  curl https://sh.rustup.rs -sSf | sh
-  append_to_zshrc 'export PATH="$HOME/.cargo/bin:$PATH"' 1
-
-  source $HOME/.cargo/env
-  rustup default stable
-  rustup component add rust-analyzer rustfmt clippy
+if git -C "$DOTFILES" remote get-url origin | grep -q '^https://github.com/'; then
+  fancy_echo "Switching the dotfiles remote to SSH ..."
+  git -C "$DOTFILES" remote set-url origin "git@github.com:$DOTFILES_REPO.git"
 fi
 
 make rust
-
-if [ ! -d "$HOME/.dotfiles/" ]; then
-  cargo install --git https://github.com/ubnt-intrepid/dot.git
-  dot init nanoxd/dotfiles
-fi
-
-fancy_echo "Symlinking diff-highlight from brew git ..."
-diff_hl="$(brew --prefix git)/share/git-core/contrib/diff-highlight/diff-highlight"
-if [ -x "$diff_hl" ] && [ ! -e "$HOME/.bin/diff-highlight" ]; then
-  ln -sf "$diff_hl" "$HOME/.bin/diff-highlight"
-fi
