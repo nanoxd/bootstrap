@@ -1,13 +1,14 @@
 #!/bin/bash
 #
 # Entry point for a fresh Mac. Installs the Command Line Tools, which bring git,
-# clones this repo, and hands off to setup:
+# clones or updates this repo, and runs make install:
 #
 #   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/nanoxd/bootstrap/main/install)"
 #
 # Run it that way rather than piping curl into bash, so the prompts in setup
 # (sudo, Apple ID, GitHub login, SSH passphrase) can read from the terminal.
-# Safe to re-run: an existing checkout is used as is.
+# Re-running it is how a machine gets updated: it fast-forwards the checkout
+# and runs everything again, which is safe because every step is idempotent.
 
 fancy_echo() {
   local fmt="$1"; shift
@@ -37,8 +38,9 @@ if [ ! -d "$BOOTSTRAP_DIR/.git" ]; then
   mkdir -p "$(dirname "$BOOTSTRAP_DIR")"
   git clone "https://github.com/$BOOTSTRAP_REPO.git" "$BOOTSTRAP_DIR"
 else
-  fancy_echo "Using the existing checkout in %s ..." "$BOOTSTRAP_DIR"
+  fancy_echo "Updating %s ..." "$BOOTSTRAP_DIR"
+  git -C "$BOOTSTRAP_DIR" pull --ff-only
 fi
 
 cd "$BOOTSTRAP_DIR"
-exec ./setup
+exec make install
