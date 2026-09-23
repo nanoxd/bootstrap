@@ -14,6 +14,8 @@ BOOTSTRAP_PROFILE="${BOOTSTRAP_PROFILE:-personal}"
 export BOOTSTRAP_PROFILE
 fancy_echo "Bootstrapping with profile: $BOOTSTRAP_PROFILE"
 
+BOOTSTRAP_DIR="$(cd "$(dirname "$0")" && pwd)"
+BOOTSTRAP_REPO="nanoxd/bootstrap"
 DOTFILES="$HOME/.dotfiles"
 DOTFILES_REPO="nanoxd/dotfiles"
 
@@ -158,9 +160,17 @@ fi
 # configures SSH commit signing.
 ./git-signing
 
-if git -C "$DOTFILES" remote get-url origin | grep -q '^https://github.com/'; then
-  fancy_echo "Switching the dotfiles remote to SSH ..."
-  git -C "$DOTFILES" remote set-url origin "git@github.com:$DOTFILES_REPO.git"
-fi
+# install and the dotfiles step clone over HTTPS because no SSH key exists yet.
+use_ssh_remote() {
+  local dir="$1" repo="$2"
+
+  if git -C "$dir" remote get-url origin | grep -q '^https://github.com/'; then
+    fancy_echo "Switching the %s remote to SSH ..." "$repo"
+    git -C "$dir" remote set-url origin "git@github.com:$repo.git"
+  fi
+}
+
+use_ssh_remote "$DOTFILES" "$DOTFILES_REPO"
+use_ssh_remote "$BOOTSTRAP_DIR" "$BOOTSTRAP_REPO"
 
 make rust

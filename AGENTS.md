@@ -9,6 +9,12 @@ This is a macOS system bootstrap automation tool that configures a fresh Mac ins
 ## Key Commands
 
 ### Full System Bootstrap
+On a fresh Mac, with nothing installed yet:
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/nanoxd/bootstrap/main/install)"
+```
+
+From an existing checkout:
 ```bash
 make                    # Run complete bootstrap process
 make install           # Same as above - full installation
@@ -33,7 +39,8 @@ brew bundle check      # Verify Brewfile dependencies
 ## Architecture & Key Components
 
 ### Core Scripts
-- **setup**: Main orchestrator script that runs the complete bootstrap process. Installs Homebrew, then Xcode before any formulas so they build against it instead of the Command Line Tools, then Rust, dotfiles, and fish. Clones dotfiles over HTTPS and links them before anything else can create `~/.config`, merging any existing directories into the repo first. Runs `git-signing` after dotfiles so `user.email` is set, then switches the dotfiles remote to SSH. Never writes shell startup files, which the dotfiles own.
+- **install**: Fresh-machine entry point. Installs the Command Line Tools, clones this repo over HTTPS into `~/dev/bootstrap` (override with `BOOTSTRAP_DIR`), and runs `setup`. Invoke it with `bash -c "$(curl ...)"` rather than `curl | bash` so setup's prompts can read the terminal.
+- **setup**: Main orchestrator script that runs the complete bootstrap process. Installs Homebrew, then Xcode before any formulas so they build against it instead of the Command Line Tools, then Rust, dotfiles, and fish. Clones dotfiles over HTTPS and links them before anything else can create `~/.config`, merging any existing directories into the repo first. Runs `git-signing` after dotfiles so `user.email` is set, then switches the dotfiles and bootstrap remotes to SSH. Never writes shell startup files, which the dotfiles own.
 - **git-signing**: Idempotent SSH commit-signing setup. Logs in to GitHub with the scopes needed to manage keys, generates an ED25519 key if missing, loads it into the agent and Apple Keychain, registers it with GitHub as an authentication and signing key, writes `~/.ssh/allowed_signers`, and configures signing in `~/.gitconfig.local`. Leaves existing GPG keys untouched.
 - **macOS**: Applies extensive macOS system preferences including Trackpad, Finder, Dock, and application-specific settings.
 

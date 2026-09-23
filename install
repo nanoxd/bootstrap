@@ -1,30 +1,44 @@
 #!/bin/bash
-set -e
+#
+# Entry point for a fresh Mac. Installs the Command Line Tools, which bring git,
+# clones this repo, and hands off to setup:
+#
+#   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/nanoxd/bootstrap/main/install)"
+#
+# Run it that way rather than piping curl into bash, so the prompts in setup
+# (sudo, Apple ID, GitHub login, SSH passphrase) can read from the terminal.
+# Safe to re-run: an existing checkout is used as is.
 
-REPO_URL="https://github.com/nanoxd/bootstrap.git"
-BOOTSTRAP_DIR="${BOOTSTRAP_DIR:-$HOME/dev/bootstrap}"
+fancy_echo() {
+  local fmt="$1"; shift
 
-say() {
-  printf "\n==> %s\n" "$*"
+  printf "\n$fmt\n" "$@"
 }
 
-# Xcode Command Line Tools — needed for git, make, and everything after
+trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
+
+set -e
+
+BOOTSTRAP_DIR="${BOOTSTRAP_DIR:-$HOME/dev/bootstrap}"
+BOOTSTRAP_REPO="nanoxd/bootstrap"
+
 if ! xcode-select -p >/dev/null 2>&1; then
-  say "Installing Xcode Command Line Tools"
+  fancy_echo "Installing the Command Line Tools. Click Install in the dialog ..."
   xcode-select --install
   until xcode-select -p >/dev/null 2>&1; do
     sleep 5
   done
+else
+  fancy_echo "Command Line Tools already installed. Skipping ..."
 fi
 
 if [ ! -d "$BOOTSTRAP_DIR/.git" ]; then
-  say "Cloning bootstrap to $BOOTSTRAP_DIR"
+  fancy_echo "Cloning %s into %s ..." "$BOOTSTRAP_REPO" "$BOOTSTRAP_DIR"
   mkdir -p "$(dirname "$BOOTSTRAP_DIR")"
-  git clone "$REPO_URL" "$BOOTSTRAP_DIR"
+  git clone "https://github.com/$BOOTSTRAP_REPO.git" "$BOOTSTRAP_DIR"
 else
-  say "Updating bootstrap in $BOOTSTRAP_DIR"
-  git -C "$BOOTSTRAP_DIR" pull --ff-only
+  fancy_echo "Using the existing checkout in %s ..." "$BOOTSTRAP_DIR"
 fi
 
 cd "$BOOTSTRAP_DIR"
-exec make install
+exec ./setup
