@@ -28,8 +28,6 @@ DOTFILES_REPO="nanoxd/dotfiles"
 # itself and never writes to ~/.zshrc or the fish config.
 export PATH="$HOME/.bin:$HOME/.cargo/bin:$PATH"
 
-softwareupdate --install-rosetta --agree-to-license 2>/dev/null || true
-
 if [ ! -x /opt/homebrew/bin/brew ]; then
   # Empty out dock
   defaults write com.apple.dock persistent-apps -array
@@ -148,7 +146,9 @@ brew update
 
 make brew
 
-brew services restart goku 2>/dev/null || true
+if [ "$BOOTSTRAP_PROFILE" = personal ]; then
+  brew services restart goku 2>/dev/null || true
+fi
 
 fish_path="$(which fish)"
 if ! grep -Fq "$fish_path" /etc/shells; then

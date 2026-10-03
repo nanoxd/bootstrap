@@ -1,5 +1,3 @@
-tap 'yqrashawn/goku'
-
 # Git formulas
 brew 'git'
 brew 'git-extras'
@@ -57,7 +55,6 @@ brew 'grex'
 brew 'hyperfine'
 brew 'editorconfig'
 brew 'tealdeer'
-brew 'yqrashawn/goku/goku', trusted: true
 brew 'grc'
 brew 'bat'
 brew 'croc'

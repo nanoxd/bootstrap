@@ -1,6 +1,9 @@
 # Package Manager
 brew 'mas'
 
+# Karabiner config compiler, paired with the karabiner-elements cask
+brew 'yqrashawn/goku/goku', trusted: true
+
 ### Casks ###
 cask 'alfred'
 cask 'android-studio'
