@@ -25,7 +25,7 @@ brew 'lua'
 brew 'stylua'
 
 # JS/TS Runtimes
-brew 'oven-sh/bun/bun', trusted: true
+brew 'bun'
 brew 'deno'
 
 # Version Manager
@@ -102,7 +102,7 @@ brew 'aria2'
 brew 'swiftformat'
 brew 'swiftlint'
 brew 'xcbeautify'
-brew 'ldomaradzki/xcsift/xcsift', trusted: true
+brew 'xcsift'
 brew 'xclogparser'
 brew 'artemnovichkov/tap/hinge', trusted: true
 brew 'create-dmg'
