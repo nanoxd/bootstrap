@@ -6,7 +6,7 @@ colored_echo() {
     local color="$2";
     local arrow="$3";
     if ! [[ $color =~ ^[0-9]$ ]] ; then
-       case $(echo $color | tr '[:upper:]' '[:lower:]') in
+       case $(echo "$color" | tr '[:upper:]' '[:lower:]') in
         black) color=0 ;;
         red) color=1 ;;
         green) color=2 ;;
@@ -19,7 +19,7 @@ colored_echo() {
     fi
     tput bold;
     tput setaf "$color";
-    echo "$arrow $exp";
+    printf '%b %s\n' "$arrow" "$exp";
     tput sgr0;
 }
 
@@ -92,7 +92,7 @@ substep_info "Avoid creating .DS_Store files on external volumes"
   defaults write com.apple.desktopservices DSDontWriteUSBStores -bool true
 
 substep_info "Show All Files"
-  defaults write com.apple.finder AppleShowAllFiles YES
+  defaults write com.apple.finder AppleShowAllFiles -bool true
 
 substep_info "Show Status Bar"
   defaults write com.apple.finder ShowStatusBar -bool true
@@ -162,10 +162,10 @@ substep_info "Don't rearrange by use"
 # Xcode {{{
 info "Xcode"
 substep_info "See how long a build takes"
-  defaults write com.apple.dt.Xcode ShowBuildOperationDuration YES
+  defaults write com.apple.dt.Xcode ShowBuildOperationDuration -bool true
 
 substep_info "Use all cores to build"
-  defaults write com.apple.dt.Xcode IDEBuildOperationMaxNumberOfConcurrentCompileTasks "$(sysctl -n hw.ncpu)"
+  defaults write com.apple.dt.Xcode IDEBuildOperationMaxNumberOfConcurrentCompileTasks -int "$(sysctl -n hw.ncpu)"
 
 substep_info "Increase number of concurrent tasks"
   defaults write com.apple.dt.Xcode BuildSystemScheduleInherentlyParallelCommandsExclusively -bool NO
