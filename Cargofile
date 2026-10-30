@@ -1,10 +1,12 @@
-#!/usr/bin/env sh
+#!/bin/bash
 
 # Only crates Homebrew has no formula for belong here. Anything bottled goes
 # in the Brewfile so a fresh bootstrap doesn't compile it from source.
 
+set -e
+
 cargo_install() {
-  cargo install "$1"
+  cargo install --locked "$1"
 }
 
 cargo_install 'cargo-whatfeatures'
