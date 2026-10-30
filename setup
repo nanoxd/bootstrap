@@ -137,7 +137,9 @@ if [ ! -d "$DOTFILES" ]; then
   git clone "https://github.com/$DOTFILES_REPO.git" "$DOTFILES"
 fi
 if ! command -v dot >/dev/null 2>&1; then
-  cargo install --git https://github.com/ubnt-intrepid/dot.git
+  # Pinned because this third-party code runs with full access to the account.
+  cargo install --locked --git https://github.com/ubnt-intrepid/dot.git \
+    --rev 42504955722ca148a6749a7e02b70bb9fe760e7e
 fi
 make_room_for_dotfiles
 dot link
