@@ -1,6 +1,5 @@
 # Git formulas
 brew 'git'
-brew 'git-extras'
 brew 'git-delta'
 brew 'gh'
 brew 'forgejo-cli'
@@ -18,6 +17,9 @@ brew 'go-task'
 
 # Rust
 brew 'cargo-update'
+brew 'cargo-nextest'
+brew 'cargo-outdated'
+brew 'cargo-sweep'
 
 brew 'lua'
 brew 'stylua'
@@ -37,6 +39,7 @@ brew 'sheldon'
 brew 'tmux'
 brew 'wget'
 brew 'neovim'
+brew 'tree-sitter-cli'
 brew 'jq'
 brew 'httpie'
 brew 'yt-dlp'
@@ -52,6 +55,7 @@ brew 'fd'
 brew 'eza'
 brew 'zoxide'
 brew 'sd'
+brew 'dust'
 brew 'grex'
 brew 'hyperfine'
 brew 'editorconfig'
@@ -74,6 +78,8 @@ brew 'oha'
 brew 'playwright-cli'
 brew 'steipete/tap/sag', trusted: true
 brew 'beads'
+brew 'pi-coding-agent'
+brew 'getsentry/tools/sentry-cli', trusted: true
 # Syncs agent skills from the manifest in the dotfiles. The tap needs its URL
 # because the repo is named skl rather than homebrew-skl.
 tap 'nanoxd/skl', 'https://github.com/nanoxd/skl'
@@ -96,6 +102,9 @@ brew 'aria2'
 brew 'swiftformat'
 brew 'swiftlint'
 brew 'xcbeautify'
+brew 'ldomaradzki/xcsift/xcsift', trusted: true
+brew 'xclogparser'
+brew 'artemnovichkov/tap/hinge', trusted: true
 brew 'create-dmg'
 brew 'xcodes'
 brew 'getsentry/xcodebuildmcp/xcodebuildmcp', trusted: true
@@ -111,7 +120,6 @@ cask 'orbstack'
 # Apps installed on every machine, servers included
 cask 'font-iosevka-nerd-font'
 cask 'google-chrome'
-cask 'penso/tap/herdr-gpui', trusted: true
 cask 'screens-connect'
 cask 'tailscale-app'
 cask 'zed'

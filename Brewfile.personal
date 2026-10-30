@@ -1,8 +1,8 @@
 # Package Manager
 brew 'mas'
 
-# Karabiner config compiler, paired with the karabiner-elements cask
-brew 'yqrashawn/goku/goku', trusted: true
+# Coding agents
+brew 'ampcode/tap/ampcode', trusted: true
 
 ### Casks ###
 cask 'alfred'
@@ -12,7 +12,6 @@ cask 'bambu-studio'
 cask 'chatgpt'
 cask 'claude'
 cask 'cleanshot'
-cask 'cmux'
 cask 'discord'
 cask 'elgato-stream-deck'
 cask 'elgato-wave-link'
@@ -27,14 +26,12 @@ cask 'imageoptim'
 cask 'itsycal'
 cask 'karabiner-elements'
 cask 'keepingyouawake'
-cask 'linearmouse'
 cask 'little-snitch'
 cask 'localsend'
 cask 'maestral'
 cask 'mole-app'
 cask 'muesli'
 cask 'notion'
-cask 'openlogi'
 cask 'stablyai/orca/orca', trusted: true
 cask 'postico'
 cask 'proxyman'
@@ -42,9 +39,11 @@ cask 'prusaslicer'
 cask 'quicklook-video'
 cask 'spotify'
 cask 'syncthing-app'
+cask 't3-code@nightly'
 cask 'thaw'
 cask 'tuist'
 cask 'tuna'
+cask 'veracrypt'
 cask 'visual-studio-code'
 cask 'darrylmorley/whatcable/whatcable', trusted: true
 cask 'zoom'
@@ -67,6 +66,7 @@ mas 'Panels', id: 1236567663
 mas 'Parcel', id: 375589283
 mas 'Pins', id: 1547106997
 mas 'RocketSim', id: 1504940162
+mas 'RocketTrace', id: 6798298905
 mas 'Screens 5', id: 1663047912
 mas 'Spark Classic', id: 1176895641
 mas 'Speedtest', id: 1153157709

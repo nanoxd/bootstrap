@@ -146,10 +146,6 @@ brew update
 
 make brew
 
-if [ "$BOOTSTRAP_PROFILE" = personal ]; then
-  brew services restart goku 2>/dev/null || true
-fi
-
 # Links the agent skills listed in ~/.config/skl, which the dotfiles provide.
 fancy_echo "Syncing agent skills ..."
 make skills
