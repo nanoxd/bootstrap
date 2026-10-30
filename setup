@@ -150,6 +150,10 @@ if [ "$BOOTSTRAP_PROFILE" = personal ]; then
   brew services restart goku 2>/dev/null || true
 fi
 
+# Links the agent skills listed in ~/.config/skl, which the dotfiles provide.
+fancy_echo "Syncing agent skills ..."
+make skills
+
 fish_path="$(which fish)"
 if ! grep -Fq "$fish_path" /etc/shells; then
   fancy_echo "Adding fish to /etc/shells"

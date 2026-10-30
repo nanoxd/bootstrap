@@ -3,6 +3,7 @@ brew 'git'
 brew 'git-extras'
 brew 'git-delta'
 brew 'gh'
+brew 'forgejo-cli'
 brew 'tig'
 brew 'lazygit'
 brew 'openssl'
@@ -73,6 +74,10 @@ brew 'oha'
 brew 'playwright-cli'
 brew 'steipete/tap/sag', trusted: true
 brew 'beads'
+# Syncs agent skills from the manifest in the dotfiles. The tap needs its URL
+# because the repo is named skl rather than homebrew-skl.
+tap 'nanoxd/skl', 'https://github.com/nanoxd/skl'
+brew 'nanoxd/skl/skl', trusted: true
 
 # Media
 brew 'fonttools'

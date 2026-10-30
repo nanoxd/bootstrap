@@ -1,4 +1,4 @@
-.PHONY: install brew macOS rust git-signing
+.PHONY: install brew skills macOS rust git-signing
 
 BOOTSTRAP_PROFILE ?= server
 
@@ -13,6 +13,13 @@ ifeq ($(BOOTSTRAP_PROFILE),personal)
 	brew bundle --verbose --file=./Brewfile.personal || \
 		printf '\nSome personal apps failed to install. Sign in to the App Store if mas apps failed, then run make brew again.\n'
 endif
+
+skills:
+	skl profile set $(BOOTSTRAP_PROFILE)
+	@# A skill that fails to fetch shouldn't stop the bootstrap. skl keeps
+	@# whatever it already installed, so rerunning make skills picks up the rest.
+	skl sync || \
+		printf '\nSome skills failed to sync. Run make skills again once the problem is fixed.\n'
 
 macOS:
 	./macOS
