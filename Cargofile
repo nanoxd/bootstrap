@@ -9,5 +9,4 @@ cargo_install() {
 
 cargo_install 'cargo-whatfeatures'
 
-cargo_install 'rusty-tags'
 cargo_install 'proximity-sort'
