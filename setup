@@ -20,6 +20,7 @@ export BOOTSTRAP_PROFILE
 fancy_echo "Bootstrapping with profile: $BOOTSTRAP_PROFILE"
 
 BOOTSTRAP_DIR="$(cd "$(dirname "$0")" && pwd)"
+cd "$BOOTSTRAP_DIR"
 BOOTSTRAP_REPO="nanoxd/bootstrap"
 DOTFILES="$HOME/.dotfiles"
 DOTFILES_REPO="nanoxd/dotfiles"
