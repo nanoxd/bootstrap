@@ -34,6 +34,8 @@ From an existing checkout, pass it to make the same way:
 
 To only run homebrew: `make brew` (honors `BOOTSTRAP_PROFILE`)
 
+The bootstrap leaves system preferences alone. Apply them with `make macOS`.
+
 ### Git commit signing
 
 Commits are signed with SSH, not GPG. `make install` sets this up, and it can
@@ -64,7 +66,7 @@ I'd recommend dumping out your own configurations on your existing PC.
 To snapshot your current setup:
 
 ```sh
-brew bundle dump --file=./Brewfile
+brew bundle dump --force --file=./Brewfile
 ```
 
 ### Dotfiles

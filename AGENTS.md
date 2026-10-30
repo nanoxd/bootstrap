@@ -36,8 +36,11 @@ make git-signing       # Ensure SSH commit signing (key, agent, GitHub, git conf
 ./setup                # Run the main setup script directly
 ./macOS                # Test macOS preferences changes
 ./git-signing          # Safe to re-run; skips anything already done
-brew bundle check      # Verify Brewfile dependencies
+brew bundle check --file=Brewfile   # List dependencies that are missing or outdated
+brew bundle list --all --file=Brewfile.personal   # Parse a Brewfile without checking what's installed
 ```
+
+`setup` doesn't run `macOS`, so apply preferences with `make macOS` after a bootstrap.
 
 ## Architecture & Key Components
 
@@ -49,7 +52,7 @@ brew bundle check      # Verify Brewfile dependencies
 
 ### Configuration Files
 - **Brewfile**: Homebrew package definitions including CLI tools, GUI applications, and Mac App Store apps. Uses tap/brew/cask/mas syntax.
-- **Cargofile**: Rust tools to install via cargo. Each line is a package name passed to `cargo install`. Only for crates Homebrew has no formula for, so a fresh bootstrap doesn't compile from source.
+- **Cargofile**: Executable script listing Rust tools to install via cargo, one `cargo_install` call per crate. Only for crates Homebrew has no formula for, so a fresh bootstrap doesn't compile from source.
 - **Makefile**: Build automation defining installation targets and dependencies.
 
 ### Security & Authentication
@@ -69,9 +72,9 @@ brew bundle check      # Verify Brewfile dependencies
 Always test scripts in isolation before running full bootstrap:
 1. Test individual make targets rather than full installation
 2. Comment out irreversible operations when testing
-3. Use `brew bundle check` to validate Brewfile syntax
+3. Use `brew bundle list --all --file=<Brewfile>` to validate Brewfile syntax
 
 ### Script Conventions
 - Preserve idempotency - scripts should be safe to run multiple times
-- Use `set -e` for fail-fast behavior in shell scripts
+- Use `set -e` for fail-fast behavior in shell scripts. `macOS` is the exception: it's best effort, so one failed write doesn't skip the rest
 - Target `/bin/bash` (bash 3.2 on macOS): no associative arrays, no `+=` on arrays under `set -u`
