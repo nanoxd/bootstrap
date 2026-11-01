@@ -19,7 +19,7 @@ cask 'fork'
 cask 'forklift'
 cask 'ghostty'
 cask 'hammerspoon'
-cask 'handy'
+cask 'anomalyco/tap/hex', trusted: true
 cask 'iina'
 cask 'imageoptim'
 cask 'itsycal'
