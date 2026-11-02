@@ -31,7 +31,6 @@ cask 'maestral'
 cask 'mole-app'
 cask 'muesli'
 cask 'notion'
-cask 'stablyai/orca/orca', trusted: true
 cask 'postico'
 cask 'proxyman'
 cask 'prusaslicer'
