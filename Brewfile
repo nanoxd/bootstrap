@@ -19,7 +19,6 @@ brew 'go-task'
 brew 'cargo-update'
 brew 'cargo-nextest'
 brew 'cargo-outdated'
-brew 'cargo-sweep'
 
 brew 'lua'
 brew 'stylua'

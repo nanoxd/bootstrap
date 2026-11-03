@@ -10,6 +10,10 @@ On a fresh Mac, run:
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/nanoxd/bootstrap/main/install)"
 ```
 
+For the personal profile, bootstrap first opens the [1Password download page](https://1password.com/downloads/mac/)
+and waits for you to install it and sign in. If the app is already installed,
+this step is skipped. The desktop app manages its own updates.
+
 The `install` script takes care of Xcode Command Line Tools, clones (or
 updates) this repo into `~/dev/bootstrap`, and then runs `make install`.
 Re-running it is the canonical "update my machine" path — everything
@@ -35,6 +39,21 @@ From an existing checkout, pass it to make the same way:
 To only run homebrew: `make brew` (honors `BOOTSTRAP_PROFILE`)
 
 The bootstrap leaves system preferences alone. Apply them with `make macOS`.
+
+### Development tools
+
+After Homebrew and dotfiles are ready, bootstrap runs `mise install` to install
+Node from the global mise config. Homebrew may install another Node as a formula
+dependency. The shell configuration gives mise's selected version precedence.
+
+Codex CLI, Claude Code, and uv use their standalone installers, outside
+Homebrew. Existing installations in `~/.local/bin` are kept. Claude Code updates
+automatically. Update Codex with its [standalone installer](https://learn.chatgpt.com/docs/codex/cli)
+and uv with `uv self update`.
+
+T3 Code Nightly remains in the personal Brewfile for initial installation and
+uses its own updater afterward. Rex Beta is installed manually through the
+[official testing program](https://www.superlogical.com/rex/docs/installation).
 
 ### Git commit signing
 

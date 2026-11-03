@@ -20,6 +20,22 @@ trap 'ret=$?; test $ret -ne 0 && printf "failed\n\n" >&2; exit $ret' EXIT
 
 set -e
 
+# Install the password manager before tools that need account credentials.
+# Keep the desktop app on its own updater, outside Homebrew.
+if [ "${BOOTSTRAP_PROFILE:-server}" = personal ]; then
+  if [ ! -d /Applications/1Password.app ] && [ ! -d "$HOME/Applications/1Password.app" ]; then
+    printf '\nInstall 1Password from https://1password.com/downloads/mac/ and sign in.\n'
+    if [ ! -t 0 ]; then
+      printf 'Rerun bootstrap in a terminal after installing 1Password.\n' >&2
+      exit 1
+    fi
+    open https://1password.com/downloads/mac/
+    while [ ! -d /Applications/1Password.app ] && [ ! -d "$HOME/Applications/1Password.app" ]; do
+      read -r -p 'Press Return once 1Password is installed and ready: ' _
+    done
+  fi
+fi
+
 BOOTSTRAP_DIR="${BOOTSTRAP_DIR:-$HOME/dev/bootstrap}"
 BOOTSTRAP_REPO="nanoxd/bootstrap"
 

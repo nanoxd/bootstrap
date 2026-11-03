@@ -27,7 +27,23 @@ DOTFILES_REPO="nanoxd/dotfiles"
 
 # Shell startup files belong to the dotfiles, so this script only sets PATH for
 # itself and never writes to ~/.zshrc or the fish config.
-export PATH="$HOME/.bin:$HOME/.cargo/bin:$PATH"
+export PATH="$HOME/.bin:$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
+
+# Install the password manager before tools that need account credentials.
+# Keep the desktop app on its own updater, outside Homebrew.
+if [ "${BOOTSTRAP_PROFILE:-server}" = personal ]; then
+  if [ ! -d /Applications/1Password.app ] && [ ! -d "$HOME/Applications/1Password.app" ]; then
+    printf '\nInstall 1Password from https://1password.com/downloads/mac/ and sign in.\n'
+    if [ ! -t 0 ]; then
+      printf 'Rerun bootstrap in a terminal after installing 1Password.\n' >&2
+      exit 1
+    fi
+    open https://1password.com/downloads/mac/
+    while [ ! -d /Applications/1Password.app ] && [ ! -d "$HOME/Applications/1Password.app" ]; do
+      read -r -p 'Press Return once 1Password is installed and ready: ' _
+    done
+  fi
+fi
 
 if [ ! -x /opt/homebrew/bin/brew ]; then
   # Empty out dock
@@ -148,6 +164,41 @@ fancy_echo "Updating Homebrew formulas ..."
 brew update
 
 make brew
+
+fancy_echo "Installing mise runtimes ..."
+(cd "$HOME" && mise install)
+
+# Download completely before execution so an HTTP failure cannot look like a
+# successful empty installer. Keep temporary files and traps in a subshell.
+run_installer() (
+  set -e
+  installer="$(mktemp "${TMPDIR:-/tmp}/bootstrap-installer.XXXXXX")"
+  trap 'rm -f "$installer"' EXIT
+  curl -fsSL "$1" -o "$installer"
+  shift
+  "$@" "$installer"
+)
+
+# Standalone installs retain the vendors' update mechanisms. Dotfiles own PATH.
+install_developer_tools() {
+  if [ ! -x "$HOME/.local/bin/codex" ]; then
+    fancy_echo "Installing Codex CLI ..."
+    run_installer https://chatgpt.com/codex/install.sh env CODEX_NON_INTERACTIVE=1 sh
+  fi
+  if [ ! -x "$HOME/.local/bin/claude" ]; then
+    fancy_echo "Installing Claude Code ..."
+    run_installer https://claude.ai/install.sh bash
+  fi
+  if [ ! -x "$HOME/.local/bin/uv" ]; then
+    fancy_echo "Installing uv ..."
+    run_installer https://astral.sh/uv/install.sh env UV_NO_MODIFY_PATH=1 UV_INSTALL_DIR="$HOME/.local/bin" sh
+  fi
+  "$HOME/.local/bin/codex" --version
+  "$HOME/.local/bin/claude" --version
+  "$HOME/.local/bin/uv" --version
+}
+
+install_developer_tools
 
 # Links the agent skills listed in ~/.config/skl, which the dotfiles provide.
 fancy_echo "Syncing agent skills ..."
