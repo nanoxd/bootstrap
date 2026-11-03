@@ -1,4 +1,4 @@
-.PHONY: install brew skills macOS rust git-signing
+.PHONY: install brew skills fish-plugins agent-config macOS rust git-signing
 
 BOOTSTRAP_PROFILE ?= server
 
@@ -20,6 +20,12 @@ skills:
 	@# whatever it already installed, so rerunning make skills picks up the rest.
 	skl sync || \
 		printf '\nSome skills failed to sync. Run make skills again once the problem is fixed.\n'
+
+fish-plugins:
+	./fish-plugins
+
+agent-config:
+	./agent-config
 
 macOS:
 	./macOS

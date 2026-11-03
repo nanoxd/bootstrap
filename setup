@@ -164,6 +164,7 @@ fancy_echo "Updating Homebrew formulas ..."
 brew update
 
 make brew
+make fish-plugins
 
 fancy_echo "Installing mise runtimes ..."
 (cd "$HOME" && mise install)
@@ -218,6 +219,9 @@ fi
 # Logs in to GitHub, generates the SSH key if needed, registers it, and
 # configures SSH commit signing.
 ./git-signing
+
+# Private preferences need the GitHub authentication established above.
+make agent-config
 
 # install and the dotfiles step clone over HTTPS because no SSH key exists yet.
 use_ssh_remote() {

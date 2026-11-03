@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -e
+
+agent_config_dir="${AGENT_CONFIG_DIR:-$HOME/dev/agent-config}"
+for tool in git gh uv; do
+  if ! command -v "$tool" >/dev/null 2>&1; then
+    printf 'Missing required command: %s\n' "$tool" >&2
+    exit 1
+  fi
+done
+
+if [ ! -e "$agent_config_dir" ]; then
+  mkdir -p "$(dirname "$agent_config_dir")"
+  gh repo clone nanoxd/agent-config "$agent_config_dir"
+else
+  if [ ! -d "$agent_config_dir/.git" ]; then
+    printf 'Not a Git checkout: %s\n' "$agent_config_dir" >&2
+    exit 1
+  fi
+  if [ -n "$(git -C "$agent_config_dir" status --porcelain)" ]; then
+    printf 'Commit or stash changes in %s before updating agent configuration.\n' "$agent_config_dir" >&2
+    exit 1
+  fi
+  git -C "$agent_config_dir" pull --ff-only
+fi
+
+uv run "$agent_config_dir/install.py" --apply

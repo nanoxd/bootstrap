@@ -1,0 +1,29 @@
+#!/bin/bash
+
+set -e
+
+if ! command -v fish >/dev/null 2>&1; then
+  printf 'Install Fish before restoring its plugins.\n' >&2
+  exit 1
+fi
+
+installer="$(mktemp "${TMPDIR:-/tmp}/bootstrap-fisher.XXXXXX")"
+trap 'rm -f "$installer"' EXIT
+curl -fsSL https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish -o "$installer"
+
+# The linked dotfiles supply fish_plugins. Fisher restores missing plugins and
+# updates installed ones. Verify the declared plugins because failed downloads
+# can otherwise leave a partial installation with a successful exit code.
+fish -c '
+  test -f "$__fish_config_dir/fish_plugins"; or exit 1
+  set -l expected (string match -r "^[^\\s]+\$" < "$__fish_config_dir/fish_plugins")
+  source $argv[1]; or exit 1
+  fisher update; or exit 1
+  set -l installed (fisher list)
+  for plugin in $expected
+    contains -- $plugin $installed; or begin
+      printf "Fish plugin was not installed: %s\n" $plugin >&2
+      exit 1
+    end
+  end
+' "$installer" < /dev/null

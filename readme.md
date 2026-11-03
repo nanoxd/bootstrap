@@ -42,7 +42,8 @@ The bootstrap leaves system preferences alone. Apply them with `make macOS`.
 
 ### Development tools
 
-After Homebrew and dotfiles are ready, bootstrap runs `mise install` to install
+After Homebrew and dotfiles are ready, bootstrap restores the Fish plugins
+listed in the dotfiles with `make fish-plugins`, then runs `mise install` to install
 Node from the global mise config. Homebrew may install another Node as a formula
 dependency. The shell configuration gives mise's selected version precedence.
 
@@ -54,6 +55,14 @@ and uv with `uv self update`.
 T3 Code Nightly remains in the personal Brewfile for initial installation and
 uses its own updater afterward. Rex Beta is installed manually through the
 [official testing program](https://www.superlogical.com/rex/docs/installation).
+
+### Agent preferences
+
+After GitHub authentication, bootstrap clones or updates the private
+`nanoxd/agent-config` repo into `~/dev/agent-config` and applies it. This links
+shared instructions and merges portable preferences while preserving local
+settings. Existing files are backed up by its installer. Override the checkout
+location with `AGENT_CONFIG_DIR` or rerun this step with `make agent-config`.
 
 ### Git commit signing
 

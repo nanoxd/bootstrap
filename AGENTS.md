@@ -25,6 +25,8 @@ make install           # Same as above - full installation
 ### Individual Components
 ```bash
 make brew              # Install Homebrew packages from Brewfile
+make fish-plugins      # Restore Fisher and declared Fish plugins
+make agent-config      # Sync private agent instructions and portable settings
 make skills            # Set the skl profile and sync agent skills from the dotfiles manifest
 make macOS             # Apply macOS system preferences
 make rust              # Install Rust packages from Cargofile
@@ -46,7 +48,7 @@ brew bundle list --all --file=Brewfile.personal   # Parse a Brewfile without che
 
 ### Core Scripts
 - **install**: Fresh-machine entry point. On the personal profile, opens the official 1Password download page and waits for manual installation before installing tools. Installs the Command Line Tools, clones this repo over HTTPS into `~/dev/bootstrap` (override with `BOOTSTRAP_DIR`) or fast-forwards an existing checkout, and runs `make install`. Re-running it is the update path. Invoke it with `bash -c "$(curl ...)"` rather than `curl | bash` so setup's prompts can read the terminal.
-- **setup**: Main orchestrator script that runs the complete bootstrap process. Installs Homebrew, then Xcode before any formulas so they build against it instead of the Command Line Tools, then Rust, dotfiles, and fish. Clones dotfiles over HTTPS and links them before anything else can create `~/.config`, merging any existing directories into the repo first. Runs `mise install` after the Brewfile and installs Codex CLI, Claude Code, and uv with their standalone installers, preserving vendor updates and leaving shell startup files alone. Runs `make skills` after the Brewfile so `skl` links the agent skills listed in the dotfiles' `~/.config/skl`. Runs `git-signing` after dotfiles so `user.email` is set, then switches the dotfiles and bootstrap remotes to SSH. Never writes shell startup files, which the dotfiles own.
+- **setup**: Main orchestrator script that runs the complete bootstrap process. Installs Homebrew, then Xcode before any formulas so they build against it instead of the Command Line Tools, then Rust, dotfiles, and fish. Clones dotfiles over HTTPS and links them before anything else can create `~/.config`, merging any existing directories into the repo first. Restores Fish plugins with `make fish-plugins` after the Brewfile. Runs `mise install` after the Brewfile and installs Codex CLI, Claude Code, and uv with their standalone installers, preserving vendor updates and leaving shell startup files alone. Runs `make skills` after the Brewfile so `skl` links the agent skills listed in the dotfiles' `~/.config/skl`. Runs `git-signing` after dotfiles so `user.email` is set, then syncs the private `nanoxd/agent-config` repo and switches the dotfiles and bootstrap remotes to SSH. Never writes shell startup files, which the dotfiles own.
 - **git-signing**: Idempotent SSH commit-signing setup. Logs in to GitHub with the scopes needed to manage keys, generates an ED25519 key if missing, loads it into the agent and Apple Keychain, registers it with GitHub as an authentication and signing key, writes `~/.ssh/allowed_signers`, and configures signing in `~/.gitconfig.local`. Leaves existing GPG keys untouched.
 - **macOS**: Applies extensive macOS system preferences including Trackpad, Finder, Dock, and application-specific settings.
 
