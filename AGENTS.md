@@ -31,6 +31,7 @@ make skills            # Set the skl profile and sync agent skills from the dotf
 make macOS             # Apply macOS system preferences
 make rust              # Install Rust packages from Cargofile
 make git-signing       # Ensure SSH commit signing (key, agent, GitHub, git config)
+make repos             # Clone missing repos from agent-config/repos.tsv into ~/dev
 ```
 
 ### Testing Changes
@@ -50,6 +51,7 @@ brew bundle list --all --file=Brewfile.personal   # Parse a Brewfile without che
 - **install**: Fresh-machine entry point. On the personal profile, opens the official 1Password download page and waits for manual installation before installing tools. Installs the Command Line Tools, clones this repo over HTTPS into `~/dev/bootstrap` (override with `BOOTSTRAP_DIR`) or fast-forwards an existing checkout, and runs `make install`. Re-running it is the update path. Invoke it with `bash -c "$(curl ...)"` rather than `curl | bash` so setup's prompts can read the terminal.
 - **setup**: Main orchestrator script that runs the complete bootstrap process. Installs Homebrew, then Xcode before any formulas so they build against it instead of the Command Line Tools, then Rust, dotfiles, and fish. Clones dotfiles over HTTPS and links them before anything else can create `~/.config`, merging any existing directories into the repo first. Restores Fish plugins with `make fish-plugins` after the Brewfile. Runs `mise install` after the Brewfile and installs Codex CLI, Claude Code, and uv with their standalone installers, preserving vendor updates and leaving shell startup files alone. Runs `make skills` after the Brewfile so `skl` links the agent skills listed in the dotfiles' `~/.config/skl`. Runs `git-signing` after dotfiles so `user.email` is set, then syncs the private `nanoxd/agent-config` repo and switches the dotfiles and bootstrap remotes to SSH. Never writes shell startup files, which the dotfiles own.
 - **git-signing**: Idempotent SSH commit-signing setup. Logs in to GitHub with the scopes needed to manage keys, generates an ED25519 key if missing, loads it into the agent and Apple Keychain, registers it with GitHub as an authentication and signing key, writes `~/.ssh/allowed_signers`, and configures signing in `~/.gitconfig.local`. Leaves existing GPG keys untouched.
+- **repos**: Clones each repository listed in the private `~/dev/agent-config/repos.tsv` (tab-separated path under `~/dev` and clone URL) that is not already present. Skips existing paths and reports failed clones without stopping. `setup` runs it on the personal profile only, after `git-signing` registers the SSH key. The list lives in agent-config because this repo is public.
 - **macOS**: Applies extensive macOS system preferences including Trackpad, Finder, Dock, and application-specific settings.
 
 ### Configuration Files

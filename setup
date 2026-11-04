@@ -236,4 +236,11 @@ use_ssh_remote() {
 use_ssh_remote "$DOTFILES" "$DOTFILES_REPO"
 use_ssh_remote "$BOOTSTRAP_DIR" "$BOOTSTRAP_REPO"
 
+# Personal project repositories, listed in the private agent-config manifest.
+# Needs the SSH key that git-signing registered with GitHub.
+if [ "$BOOTSTRAP_PROFILE" = personal ]; then
+  fancy_echo "Cloning personal repositories ..."
+  make repos
+fi
+
 make rust

@@ -1,4 +1,4 @@
-.PHONY: install brew skills fish-plugins agent-config macOS rust git-signing
+.PHONY: install brew skills fish-plugins agent-config macOS rust git-signing repos
 
 BOOTSTRAP_PROFILE ?= server
 
@@ -35,3 +35,6 @@ rust:
 
 git-signing:
 	./git-signing
+
+repos:
+	./repos

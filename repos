@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Clones the repositories listed in the private agent-config manifest into
+# ~/dev. Existing paths are left alone, so it is safe to rerun.
+
+set -e
+
+agent_config_dir="${AGENT_CONFIG_DIR:-$HOME/dev/agent-config}"
+manifest="${REPOS_MANIFEST:-$agent_config_dir/repos.tsv}"
+dev_dir="${DEV_DIR:-$HOME/dev}"
+
+if [ ! -f "$manifest" ]; then
+  printf 'Missing repository manifest: %s\nRun make agent-config first.\n' "$manifest" >&2
+  exit 1
+fi
+
+failed=()
+while IFS=$'\t' read -r path url || [ -n "$path" ]; do
+  case "$path" in ''|'#'*) continue ;; esac
+  if [ -z "$url" ]; then
+    printf 'Skipping %s: no clone URL in the manifest.\n' "$path" >&2
+    continue
+  fi
+
+  target="$dev_dir/$path"
+  if [ -e "$target" ]; then
+    printf 'Exists: %s\n' "$path"
+    continue
+  fi
+
+  printf 'Cloning %s ...\n' "$path"
+  mkdir -p "$(dirname "$target")"
+  if ! git clone --recurse-submodules "$url" "$target" </dev/null; then
+    failed+=("$path")
+  fi
+done < "$manifest"
+
+# One unreachable repository shouldn't stop the bootstrap.
+if [ ${#failed[@]} -gt 0 ]; then
+  printf '\nThese repositories failed to clone. Run make repos again once the problem is fixed:\n' >&2
+  printf '  %s\n' "${failed[@]}" >&2
+fi
