@@ -13,11 +13,9 @@ cask 'chatgpt'
 cask 'claude'
 cask 'cleanshot'
 cask 'discord'
-cask 'elgato-stream-deck'
 cask 'firefox'
 cask 'fork'
 cask 'forklift'
-cask 'ghostty'
 cask 'hammerspoon'
 cask 'anomalyco/tap/hex', trusted: true
 cask 'iina'
@@ -25,7 +23,6 @@ cask 'imageoptim'
 cask 'itsycal'
 cask 'karabiner-elements'
 cask 'keepingyouawake'
-cask 'little-snitch'
 cask 'localsend'
 cask 'maestral'
 cask 'mole-app'
@@ -39,16 +36,13 @@ cask 'spotify'
 cask 'syncthing-app'
 cask 't3-code@nightly'
 cask 'tuist'
-cask 'tuna'
 cask 'veracrypt'
-cask 'visual-studio-code'
 cask 'darrylmorley/whatcable/whatcable', trusted: true
 cask 'zoom'
 
 ### MAS ###
 mas '1Password for Safari', id: 1569813296
 mas 'AdGuard', id: 1440147259
-mas 'Blackmagic Disk Speed Test', id: 425264550
 mas 'Brother P-touch Editor', id: 1453365242
 mas 'Brother Transfer Express', id: 1627217996
 mas 'brrr', id: 6755617665
@@ -63,7 +57,6 @@ mas 'Panels', id: 1236567663
 mas 'Parcel', id: 375589283
 mas 'Pins', id: 1547106997
 mas 'RocketSim', id: 1504940162
-mas 'RocketTrace', id: 6798298905
 mas 'Screens 5', id: 1663047912
 mas 'Spark Classic', id: 1176895641
 mas 'Speedtest', id: 1153157709

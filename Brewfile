@@ -7,9 +7,6 @@ brew 'tig'
 brew 'lazygit'
 brew 'openssl'
 
-# Package Manager
-brew 'luarocks'
-
 # Go
 brew 'go'
 brew 'golangci-lint'
@@ -23,9 +20,7 @@ brew 'cargo-outdated'
 brew 'lua'
 brew 'stylua'
 
-# JS/TS Runtimes
 brew 'bun'
-brew 'deno'
 
 # Version Manager
 brew 'mise'
@@ -35,7 +30,6 @@ brew 'fish'
 brew 'sheldon'
 
 # Tools
-brew 'tmux'
 brew 'wget'
 brew 'neovim'
 brew 'tree-sitter-cli'
@@ -57,17 +51,13 @@ brew 'dust'
 brew 'grex'
 brew 'hyperfine'
 brew 'editorconfig'
-brew 'tealdeer'
 brew 'grc'
 brew 'bat'
-brew 'croc'
 brew 'starship'
 brew 'restic'
 brew 'ack'
 brew 'just'
-brew 'd2'
 brew 'awscli'
-brew 'hey'
 brew 'actionlint'
 brew 'cmake'
 brew 'mosh'
@@ -102,7 +92,6 @@ brew 'swiftlint'
 brew 'xcbeautify'
 brew 'xcsift'
 brew 'xclogparser'
-brew 'artemnovichkov/tap/hinge', trusted: true
 brew 'create-dmg'
 brew 'xcodes'
 brew 'getsentry/xcodebuildmcp/xcodebuildmcp', trusted: true
