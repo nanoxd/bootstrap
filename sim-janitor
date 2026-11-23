@@ -71,7 +71,8 @@ its command anyway.
 
 Every subprocess has a hard timeout, capped at what is left of the pass's
 budget, since simctl hangs when CoreSimulatorService is overloaded. Devices are
-tried least recently failed first, and one whose shutdown failed twice in a
+tried least recently failed first (a failed shutdown or a final check that
+could not finish), and one whose shutdown failed twice in a
 row waits 10 minutes, doubling to an hour, so it can't starve the others. Only
 one pass runs at a time (a non-blocking flock). Every pass logs at least one
 line to ~/Library/Logs/sim-janitor.log. If ~/.agents/sim-janitor.pause exists
@@ -787,17 +788,18 @@ def run_pass(config, dry_run=False):
 def shut_down(config, candidates, state, deadline, save):
     """Shut down each candidate that is still idle when checked again right
     before acting. Tries devices that never failed first, then the least
-    recently failed, and skips one backing off. Among those, a device whose
-    final check could not finish last time goes behind the rest, so slow
-    checks rotate instead of starving later devices. Returns (counts, why it
-    stopped early or '')."""
+    recently failed, and skips one backing off. A failure is a shutdown that
+    failed or a final check that could not finish, whichever was later, so
+    every kind of slow device takes its turn and none starves the rest.
+    Returns (counts, why it stopped early or '')."""
     since, attempts, unchecked = state['since'], state['attempts'], state['unchecked']
     counts = dict(shut=0, failed=0, waiting=0)
     now = config.clock()
 
     def order(verdict):
         key = key_of(verdict['device'])
-        return (attempts[key]['last'] if key in attempts else 0, unchecked.get(key, 0), -verdict['idle'], key)
+        failed = attempts[key]['last'] if key in attempts else 0
+        return (max(failed, unchecked.get(key, 0)), -verdict['idle'], key)
 
     queue = sorted(candidates, key=order)
     for index, verdict in enumerate(queue):

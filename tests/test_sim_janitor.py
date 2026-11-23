@@ -516,6 +516,18 @@ class JanitorTest(unittest.TestCase):
                          'the device whose last check could not finish waits behind the other')
         self.assertEqual(json.loads(self.config.state_file.read_text())['unchecked'], {})
 
+    def test_a_once_failed_device_is_not_starved_by_slow_checks(self):
+        quiet, fixture = self.two_idle_devices()
+        state = json.loads(self.config.state_file.read_text())
+        # DEVICE's shutdown failed once, before OTHER's check last ran out of time.
+        state['attempts'] = {f'default:{DEVICE}': dict(last=T0 - 600, failures=1)}
+        state['unchecked'] = {f'default:{OTHER}': T0 - 300}
+        self.config.state_file.write_text(json.dumps(state))
+        self.fixture(**fixture)
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [['default', 'shutdown', DEVICE], ['default', 'shutdown', OTHER]],
+                         'the least recent unsuccessful visit goes first, whatever its kind')
+
     def test_each_final_listing_gets_only_the_time_left(self):
         self.config.list_timeout = 30
         janitor_calls = []
