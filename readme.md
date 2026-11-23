@@ -94,8 +94,11 @@ booted it. Install or remove it on its own with `make sim-janitor` and
 `make sim-janitor-uninstall`.
 
 A device is in use while a process other than the simulator's own names its
-UDID (xcodebuild, `xcrun simctl`, maestro, agent-device), while an agent-device
-session holds it, or while a lease is held:
+UDID (xcodebuild, `xcrun simctl`, maestro, agent-device) or its exact name in an
+xcodebuild `-destination`, while a debugger is attached to something running on
+it, while an agent-device session that was active in the last 2 hours holds it,
+or while a lease is held. An app or test runner launched on it counts as use
+for the next 30 minutes:
 
 ```sh
 sim-janitor lease <UDID> -- xcodebuild test -destination id=<UDID> ...
@@ -104,11 +107,18 @@ sim-janitor run --dry-run     # log what would be shut down
 touch ~/.agents/sim-janitor.pause   # pause it; delete the file to resume
 ```
 
-Set `SIM_JANITOR_GRACE_MINUTES` to change the grace period. Each pass writes a
-line to `~/Library/Logs/sim-janitor.log`. It only ever runs
-`xcrun simctl shutdown`: it never deletes or erases a device and never kills a
-process. A simulator someone uses by hand in Simulator.app, with no tool
-attached, looks idle, so hold a lease or pause the janitor for that.
+Set `SIM_JANITOR_GRACE_MINUTES` to change the grace period and
+`SIM_JANITOR_SESSION_IDLE_MINUTES` to change how long a quiet agent-device
+session keeps its device. Each pass writes a line to
+`~/Library/Logs/sim-janitor.log`. It only ever runs `xcrun simctl shutdown`: it
+never deletes or erases a device and never kills a process. A lease started
+while the janitor is shutting that device down waits for it to finish, then
+says so on stderr and runs its command anyway.
+
+Some use looks idle: a simulator someone uses by hand in Simulator.app with no
+tool attached, an Xcode run or test longer than 30 minutes without the
+debugger, or a long `maestro test` without `--device`. Hold a lease or pause
+the janitor for those.
 
 ## Customization
 

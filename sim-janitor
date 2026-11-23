@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Shut down iOS Simulators that nothing has used for a while.
 
-    sim-janitor run [--dry-run] [--grace-minutes N]   one pass, then exit
-    sim-janitor status [--grace-minutes N]            what is booted, who owns it
-    sim-janitor lease UDID -- COMMAND...              hold the device while COMMAND runs
+    sim-janitor run [--dry-run] [--grace-minutes N] [--session-idle-minutes N]
+    sim-janitor status [--grace-minutes N] [--session-idle-minutes N]
+    sim-janitor lease UDID -- COMMAND...      hold the device while COMMAND runs
 
 A machine-wide backstop that knows nothing about any one app. launchd runs one
 short pass every 5 minutes. Each pass lists the booted devices in the default
@@ -13,52 +13,89 @@ use:
 
   - a held lease: `sim-janitor lease` holds a shared flock on
     ~/Library/Caches/sim-janitor/leases/<UDID>.lock while its command runs;
-  - a process outside the simulator's own runtime tree (launchd_sim and its
-    descendants) whose argv names the UDID, such as xcodebuild
+  - a process outside the simulators' own runtime trees (each launchd_sim and
+    its descendants) whose argv names the UDID, such as xcodebuild
     `-destination id=`, `xcrun simctl` subcommands, maestro or agent-device;
-  - an open agent-device session: a claim in ~/.agent-device/device-claims (or
+  - a process outside those trees with a `-destination` whose `name=` is the
+    device's exact name, as in xcodebuild
+    `-destination 'platform=iOS Simulator,name=iPhone 17'`. It owns every
+    booted device with that name;
+  - a process in the device's own tree that is being traced (ps stat `X`),
+    which is a debugger attached to an app or test runner;
+  - an agent-device claim in ~/.agent-device/device-claims (or
     $AGENT_DEVICE_CLAIMS_DIR) whose owner process is still running with the
-    start time the claim records.
+    start time the claim records, that agent-device has not marked abandoned,
+    and whose session shows activity within the session cap (2 hours;
+    SIM_JANITOR_SESSION_IDLE_MINUTES or --session-idle-minutes). A session's
+    last activity is the later of the claim's updatedAtMs and the mtime of
+    <stateDir>/sessions/<session>/events.ndjson, where the daemon appends a
+    line as each request on the session starts and finishes. If either cannot
+    be read the claim counts as in use. A transient-command claim, held for one
+    command and abandoned after it, counts while its owner runs.
+
+The device's own tree also gives activity, which only delays a shutdown: the
+newest start time of an app (a main executable under
+/Containers/Bundle/Application/), a test runner (`*-Runner.app`) or `xctest`
+process there counts as the device's last use. App extensions and simulator
+system daemons do not count, since the system restarts them on its own. A
+running app's start time counts, not its existence, so an app left open does
+not keep a device forever.
 
 An agent-device runner (the detached `xcodebuild test-without-building` of
 AgentDeviceRunner) is not an owner by itself, because one whose session is
-gone would pin its device forever. While its session is open the claim keeps
-the device. The janitor never stops a runner; shutting the device down ends it.
+gone would pin its device forever. While its session is open and active the
+claim keeps the device. The janitor never stops a runner; shutting the device
+down ends it.
 
 A clone in the testing set ("Clone N of NAME") is also owned through the
 default-set device NAME, since xcodebuild names only the source device.
 
 A device is shut down with `xcrun simctl shutdown` once it has been idle for
 longer than the grace period (30 minutes; SIM_JANITOR_GRACE_MINUTES or
---grace-minutes). Idle time runs from the later of the last pass that saw an
-owner and the device's boot. A device seen for the first time is idle from
-that moment. The janitor never deletes or erases a device, never touches one
-that is not Booted, and never signals any process other than its own hung
-subprocesses.
+--grace-minutes). Idle time runs from the latest of the last pass that saw an
+owner, the device's boot, and the newest app or test start in its tree. A
+device seen for the first time is idle from that moment. The janitor never
+deletes or erases a device, never touches one that is not Booted, and never
+signals any process other than its own hung subprocesses.
 
-Every subprocess has a hard timeout and the whole pass has a deadline, since
-simctl hangs when CoreSimulatorService is overloaded. Only one pass runs at a
-time (a non-blocking flock). Every pass logs at least one line to
-~/Library/Logs/sim-janitor.log. If ~/.agents/sim-janitor.pause exists, a pass
-logs that and exits. If the process table or the claim directory cannot be
-read, the pass keeps every device. Right before shutting a device down it lists
-the devices and reads the process table again, and keeps any that gained an
-owner.
+Right before each shutdown the janitor takes an exclusive flock on the
+device's lease file, and on its source device's for a clone, creating the
+file if needed (it never deletes one). Holding those, it lists the devices,
+reads the process table and the claims again, and judges that device afresh,
+so an owner that arrived during an earlier shutdown, or a reboot, keeps it. It
+keeps the locks until `simctl shutdown` returns or times out, then writes the
+outcome into the lease file. A `sim-janitor lease` started meanwhile waits for
+the locks, at most one final check and one shutdown timeout, says on stderr
+that the janitor shut the device down while it waited if it did, and then runs
+its command anyway.
+
+Every subprocess has a hard timeout, capped at what is left of the pass's
+budget, since simctl hangs when CoreSimulatorService is overloaded. Devices are
+tried least recently failed first, and one whose shutdown failed twice in a
+row waits 10 minutes, doubling to an hour, so it can't starve the others. Only
+one pass runs at a time (a non-blocking flock). Every pass logs at least one
+line to ~/Library/Logs/sim-janitor.log. If ~/.agents/sim-janitor.pause exists
+a pass logs that and exits, and a pass that sees it appear stops before its
+next shutdown. If the process table or the claim directory cannot be read,
+the pass keeps every device.
 
 What it cannot see, so hold a lease or pause it for these:
 
-  - a person using Simulator.app by hand with no tool attached;
-  - a tool that names the device some other way, such as
-    `-destination 'name=iPhone 17'` or `simctl ... booted`, between the
-    commands that do name it;
+  - a person using Simulator.app by hand, with no tool attached and no app
+    launched within the grace period;
+  - an Xcode GUI run or test longer than the grace period with no debugger
+    attached, since Xcode's own argv names no device;
+  - a long run of a tool that names the device some other way, such as
+    `maestro test` without `--device` or `simctl ... booted`, once its app or
+    test runner started more than the grace period ago;
+  - an agent-device session silent for longer than the session cap;
   - the command of a `lease` whose wrapper was killed with SIGKILL, since the
     kernel drops the flock with the wrapper.
 
-And what it trusts: an open agent-device session pins its device for as long
-as agent-device keeps the claim, and any long-lived process that names the UDID
-(a forgotten `simctl io recordVideo`, `log stream`) pins it until it exits.
-`status` names each one. Idle clocks live in a cache file, so losing it only
-restarts them.
+And what it trusts: any long-lived process that names the UDID (a forgotten
+`simctl io recordVideo`, `log stream`) or the device's name in a
+`-destination` pins it until it exits. `status` names each one. Idle clocks
+and shutdown failures live in a cache file, so losing it only restarts them.
 """
 import argparse
 import errno
@@ -80,6 +117,16 @@ LOG_LIMIT = 1 << 20
 # counts as an owner, an older one is reported and ignored so it can't pin.
 UNREADABLE_CLAIM_WINDOW = 300
 CLAIM_LIMIT = 1 << 16
+# After two shutdown failures in a row a device waits this long, doubling per
+# further failure up to the cap, so one wedged device can't take every pass.
+BACKOFF_BASE = 600
+BACKOFF_MAX = 3600
+# A main app executable (not an extension under PlugIns/), a UI test runner,
+# or xctest. Their start times are activity on the device.
+BUNDLE_APP = re.compile(r'/Containers/Bundle/Application/[0-9A-Fa-f-]{36}/[^/]+\.app/[^/ ]+(?: |$)')
+TEST_RUNNER = re.compile(r'-Runner\.app/[^/ ]+(?: |$)|(?:^|/)xctest(?: |$)')
+DESTINATION = re.compile(r'(?:^|\s)-destination(?:=|\s+)')
+DESTINATION_END = re.compile(r'\s+(?:-{1,2}[A-Za-z]|[|;&])')
 
 
 class Unavailable(Exception):
@@ -114,6 +161,10 @@ class Config:
             claims.append(Path(os.environ['AGENT_DEVICE_CLAIMS_DIR']))
         self.claim_dirs = claims
         self.grace = env_float('SIM_JANITOR_GRACE_MINUTES', 30.0) * 60
+        # An open agent-device session with no activity for this long no
+        # longer owns its device. agent-device's own idle timeout is off by
+        # default, so without this a forgotten session pins it forever.
+        self.session_cap = env_float('SIM_JANITOR_SESSION_IDLE_MINUTES', 120.0) * 60
         self.xcrun = os.environ.get('SIM_JANITOR_XCRUN') or '/usr/bin/xcrun'
         self.ps = os.environ.get('SIM_JANITOR_PS') or '/bin/ps'
         self.list_timeout = env_float('SIM_JANITOR_LIST_TIMEOUT', 45.0)
@@ -121,6 +172,9 @@ class Config:
         self.shutdown_timeout = env_float('SIM_JANITOR_SHUTDOWN_TIMEOUT', 90.0)
         # launchd starts a pass every 300s. A pass gives up well before that.
         self.pass_budget = env_float('SIM_JANITOR_PASS_BUDGET', 240.0)
+        # Don't start a device's final check and shutdown with less than this
+        # much of the budget left.
+        self.min_step = env_float('SIM_JANITOR_MIN_STEP', 10.0)
         self.clock = time.time
         for key, value in overrides.items():
             if not hasattr(self, key):
@@ -151,6 +205,8 @@ def log(config, message):
 def call(args, timeout):
     """stdout of a command, or Unavailable. A command that overruns `timeout`
     is killed: it is our own child, never a simulator or a tool's process."""
+    if timeout <= 0:
+        raise Unavailable(f'{" ".join(args[:4])} skipped: no time left in the pass')
     try:
         result = subprocess.run(args, stdin=subprocess.DEVNULL, capture_output=True, text=True,
                                 errors='replace', timeout=timeout, env=dict(os.environ, LC_ALL='C'))
@@ -169,9 +225,10 @@ def simctl_args(config, device_set, *args):
     return [config.xcrun, 'simctl', *(['--set', 'testing'] if device_set == 'testing' else []), *args]
 
 
-def list_devices(config, device_set):
+def list_devices(config, device_set, timeout=None):
     """[{udid, name, state, set}] for every device in the set."""
-    output = call(simctl_args(config, device_set, 'list', 'devices', '-j'), config.list_timeout)
+    output = call(simctl_args(config, device_set, 'list', 'devices', '-j'),
+                  config.list_timeout if timeout is None else timeout)
     try:
         groups = json.loads(output)['devices']
         devices = []
@@ -187,25 +244,27 @@ def list_devices(config, device_set):
 
 
 class Process:
-    __slots__ = ('pid', 'ppid', 'start', 'command')
+    __slots__ = ('pid', 'ppid', 'stat', 'start', 'command')
 
-    def __init__(self, pid, ppid, start, command):
-        self.pid, self.ppid, self.start, self.command = pid, ppid, start, command
+    def __init__(self, pid, ppid, stat, start, command):
+        self.pid, self.ppid, self.stat, self.start, self.command = pid, ppid, stat, start, command
 
 
-def process_table(config):
+def process_table(config, timeout=None):
     """{pid: Process} for every process. `start` is ps's lstart, which is what
     agent-device records as a process's start time."""
-    output = call([config.ps, '-axww', '-o', 'pid=,ppid=,lstart=,command='], config.ps_timeout)
+    output = call([config.ps, '-axww', '-o', 'pid=,ppid=,stat=,lstart=,command='],
+                  config.ps_timeout if timeout is None else timeout)
     table = {}
     for line in output.splitlines():
-        fields = line.split(None, 7)
-        if len(fields) < 7:
+        fields = line.split(None, 8)
+        if len(fields) < 8:
             continue
         if not (fields[0].isdigit() and fields[1].isdigit()):
             raise Unavailable(f'ps printed an unexpected line: {line[:120]!r}')
         pid = int(fields[0])
-        table[pid] = Process(pid, int(fields[1]), ' '.join(fields[2:7]), fields[7] if len(fields) > 7 else '')
+        table[pid] = Process(pid, int(fields[1]), fields[2], ' '.join(fields[3:8]),
+                             fields[8] if len(fields) > 8 else '')
     if not table:
         raise Unavailable('ps listed no processes')
     return table
@@ -225,20 +284,29 @@ def is_runtime_root(process):
     return os.path.basename(argv0) == 'launchd_sim'
 
 
-def runtime_tree(table):
-    """Pids of every launchd_sim and its descendants: the simulators' own processes."""
+def device_trees(table):
+    """{UDID: {pids}} of each device's launchd_sim and its descendants, and
+    the set of every pid in any simulator's tree."""
     children = {}
     for process in table.values():
         children.setdefault(process.ppid, []).append(process.pid)
-    inside = set()
-    stack = [pid for pid, process in table.items() if is_runtime_root(process)]
-    while stack:
-        pid = stack.pop()
-        if pid in inside:
+    trees, inside = {}, set()
+    for root in table.values():
+        if not is_runtime_root(root):
             continue
-        inside.add(pid)
-        stack.extend(children.get(pid, ()))
-    return inside
+        match = re.search(r'/(?:Devices|XCTestDevices)/(' + UDID.pattern + r')/', root.command)
+        tree = set()
+        stack = [root.pid]
+        while stack:
+            pid = stack.pop()
+            if pid in tree:
+                continue
+            tree.add(pid)
+            stack.extend(children.get(pid, ()))
+        inside |= tree
+        if match:
+            trees.setdefault(match[1].upper(), set()).update(tree)
+    return trees, inside
 
 
 def boot_times(table):
@@ -258,17 +326,59 @@ def is_agent_device_runner(command):
     return os.path.basename(argv0) == 'xcodebuild' and 'AgentDeviceRunner' in command
 
 
+def is_app_or_test(command):
+    return bool(BUNDLE_APP.search(command) or TEST_RUNNER.search(command))
+
+
+def destination_names(command):
+    """Every `name=` inside a `-destination` spec in a command line."""
+    names = []
+    for match in DESTINATION.finditer(command):
+        rest = command[match.end():]
+        if rest[:1] in ('"', "'"):
+            end = rest.find(rest[0], 1)
+            spec = rest[1:end] if end > 0 else rest[1:]
+        else:
+            stop = DESTINATION_END.search(rest)
+            spec = rest[:stop.start()] if stop else rest
+        for part in spec.split(','):
+            key, sep, value = part.partition('=')
+            if sep and key.strip() == 'name':
+                value = value.strip().strip('\'"')
+                if value:
+                    names.append(value)
+    return names
+
+
+def session_dir_name(session):
+    """agent-device's own mapping from a session name to its directory."""
+    name = re.sub(r'[^a-zA-Z0-9._-]', '_', session)
+    return name if name not in ('', '.', '..') else None
+
+
 class Evidence:
     """What one look at the machine found: the process table and the claims.
-    `problem` says why ownership cannot be judged at all this pass."""
+    `problem` says why ownership cannot be judged at all this pass. `held` are
+    the UDIDs whose lease files this process itself holds exclusively."""
 
-    def __init__(self, config, table, problem=None):
+    def __init__(self, config, table, problem=None, held=()):
         self.config = config
         self.table = table
         self.problem = problem
-        self.inside = runtime_tree(table) if table else set()
+        self.held = {udid.upper() for udid in held}
+        self.trees, self.inside = device_trees(table) if table else ({}, set())
         self.booted = boot_times(table) if table else {}
+        self.named = self.destinations() if table else {}
         self.claims = self.read_claims() if table else []
+
+    def destinations(self):
+        named = {}
+        for process in self.table.values():
+            if process.pid in self.inside or process.pid == os.getpid() or '-destination' not in process.command:
+                continue
+            for name in destination_names(process.command):
+                named.setdefault(name, []).append(process)
+        return named
 
     def read_claims(self):
         claims = []
@@ -296,16 +406,37 @@ class Evidence:
                     pid = int(claim['ownerPid'])
                     started = claim.get('ownerStartTime')
                     updated = claim.get('updatedAtMs')
+                    abandoned = claim.get('abandonedAtMs')
                     claims.append(dict(path=path, device=device, pid=pid, start=started,
-                                       session=claim.get('session', '?'), readable=True,
+                                       session=str(claim.get('session', '?')), readable=True,
+                                       kind=claim.get('claimOwnerKind'), state_dir=claim.get('stateDir'),
+                                       abandoned=abandoned / 1000 if isinstance(abandoned, (int, float)) else None,
                                        updated=updated / 1000 if isinstance(updated, (int, float)) else None))
                 except (ValueError, KeyError, TypeError, AttributeError):
                     claims.append(dict(path=path, text=text.upper(), readable=False,
                                        fresh=now - info.st_mtime < UNREADABLE_CLAIM_WINDOW))
         return claims
 
+    def session_activity(self, claim):
+        """(epoch of the session's last activity, None), or (None, why) when a
+        signal can't be read. The claim's updatedAtMs moves on open, renew and
+        reboot takeover. The daemon appends to the session's events.ndjson as
+        every request on it starts and finishes."""
+        if claim['updated'] is None:
+            return None, 'the claim has no updatedAtMs'
+        state_dir, directory = claim['state_dir'], session_dir_name(claim['session'])
+        if not isinstance(state_dir, str) or not os.path.isabs(state_dir) or directory is None:
+            return None, 'the claim names no usable stateDir and session'
+        events = Path(state_dir) / 'sessions' / directory / 'events.ndjson'
+        try:
+            touched = events.stat().st_mtime
+        except OSError as error:
+            return None, f'{events}: {error.strerror or error}'
+        return max(claim['updated'], touched), None
+
     def claim_owners(self, udid):
         owners, notes = [], []
+        now = self.config.clock()
         for claim in self.claims:
             if not claim['readable']:
                 if udid in claim['text']:
@@ -316,21 +447,35 @@ class Evidence:
                 continue
             if claim['device'] != udid:
                 continue
+            session = f'agent-device session {claim["session"]}'
+            if claim['abandoned'] is not None:
+                notes.append(f'{session}: closed {duration(max(0, now - claim["abandoned"]))} ago (claim abandoned)')
+                continue
             owner = self.table.get(claim['pid'])
             if owner is None:
-                notes.append(f'agent-device session {claim["session"]}: daemon {claim["pid"]} is gone')
-            elif isinstance(claim['start'], str) and claim['start'].split() != owner.start.split():
-                notes.append(f'agent-device session {claim["session"]}: pid {claim["pid"]} was reused')
+                notes.append(f'{session}: daemon {claim["pid"]} is gone')
+                continue
+            if isinstance(claim['start'], str) and claim['start'].split() != owner.start.split():
+                notes.append(f'{session}: pid {claim["pid"]} was reused')
+                continue
+            who = f'{session} (daemon {claim["pid"]})'
+            if claim['kind'] == 'transient-command':
+                owners.append(f'{who}, running one command')
+                continue
+            last, why = self.session_activity(claim)
+            if last is None:
+                owners.append(f'{who}, last activity unknown ({why}), so counted as in use')
+            elif now - last > self.config.session_cap:
+                notes.append(f'{who}: last activity {duration(max(0, now - last))} ago, '
+                             f'past the {duration(self.config.session_cap)} session cap')
             else:
-                touched = ''
-                if claim['updated'] is not None:
-                    touched = f', claim updated {duration(max(0, self.config.clock() - claim["updated"]))} ago'
-                owners.append(f'agent-device session {claim["session"]} (daemon {claim["pid"]}{touched})')
+                owners.append(f'{who}, last activity {duration(max(0, now - last))} ago')
         return owners, notes
 
-    def process_owners(self, udid):
+    def process_owners(self, udid, name=None):
         owners, notes = [], []
         own_paths = re.compile(r'/(?:Devices|XCTestDevices)/' + udid, re.IGNORECASE)
+        counted = set()
         for process in self.table.values():
             if process.pid in self.inside or process.pid == os.getpid():
                 continue
@@ -341,15 +486,37 @@ class Evidence:
             if is_agent_device_runner(process.command):
                 notes.append(f'agent-device runner {process.pid} (an owner only while its session is open)')
                 continue
+            counted.add(process.pid)
             owners.append(f'process {process.pid}: {process.command[:160]}')
+        for process in self.named.get(name, ()) if name else ():
+            if process.pid not in counted:
+                counted.add(process.pid)
+                owners.append(f'process {process.pid} names it {name!r} in -destination: {process.command[:140]}')
+        for pid in sorted(self.trees.get(udid, ())):
+            process = self.table.get(pid)
+            if process and 'X' in process.stat:
+                owners.append(f'process {pid} is being debugged: {process.command[:140]}')
         return owners, notes
 
-    def owners(self, udid):
-        """(owners, notes) for one UDID. Owners mark it in use."""
+    def activity(self, udid):
+        """(epoch, Process) of the newest app or test process in the device's
+        own tree, or None. Its start time, not its existence, is the activity."""
+        newest = None
+        for pid in self.trees.get(udid, ()):
+            process = self.table.get(pid)
+            if process is None or not is_app_or_test(process.command):
+                continue
+            started = parse_start(process.start)
+            if started is not None and (newest is None or started > newest[0]):
+                newest = (started, process)
+        return newest
+
+    def owners(self, udid, name=None):
+        """(owners, notes) for one UDID, named `name`. Owners mark it in use."""
         owners, notes = [], []
-        if lease_held(self.config, udid):
-            owners.append(f'lease {self.config.lease_dir / (udid + ".lock")}')
-        for found, noted in (self.process_owners(udid), self.claim_owners(udid)):
+        if udid.upper() not in self.held and lease_held(self.config, udid):
+            owners.append(f'lease {lease_path(self.config, udid)}')
+        for found, noted in (self.process_owners(udid, name), self.claim_owners(udid)):
             owners += found
             notes += noted
         return owners, notes
@@ -374,20 +541,59 @@ def lease_held(config, udid):
     return False
 
 
+def lock_leases(config, udids):
+    """Exclusive, non-blocking locks on these devices' lease files, created if
+    missing. Returns (handles, None), or (None, UDID) when a lease holds one.
+    While these are held a `sim-janitor lease` on any of them waits."""
+    config.lease_dir.mkdir(parents=True, exist_ok=True)
+    handles = []
+    for udid in sorted({udid.upper() for udid in udids}):
+        try:
+            handle = open(lease_path(config, udid), 'a+')
+        except OSError:
+            release_leases(handles)
+            raise
+        try:
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError as error:
+            handle.close()
+            release_leases(handles)
+            if error.errno in (errno.EWOULDBLOCK, errno.EAGAIN):
+                return None, udid
+            raise
+        handles.append(handle)
+    return handles, None
+
+
+def release_leases(handles, outcome=None):
+    """Record what the janitor did in each lease file, for a lease that waited
+    on it, then unlock."""
+    for handle in handles:
+        if outcome is not None:
+            try:
+                handle.seek(0)
+                handle.truncate()
+                handle.write(json.dumps(outcome) + '\n')
+                handle.flush()
+            except OSError:
+                pass
+        handle.close()
+
+
 def related(device, by_name):
-    """The UDIDs whose owners also own `device`: a testing-set clone is owned
-    through the default-set device it was cloned from."""
-    udids = [device['udid']]
+    """(UDID, name) pairs whose owners also own `device`: a testing-set clone
+    is owned through the default-set device it was cloned from."""
+    pairs = [(device['udid'], device['name'])]
     if device['set'] == 'testing':
         match = CLONE.fullmatch(device['name'])
         if match:
-            udids += [udid for udid in by_name.get(match[1], ()) if udid != device['udid']]
-    return udids
+            pairs += [(udid, match[1]) for udid in by_name.get(match[1], ()) if udid != device['udid']]
+    return pairs
 
 
-def look(config):
+def look(config, held=(), timeout=None):
     try:
-        return Evidence(config, process_table(config))
+        return Evidence(config, process_table(config, timeout), held=held)
     except Unavailable as error:
         return Evidence(config, None, f'process table unreadable: {error}')
 
@@ -395,17 +601,30 @@ def look(config):
 # --- state -------------------------------------------------------------------
 
 def load_state(config):
+    """{since: {key: epoch}, attempts: {key: {last, failures}}}. `since` is
+    when each device was last seen owned (or first seen), `attempts` its run
+    of failed shutdowns."""
+    state = dict(since={}, attempts={})
     try:
         data = json.loads(config.state_file.read_text())
-        return {str(key): float(value) for key, value in data.get('since', {}).items()}
-    except (OSError, ValueError, AttributeError, TypeError):
-        return {}
+    except (OSError, ValueError):
+        return state
+    try:
+        state['since'] = {str(key): float(value) for key, value in data.get('since', {}).items()}
+    except (AttributeError, TypeError, ValueError):
+        pass
+    try:
+        for key, entry in data.get('attempts', {}).items():
+            state['attempts'][str(key)] = dict(last=float(entry['last']), failures=int(entry['failures']))
+    except (AttributeError, TypeError, ValueError, KeyError):
+        state['attempts'] = {}
+    return state
 
 
-def save_state(config, since):
+def save_state(config, state):
     config.state_dir.mkdir(parents=True, exist_ok=True)
     temporary = config.state_file.with_name(f'.state.{os.getpid()}.tmp')
-    temporary.write_text(json.dumps({'since': since}, indent=1, sort_keys=True) + '\n')
+    temporary.write_text(json.dumps(state, indent=1, sort_keys=True) + '\n')
     os.replace(temporary, config.state_file)
 
 
@@ -413,14 +632,22 @@ def key_of(device):
     return f'{device["set"]}:{device["udid"]}'
 
 
+def backoff_left(entry, now):
+    """Seconds until a device whose shutdowns keep failing is tried again."""
+    if not entry or entry['failures'] < 2:
+        return 0
+    wait = min(BACKOFF_BASE * 2 ** (entry['failures'] - 2), BACKOFF_MAX)
+    return max(0.0, entry['last'] + wait - now)
+
+
 # --- one pass ----------------------------------------------------------------
 
-def inventory(config):
+def inventory(config, sets=('default', 'testing'), timeout=None):
     """(devices, sets that listed, problems). Without the default set nothing is known."""
     devices, listed, problems = [], [], []
-    for device_set in ('default', 'testing'):
+    for device_set in sets:
         try:
-            devices += list_devices(config, device_set)
+            devices += list_devices(config, device_set, timeout)
             listed.append(device_set)
         except Unavailable as error:
             problems.append(str(error))
@@ -429,9 +656,9 @@ def inventory(config):
     return devices, listed, problems
 
 
-def judge(config, devices, evidence, since, now):
-    """One verdict per booted device: dict(device, owners, notes, idle, action).
-    Updates `since` with what was seen."""
+def judge(config, devices, evidence, since, now, keys=None):
+    """One verdict per booted device (or per key in `keys`): dict(device,
+    owners, notes, idle, activity, action). Updates `since` with what was seen."""
     by_name = {}
     for device in devices:
         if device['set'] == 'default':
@@ -441,17 +668,24 @@ def judge(config, devices, evidence, since, now):
         if device['state'] != 'Booted':
             continue
         key = key_of(device)
+        if keys is not None and key not in keys:
+            continue
         owners, notes = [], []
+        activity = None
         if evidence.problem is None:
-            for udid in related(device, by_name):
-                found, noted = evidence.owners(udid)
+            for udid, name in related(device, by_name):
+                found, noted = evidence.owners(udid, name)
                 suffix = '' if udid == device['udid'] else f' (via source {udid})'
                 owners += [owner + suffix for owner in found]
                 notes += [note + suffix for note in noted]
+            activity = evidence.activity(device['udid'])
         if owners:
             since[key] = now
         elif key not in since:
             since[key] = now
+        if activity is not None and activity[0] > since[key]:
+            # An app or test runner started since: idle from that start.
+            since[key] = min(activity[0], now)
         started = max(since[key], evidence.booted.get(device['udid'], 0))
         idle = max(0.0, now - started)
         if evidence.problem is not None:
@@ -462,7 +696,8 @@ def judge(config, devices, evidence, since, now):
             action = 'shut down'
         else:
             action = f'keep: shut down in {duration(config.grace - idle)} if still idle'
-        verdicts.append(dict(device=device, owners=owners, notes=notes, idle=idle, action=action))
+        verdicts.append(dict(device=device, owners=owners, notes=notes, idle=idle, activity=activity,
+                             action=action))
     return verdicts
 
 
@@ -479,8 +714,8 @@ def label(device):
     return f'{device["name"]} ({device["udid"]}, {device["set"]} set)'
 
 
-def shutdown(config, device):
-    call(simctl_args(config, device['set'], 'shutdown', device['udid']), config.shutdown_timeout)
+def shutdown(config, device, timeout):
+    call(simctl_args(config, device['set'], 'shutdown', device['udid']), timeout)
 
 
 def run_pass(config, dry_run=False):
@@ -494,77 +729,166 @@ def run_pass(config, dry_run=False):
     if 'default' not in listed:
         log(config, f'{tag}pass done: simctl could not list devices, nothing judged')
         return 1
-    since = load_state(config)
+    state = load_state(config)
+    since, attempts = state['since'], state['attempts']
     evidence = look(config)
     if evidence.problem:
         log(config, f'{tag}{evidence.problem}; keeping every device this pass')
     now = config.clock()
     verdicts = judge(config, devices, evidence, since, now)
     candidates = [v for v in verdicts if v['action'] == 'shut down']
-    shut = failed = 0
+    booted = {key_of(v['device']) for v in verdicts}
+
+    def forget():
+        # Forget devices that are no longer booted in the sets that listed.
+        for table in (since, attempts):
+            for key in list(table):
+                if key.split(':', 1)[0] in listed and key not in booted:
+                    del table[key]
+
+    def save():
+        try:
+            save_state(config, state)
+        except OSError as error:
+            log(config, f'could not save state: {error}')
+
+    counts = dict(shut=0, failed=0, waiting=0)
+    stopped = ''
     if candidates:
         if dry_run:
             for verdict in candidates:
-                log(config, f'{tag}would shut down {label(verdict["device"])}, idle {duration(verdict["idle"])}')
+                wait = backoff_left(attempts.get(key_of(verdict['device'])), now)
+                log(config, f'{tag}would shut down {label(verdict["device"])}, idle {duration(verdict["idle"])}'
+                            + (f', after a back-off of {duration(wait)}' if wait else ''))
         else:
-            shut, failed = shut_down(config, candidates, since, deadline)
-    # Forget devices that are no longer booted in the sets that listed.
-    booted = {key_of(v['device']) for v in verdicts}
-    for key in list(since):
-        if key.split(':', 1)[0] in listed and key not in booted:
-            del since[key]
+            forget()
+            counts, stopped = shut_down(config, candidates, state, deadline, save)
+    forget()
     if not dry_run:
-        try:
-            save_state(config, since)
-        except OSError as error:
-            log(config, f'could not save state: {error}')
+        save()
     in_use = sum(1 for v in verdicts if v['owners'])
     log(config, f'{tag}pass done: {len(verdicts)} booted, {in_use} in use, '
-                f'{len(candidates)} idle past {duration(config.grace)}, {shut} shut down, {failed} failed'
-                f'{"" if "testing" in listed else ", testing set unlisted"}; '
+                f'{len(candidates)} idle past {duration(config.grace)}, {counts["shut"]} shut down, '
+                f'{counts["failed"]} failed, {counts["waiting"]} waiting'
+                f'{"" if "testing" in listed else ", testing set unlisted"}'
+                f'{f", stopped: {stopped}" if stopped else ""}; '
                 f'took {config.clock() - began:.1f}s')
-    return 1 if failed else 0
+    return 1 if counts['failed'] else 0
 
 
-def shut_down(config, candidates, since, deadline):
-    """Look again right before acting, then shut down what is still booted and
-    unowned. Returns (shut, failed)."""
-    shut = failed = 0
-    current, listed, problems = inventory(config)
-    for problem in problems:
-        log(config, problem)
-    still_booted = {key_of(d) for d in current if d['state'] == 'Booted'}
-    evidence = look(config)
-    if evidence.problem:
-        log(config, f'{evidence.problem}; shutting nothing down this pass')
-        return 0, 0
-    by_name = {}
-    for device in current:
-        if device['set'] == 'default':
-            by_name.setdefault(device['name'], []).append(device['udid'])
-    for verdict in candidates:
+def shut_down(config, candidates, state, deadline, save):
+    """Shut down each candidate that is still idle when checked again right
+    before acting. Tries devices that never failed first, then the least
+    recently failed, and skips one backing off. Returns (counts, why it
+    stopped early or '')."""
+    since, attempts = state['since'], state['attempts']
+    counts = dict(shut=0, failed=0, waiting=0)
+    now = config.clock()
+
+    def order(verdict):
+        key = key_of(verdict['device'])
+        return (attempts[key]['last'] if key in attempts else 0, -verdict['idle'], key)
+
+    queue = sorted(candidates, key=order)
+    for index, verdict in enumerate(queue):
         device = verdict['device']
         key = key_of(device)
-        if key not in still_booted:
+        left = len(queue) - index
+        if config.pause_file.exists():
+            log(config, f'paused: {config.pause_file} appeared, {left} device(s) left booted')
+            counts['waiting'] += left
+            return counts, 'paused'
+        wait = backoff_left(attempts.get(key), now)
+        if wait > 0:
+            counts['waiting'] += 1
+            log(config, f'{label(device)} failed to shut down {attempts[key]["failures"]} times in a row, '
+                        f'next try in {duration(wait)}')
             continue
-        owners = [owner for udid in related(device, by_name) for owner in evidence.owners(udid)[0]]
-        if owners:
-            since[key] = config.clock()
-            log(config, f'kept {label(device)}: an owner arrived ({owners[0][:120]})')
-            continue
-        if time.monotonic() > deadline:
-            log(config, f'pass budget spent, {label(device)} waits for the next pass')
-            continue
+        if deadline - time.monotonic() < config.min_step:
+            log(config, f'pass budget spent, {left} device(s) wait for the next pass')
+            counts['waiting'] += left
+            return counts, 'budget spent'
+        result = shut_down_one(config, device, since, deadline)
+        if result == 'shut':
+            counts['shut'] += 1
+            attempts.pop(key, None)
+        elif result == 'failed':
+            counts['failed'] += 1
+            previous = attempts.get(key, dict(failures=0))
+            attempts[key] = dict(last=config.clock(), failures=previous['failures'] + 1)
+        elif result == 'gone':
+            attempts.pop(key, None)
+        elif result == 'paused':
+            counts['waiting'] += left
+            return counts, 'paused'
+        elif result == 'unchecked':
+            counts['waiting'] += 1
+        # Persist as we go, so a hard stop mid-pass keeps the failure counts.
+        save()
+    return counts, ''
+
+
+def shut_down_one(config, device, since, deadline):
+    """Lock the device's leases, judge it again from scratch, and shut it down
+    if it is still idle. The locks are held until simctl returns. Returns
+    'shut', 'failed', 'kept', 'gone', 'paused' or 'unchecked'."""
+    key = key_of(device)
+
+    def left():
+        return deadline - time.monotonic()
+
+    sets = ('default',) if device['set'] == 'default' else ('default', device['set'])
+    current, listed, problems = inventory(config, sets, min(config.list_timeout, left()))
+    if device['set'] not in listed or 'default' not in listed:
+        log(config, f'kept {label(device)} this pass: cannot list devices ({"; ".join(problems)})')
+        return 'unchecked'
+    now_device = next((d for d in current if key_of(d) == key), None)
+    if now_device is None or now_device['state'] != 'Booted':
+        return 'gone'
+    by_name = {}
+    for each in current:
+        if each['set'] == 'default':
+            by_name.setdefault(each['name'], []).append(each['udid'])
+    udids = [udid for udid, _ in related(now_device, by_name)]
+    try:
+        handles, busy = lock_leases(config, udids)
+    except OSError as error:
+        log(config, f'kept {label(device)} this pass: cannot lock its lease file: {error}')
+        return 'unchecked'
+    if handles is None:
+        since[key] = config.clock()
+        log(config, f'kept {label(device)}: an owner arrived (lease on {busy})')
+        return 'kept'
+    outcome = None
+    try:
+        evidence = look(config, held=udids, timeout=min(config.ps_timeout, left()))
+        if evidence.problem:
+            log(config, f'kept {label(device)} this pass: {evidence.problem}')
+            return 'unchecked'
+        verdict = judge(config, current, evidence, since, config.clock(), keys={key})[0]
+        if verdict['action'] != 'shut down':
+            if verdict['owners']:
+                log(config, f'kept {label(device)}: an owner arrived ({verdict["owners"][0][:120]})')
+            else:
+                log(config, f'kept {label(device)}: idle only {duration(verdict["idle"])} now')
+            outcome = dict(result='kept', at=time.time(), pid=os.getpid())
+            return 'kept'
+        if config.pause_file.exists():
+            log(config, f'paused: {config.pause_file} appeared, {label(device)} left booted')
+            return 'paused'
+        timeout = min(config.shutdown_timeout, left())
         try:
-            shutdown(config, device)
+            shutdown(config, device, timeout)
         except Unavailable as error:
-            failed += 1
             log(config, f'could not shut down {label(device)}: {error}')
-            continue
-        shut += 1
+            outcome = dict(result='failed', at=time.time(), pid=os.getpid(), error=str(error)[:200])
+            return 'failed'
         since.pop(key, None)
         log(config, f'shut down {label(device)} after {duration(verdict["idle"])} idle')
-    return shut, failed
+        outcome = dict(result='shut down', at=time.time(), pid=os.getpid())
+        return 'shut'
+    finally:
+        release_leases(handles, outcome)
 
 
 # --- commands ----------------------------------------------------------------
@@ -629,27 +953,30 @@ def command_run(config, dry_run=False):
         lock.close()
 
 
-def command_status(config, out=sys.stdout):
+def command_status(config, out=None):
+    out = out or sys.stdout
     devices, listed, problems = inventory(config)
     for problem in problems:
         print(f'warning: {problem}', file=out)
     if 'default' not in listed:
         print('simctl could not list devices', file=out)
         return 1
-    since = load_state(config)
+    state = load_state(config)
     evidence = look(config)
     if evidence.problem:
         print(f'warning: {evidence.problem}', file=out)
     paused = config.pause_file.exists()
-    print(f'grace {duration(config.grace)}; log {config.log_file}; leases {config.lease_dir}'
+    print(f'grace {duration(config.grace)}; agent-device session cap {duration(config.session_cap)}; '
+          f'log {config.log_file}; leases {config.lease_dir}'
           + (f'; PAUSED by {config.pause_file}' if paused else ''), file=out)
-    verdicts = judge(config, devices, evidence, since, config.clock())
+    now = config.clock()
+    verdicts = judge(config, devices, evidence, state['since'], now)
     if not verdicts:
         print('no booted devices', file=out)
     for verdict in verdicts:
         device = verdict['device']
         boot = evidence.booted.get(device['udid'])
-        up = f', up {duration(config.clock() - boot)}' if boot else ''
+        up = f', up {duration(now - boot)}' if boot else ''
         print(f'{label(device)} {device["runtime"]}{up}', file=out)
         if not verdict['owners']:
             print('    owners: none found', file=out)
@@ -657,9 +984,18 @@ def command_status(config, out=sys.stdout):
             print(f'    owner: {owner}', file=out)
         for note in verdict['notes']:
             print(f'    not an owner: {note}', file=out)
+        if verdict['activity']:
+            started, process = verdict['activity']
+            print(f'    last app or test start: {duration(max(0, now - started))} ago, '
+                  f'process {process.pid}: {process.command[:120]}', file=out)
         action = verdict['action']
         if paused and action == 'shut down':
             action = 'shut down (once unpaused)'
+        entry = state['attempts'].get(key_of(device))
+        if entry:
+            wait = backoff_left(entry, now)
+            action += (f'; {entry["failures"]} failed shutdown(s) in a row'
+                       + (f', next try in {duration(wait)}' if wait else ''))
         print(f'    idle {duration(verdict["idle"])} -> {action}', file=out)
     return 0
 
@@ -672,10 +1008,17 @@ def command_lease(config, udid, command):
         print('sim-janitor lease: nothing to run (sim-janitor lease UDID -- COMMAND...)', file=sys.stderr)
         return 64
     config.lease_dir.mkdir(parents=True, exist_ok=True)
-    with open(lease_path(config, udid), 'a') as handle:
+    with open(lease_path(config, udid), 'a+') as handle:
         # Shared, so several tools can hold one device at once. The janitor's
-        # exclusive probe fails while any of them runs.
-        fcntl.flock(handle, fcntl.LOCK_SH)
+        # exclusive probe fails while any of them runs. While the janitor
+        # holds its exclusive lock to shut this device down, wait for it: at
+        # most one final check and one shutdown timeout.
+        if not try_shared_lock(handle):
+            began = time.time()
+            print(f'sim-janitor lease: waiting for sim-janitor, which is checking {udid.upper()} '
+                  'for shutdown', file=sys.stderr)
+            fcntl.flock(handle, fcntl.LOCK_SH)
+            report_janitor(handle, udid, began)
         try:
             child = subprocess.Popen(command)
         except OSError as error:
@@ -703,6 +1046,38 @@ def command_lease(config, udid, command):
     return status if status >= 0 else 128 - status
 
 
+def try_shared_lock(handle):
+    """A shared lock without waiting, retried briefly so the janitor's
+    momentary ownership probe doesn't count as a shutdown in progress."""
+    for attempt in range(5):
+        try:
+            fcntl.flock(handle, fcntl.LOCK_SH | fcntl.LOCK_NB)
+            return True
+        except OSError as error:
+            if error.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):
+                raise
+        time.sleep(0.05)
+    return False
+
+
+def report_janitor(handle, udid, began):
+    """After waiting on the janitor, say on stderr what it did to the device."""
+    try:
+        handle.seek(0)
+        outcome = json.loads(handle.read() or '{}')
+        result, at = outcome.get('result'), float(outcome.get('at', 0))
+    except (OSError, ValueError, TypeError, AttributeError):
+        return
+    if at < began - 1:
+        return
+    if result == 'shut down':
+        print(f'sim-janitor lease: sim-janitor shut {udid.upper()} down while this lease waited; '
+              'the command runs anyway, so boot the device if it needs one', file=sys.stderr)
+    elif result == 'failed':
+        print(f'sim-janitor lease: sim-janitor tried to shut {udid.upper()} down while this lease waited '
+              'and simctl did not confirm it; the device may be shutting down', file=sys.stderr)
+
+
 def main(argv=None, config=None):
     argv = sys.argv[1:] if argv is None else argv
     if argv[:1] == ['lease']:
@@ -718,6 +1093,9 @@ def main(argv=None, config=None):
     status = commands.add_parser('status', help='booted devices, their owners, and what run would do')
     for each in (run, status):
         each.add_argument('--grace-minutes', type=float, help='idle minutes before shutdown (default 30)')
+        each.add_argument('--session-idle-minutes', type=float,
+                          help='minutes without activity before an agent-device session stops '
+                               'owning its device (default 120)')
     commands.add_parser('lease', help='sim-janitor lease UDID -- COMMAND...: hold the device while COMMAND runs')
     args = parser.parse_args(argv)
     if args.command is None:
@@ -726,6 +1104,8 @@ def main(argv=None, config=None):
     config = config or Config()
     if args.grace_minutes is not None:
         config.grace = args.grace_minutes * 60
+    if args.session_idle_minutes is not None:
+        config.session_cap = args.session_idle_minutes * 60
     if args.command == 'run':
         return command_run(config, args.dry_run)
     return command_status(config)

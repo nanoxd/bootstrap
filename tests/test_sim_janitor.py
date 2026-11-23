@@ -57,10 +57,29 @@ devices = fixture['sets'][device_set]
 if args[0] == 'list':
     print(json.dumps({{'devices': {{'com.apple.CoreSimulator.SimRuntime.iOS-27-2': devices}}}}))
 elif args[0] == 'shutdown':
+    if fixture.get('probe_leases'):
+        # What a `sim-janitor lease` would find while this shutdown runs.
+        import fcntl
+        results = []
+        for udid in fixture.get('probe_udids') or [args[1]]:
+            try:
+                with open(os.path.join(fixture['probe_leases'], udid + '.lock'), 'rb') as lease:
+                    try:
+                        fcntl.flock(lease, fcntl.LOCK_SH | fcntl.LOCK_NB)
+                        results.append([udid, 'free'])
+                    except OSError:
+                        results.append([udid, 'blocked'])
+            except OSError:
+                results.append([udid, 'missing'])
+        with open(os.path.join(here, 'probes.log'), 'a') as out:
+            out.write(json.dumps(results) + '\\n')
+    time.sleep(fixture.get('hang_device', {{}}).get(args[1], 0))
     for device in devices:
         if device['udid'] == args[1]:
             device['state'] = 'Shutdown'
     json.dump(fixture, open(fixture_path, 'w'))
+    if fixture.get('touch_on_shutdown'):
+        open(fixture['touch_on_shutdown'], 'a').close()
 '''
 
 FAKE_PS = '''#!{python}
@@ -73,8 +92,10 @@ open(counter, 'w').write(str(count + 1))
 if fixture.get('ps_fail'):
     sys.exit(1)
 tables = fixture['ps']
-for pid, ppid, start, command in tables[min(count, len(tables) - 1)]:
-    print('%6d %6d %s %s' % (pid, ppid, start, command))
+for row in tables[min(count, len(tables) - 1)]:
+    pid, ppid, start, command = row[:4]
+    stat = row[4] if len(row) > 4 else 'Ss'
+    print('%6d %6d %-4s %s %s' % (pid, ppid, stat, start, command))
 '''
 
 T0 = 1795400000.0
@@ -165,12 +186,12 @@ class JanitorTest(unittest.TestCase):
         janitor.command_status(self.config, out=out)
         return out.getvalue()
 
-    def claim(self, udid, pid, start, session='t3-session'):
+    def claim(self, udid, pid, start, session='t3-session', **extra):
         self.claims.mkdir(parents=True, exist_ok=True)
         record = dict(schemaVersion=3, deviceKey=f'local:apple:ios:{udid}', session=session,
                       device=dict(id=udid, family='apple', kind='simulator'), ownerPid=pid,
-                      ownerStartTime=start, claimOwnerKind='open-session')
-        (self.claims / f'{session}.json').write_text(json.dumps(record))
+                      ownerStartTime=start, claimOwnerKind='open-session', **extra)
+        (self.claims / f'{session.replace(":", "_")}.json').write_text(json.dumps(record))
 
     # --- grace ---------------------------------------------------------------
 
@@ -450,6 +471,344 @@ class JanitorTest(unittest.TestCase):
         janitor.log(self.config, 'hello')
         self.assertTrue(self.config.log_file.with_name('sim-janitor.log.1').exists())
         self.assertIn('hello', self.log_text())
+
+    # --- A: each shutdown is judged afresh ----------------------------------
+
+    def two_idle_devices(self, *extra_tables):
+        """DEVICE, idle longer, goes before OTHER. `extra_tables` are what
+        ps shows at each final check, in order."""
+        self.config.state_dir.mkdir(parents=True, exist_ok=True)
+        self.config.state_file.write_text(json.dumps({'since': {
+            f'default:{DEVICE}': T0 - 5 * 3600, f'default:{OTHER}': T0 - 5 * 3600}}))
+        quiet = BASE_PS + [launchd_sim(100, DEVICE, T0 - 4 * 3600), launchd_sim(200, OTHER, T0 - 3 * 3600)]
+        return quiet, dict(default=[device(DEVICE), device(OTHER, 'iPhone gate 1')], ps=[quiet, quiet, *extra_tables] if extra_tables else [quiet])
+
+    def test_owner_arriving_during_an_earlier_shutdown_keeps_the_next_device(self):
+        quiet, fixture = self.two_idle_devices()
+        test_run = [800, 400, lstart(T0), f'/usr/bin/xcodebuild test -destination id={OTHER}']
+        fixture['ps'] = [quiet, quiet, quiet + [test_run]]
+        self.fixture(**fixture)
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [['default', 'shutdown', DEVICE]])
+        self.assertIn(f'kept iPhone gate 1 ({OTHER}, default set): an owner arrived (process 800', self.log_text())
+
+    def test_reboot_during_an_earlier_shutdown_resets_the_next_devices_idle_time(self):
+        quiet, fixture = self.two_idle_devices()
+        rebooted = BASE_PS + [launchd_sim(100, DEVICE, T0 - 4 * 3600), launchd_sim(201, OTHER, T0 - 30)]
+        fixture['ps'] = [quiet, quiet, rebooted]
+        self.fixture(**fixture)
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [['default', 'shutdown', DEVICE]])
+        self.assertIn(f'kept iPhone gate 1 ({OTHER}, default set): idle only 30s now', self.log_text())
+
+    def test_each_device_gets_its_own_final_look(self):
+        quiet, fixture = self.two_idle_devices()
+        self.fixture(**fixture)
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [['default', 'shutdown', DEVICE], ['default', 'shutdown', OTHER]])
+        lists = [call for call in self.calls() if call[1] == 'list']
+        self.assertEqual(len(lists), 4, 'one pass listing of both sets, then the default set before each shutdown')
+        self.assertEqual(int((self.bin / 'ps.count').read_text()), 3, 'one ps for the pass, one per device')
+
+    # --- B: the lease file is locked through the shutdown -------------------
+
+    def probes(self):
+        try:
+            return [json.loads(line) for line in (self.bin / 'probes.log').read_text().splitlines()]
+        except FileNotFoundError:
+            return []
+
+    def test_lease_is_locked_while_simctl_shutdown_runs(self):
+        self.seed(f'default:{DEVICE}', T0 - 3 * 3600)
+        self.fixture(default=[device(DEVICE)], ps=[BASE_PS + [launchd_sim(100, DEVICE, T0 - 7200)]],
+                     probe_leases=str(self.config.lease_dir))
+        self.run_pass()
+        self.assertEqual(self.probes(), [[[DEVICE, 'blocked']]], 'a lease started now waits for the janitor')
+        self.assertFalse(janitor.lease_held(self.config, DEVICE), 'released once the shutdown returns')
+        outcome = json.loads(janitor.lease_path(self.config, DEVICE).read_text())
+        self.assertEqual(outcome['result'], 'shut down')
+
+    def test_clone_shutdown_locks_the_source_lease_too(self):
+        self.seed(f'testing:{CLONE}', T0 - 3 * 3600)
+        self.fixture(default=[device(DEVICE, 'Gate', state='Shutdown')],
+                     testing=[device(CLONE, 'Clone 1 of Gate')],
+                     ps=[BASE_PS + [launchd_sim(100, CLONE, T0 - 7200, testing=True)]],
+                     probe_leases=str(self.config.lease_dir), probe_udids=[CLONE, DEVICE])
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [['testing', 'shutdown', CLONE]])
+        self.assertEqual(self.probes(), [[[CLONE, 'blocked'], [DEVICE, 'blocked']]])
+
+    def test_lease_taken_before_the_lock_keeps_the_device(self):
+        self.config.lease_dir.mkdir(parents=True)
+        with open(janitor.lease_path(self.config, DEVICE), 'a') as lease:
+            fcntl.flock(lease, fcntl.LOCK_SH)
+            handles, busy = janitor.lock_leases(self.config, [OTHER, DEVICE])
+        self.assertIsNone(handles)
+        self.assertEqual(busy, DEVICE)
+        self.assertFalse(janitor.lease_held(self.config, OTHER), 'locks already taken are released')
+
+    def test_lease_waits_for_the_janitor_and_says_it_shut_the_device_down(self):
+        self.config.lease_dir.mkdir(parents=True)
+        path = janitor.lease_path(self.config, DEVICE)
+        env = dict(os.environ, SIM_JANITOR_STATE_DIR=str(self.config.state_dir))
+        with open(path, 'a+') as held:
+            fcntl.flock(held, fcntl.LOCK_EX)
+            wrapper = subprocess.Popen([sys.executable, str(SCRIPT), 'lease', DEVICE, '--',
+                                        sys.executable, '-c', 'print("ran")'],
+                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)
+            time.sleep(1)
+            self.assertIsNone(wrapper.poll(), 'the lease blocks rather than failing')
+            held.truncate(0)
+            held.write(json.dumps(dict(result='shut down', at=time.time(), pid=1)) + '\n')
+            held.flush()
+        out, err = wrapper.communicate(timeout=30)
+        self.assertEqual(wrapper.returncode, 0)
+        self.assertEqual(out.strip(), 'ran', 'the command still runs')
+        self.assertIn('waiting for sim-janitor', err)
+        self.assertIn(f'sim-janitor shut {DEVICE} down while this lease waited', err)
+
+    def test_lease_that_did_not_wait_says_nothing(self):
+        self.config.lease_dir.mkdir(parents=True)
+        janitor.lease_path(self.config, DEVICE).write_text(
+            json.dumps(dict(result='shut down', at=time.time(), pid=1)) + '\n')
+        env = dict(os.environ, SIM_JANITOR_STATE_DIR=str(self.config.state_dir))
+        result = subprocess.run([sys.executable, str(SCRIPT), 'lease', DEVICE, '--', 'true'],
+                                capture_output=True, text=True, env=env, timeout=30)
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stderr, '')
+
+    # --- C: budget and retry order ------------------------------------------
+
+    def test_shutdown_timeout_is_capped_at_the_pass_budget(self):
+        self.seed(f'default:{DEVICE}', T0 - 3 * 3600)
+        self.config.pass_budget = 3
+        self.config.shutdown_timeout = 60
+        self.config.min_step = 0.5
+        self.fixture(default=[device(DEVICE)], ps=[BASE_PS + [launchd_sim(100, DEVICE, T0 - 7200)]],
+                     hang={'shutdown:default': 30})
+        started = time.monotonic()
+        self.assertEqual(self.run_pass(), 1)
+        self.assertLess(time.monotonic() - started, 10)
+        self.assertRegex(self.log_text(), r'could not shut down .* timed out after [23]s')
+
+    def test_a_device_that_times_out_does_not_starve_the_next(self):
+        quiet, fixture = self.two_idle_devices()
+        self.fixture(hang_device={DEVICE: 30}, **fixture)
+        self.config.pass_budget = 3
+        self.config.shutdown_timeout = 2.5
+        self.config.min_step = 1
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [['default', 'shutdown', DEVICE]])
+        self.assertIn('pass budget spent, 1 device(s) wait for the next pass', self.log_text())
+        attempts = json.loads(self.config.state_file.read_text())['attempts']
+        self.assertEqual(attempts[f'default:{DEVICE}']['failures'], 1)
+        self.now = T0 + 300
+        self.fixture(hang_device={DEVICE: 30}, **fixture)
+        self.run_pass()
+        self.assertEqual(self.shutdowns()[1], ['default', 'shutdown', OTHER],
+                         'the device that never failed goes first')
+
+    def test_repeated_shutdown_failures_back_off(self):
+        self.seed(f'default:{DEVICE}', T0 - 3 * 3600)
+        self.config.shutdown_timeout = 1
+        self.fixture(default=[device(DEVICE)], ps=[BASE_PS + [launchd_sim(100, DEVICE, T0 - 7200)]],
+                     hang_device={DEVICE: 30})
+        self.run_pass()
+        self.now = T0 + 300
+        self.run_pass()
+        self.assertEqual(len(self.shutdowns()), 2)
+        self.now = T0 + 600
+        self.run_pass()
+        self.assertEqual(len(self.shutdowns()), 2, 'two failures in a row wait 10 minutes')
+        self.assertIn('failed to shut down 2 times in a row, next try in 5m', self.log_text())
+        self.assertIn('2 failed shutdown(s) in a row, next try in 5m', self.status())
+        self.now = T0 + 300 + 601
+        self.run_pass()
+        self.assertEqual(len(self.shutdowns()), 3)
+        self.assertEqual(janitor.backoff_left(dict(last=0, failures=9), 0), janitor.BACKOFF_MAX)
+
+    def test_success_clears_the_failure_count(self):
+        self.seed(f'default:{DEVICE}', T0 - 3 * 3600)
+        state = json.loads(self.config.state_file.read_text())
+        state['attempts'] = {f'default:{DEVICE}': dict(last=T0 - 3600, failures=3)}
+        self.config.state_file.write_text(json.dumps(state))
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [['default', 'shutdown', DEVICE]])
+        self.assertEqual(json.loads(self.config.state_file.read_text())['attempts'], {})
+
+    # --- D: the pause switch between shutdowns ------------------------------
+
+    def test_pause_appearing_mid_pass_stops_before_the_next_shutdown(self):
+        quiet, fixture = self.two_idle_devices()
+        self.config.pause_file.parent.mkdir(parents=True)
+        self.fixture(touch_on_shutdown=str(self.config.pause_file), **fixture)
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [['default', 'shutdown', DEVICE]])
+        self.assertIn(f'paused: {self.config.pause_file} appeared, 1 device(s) left booted', self.log_text())
+        self.assertIn('stopped: paused', self.log_text())
+
+    # --- E: agent-device session activity -----------------------------------
+
+    def live_session(self, updated, events=None, session='t3-session', **extra):
+        """A claim whose daemon runs, with its events file touched at `events`."""
+        self.seed(f'default:{DEVICE}', T0 - 3 * 3600)
+        state_dir = self.home / 'agent-device-state'
+        daemon = [4242, 1, lstart(T0 - 9000), '/opt/homebrew/bin/node /x/agent-device/dist/src/internal/daemon.js']
+        self.claim(DEVICE, 4242, lstart(T0 - 9000), session=session, stateDir=str(state_dir),
+                   updatedAtMs=int(updated * 1000), **extra)
+        if events is not None:
+            folder = state_dir / 'sessions' / janitor.session_dir_name(session)
+            folder.mkdir(parents=True)
+            (folder / 'events.ndjson').write_text('{}\n')
+            os.utime(folder / 'events.ndjson', (events, events))
+        self.fixture(default=[device(DEVICE)], ps=[BASE_PS + [launchd_sim(100, DEVICE, T0 - 7200), daemon]])
+
+    def test_session_quiet_past_the_cap_does_not_own_the_device(self):
+        self.live_session(updated=T0 - 3 * 3600, events=T0 - 2.5 * 3600)
+        status = self.status()
+        self.assertIn('not an owner: agent-device session t3-session (daemon 4242): '
+                      'last activity 2h30m ago, past the 2h00m session cap', status)
+        self.assertIn('owners: none found', status)
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [['default', 'shutdown', DEVICE]])
+
+    def test_recent_session_events_keep_the_device(self):
+        self.live_session(updated=T0 - 3 * 3600, events=T0 - 300, session='t3:odd name')
+        self.assertIn('owner: agent-device session t3:odd name (daemon 4242), last activity 5m ago', self.status())
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [])
+
+    def test_recent_claim_update_keeps_the_device(self):
+        self.live_session(updated=T0 - 60, events=T0 - 3 * 3600)
+        self.assertIn('last activity 1m ago', self.status())
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [])
+
+    def test_unreadable_session_activity_counts_as_in_use(self):
+        self.live_session(updated=T0 - 3 * 3600, events=None)
+        self.assertIn('last activity unknown', self.status())
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [])
+
+    def test_abandoned_claim_does_not_own_the_device(self):
+        self.live_session(updated=T0 - 60, events=T0 - 60, abandonedAtMs=int((T0 - 60) * 1000))
+        self.assertIn('not an owner: agent-device session t3-session: closed 1m ago (claim abandoned)', self.status())
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [['default', 'shutdown', DEVICE]])
+
+    def test_transient_command_claim_owns_while_its_daemon_runs(self):
+        self.live_session(updated=T0 - 3 * 3600, session='transient:install',
+                          **{'transientCommand': 'install'})
+        record = json.loads((self.claims / 'transient_install.json').read_text())
+        record['claimOwnerKind'] = 'transient-command'
+        (self.claims / 'transient_install.json').write_text(json.dumps(record))
+        self.assertIn('running one command', self.status())
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [])
+
+    def test_session_cap_from_environment_and_flag(self):
+        os.environ['SIM_JANITOR_SESSION_IDLE_MINUTES'] = '45'
+        self.addCleanup(os.environ.pop, 'SIM_JANITOR_SESSION_IDLE_MINUTES')
+        self.assertEqual(janitor.Config(home=self.home).session_cap, 45 * 60)
+        self.live_session(updated=T0 - 3 * 3600, events=T0 - 3600)
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            janitor.main(['status', '--session-idle-minutes', '30'], config=self.config)
+        self.assertEqual(self.config.session_cap, 30 * 60)
+        self.assertIn('past the 30m session cap', out.getvalue())
+
+    # --- F: devices a test names some other way -----------------------------
+
+    def app(self, pid, started, path='Containers/Bundle/Application', parent=100, stat='Ss'):
+        bundle = f'{HOST}/CoreSimulator/Devices/{DEVICE}/data/{path}/6F1D2C3B-4A5E-4F60-8A7B-9C0D1E2F3A4B'
+        return [pid, parent, lstart(started), f'{bundle}/Some App.app/SomeApp -AppleLanguages (en)', stat]
+
+    def test_recent_app_start_in_the_device_tree_keeps_it(self):
+        self.seed(f'default:{DEVICE}', T0 - 3 * 3600)
+        self.fixture(default=[device(DEVICE)],
+                     ps=[BASE_PS + [launchd_sim(100, DEVICE, T0 - 7200), self.app(110, T0 - 10 * 60)]])
+        self.assertIn('last app or test start: 10m ago, process 110', self.status())
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [])
+        self.fixture(default=[device(DEVICE)], ps=[BASE_PS + [launchd_sim(100, DEVICE, T0 - 7200)]])
+        self.now = T0 + 15 * 60
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [], 'idle from the app start, even after the app exits')
+        self.now = T0 + 21 * 60
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [['default', 'shutdown', DEVICE]])
+
+    def test_long_running_app_does_not_pin_the_device(self):
+        self.seed(f'default:{DEVICE}', T0 - 3 * 3600)
+        self.fixture(default=[device(DEVICE)],
+                     ps=[BASE_PS + [launchd_sim(100, DEVICE, T0 - 7200), self.app(110, T0 - 7000)]])
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [['default', 'shutdown', DEVICE]])
+
+    def test_extensions_and_system_daemons_are_not_activity(self):
+        self.seed(f'default:{DEVICE}', T0 - 3 * 3600)
+        widget = [111, 100, lstart(T0 - 60), f'{HOST}/CoreSimulator/Devices/{DEVICE}/data/Containers/Bundle/'
+                  'Application/6F1D2C3B-4A5E-4F60-8A7B-9C0D1E2F3A4B/App.app/PlugIns/Widgets.appex/Widgets']
+        daemon = [112, 100, lstart(T0 - 60), '/Library/Developer/CoreSimulator/Volumes/iOS/usr/libexec/diagnosticd']
+        self.fixture(default=[device(DEVICE)], ps=[BASE_PS + [launchd_sim(100, DEVICE, T0 - 7200), widget, daemon]])
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [['default', 'shutdown', DEVICE]])
+
+    def test_test_runner_and_xctest_starts_are_activity(self):
+        for command in (f'{HOST}/CoreSimulator/Devices/{DEVICE}/data/Containers/Bundle/Application/'
+                        '6F1D2C3B-4A5E-4F60-8A7B-9C0D1E2F3A4B/AppUITests-Runner.app/AppUITests-Runner',
+                        '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/'
+                        'Developer/Library/Xcode/Agents/xctest'):
+            self.assertTrue(janitor.is_app_or_test(command), command)
+
+    def test_destination_by_name_owns_every_booted_device_with_that_name(self):
+        self.seed(f'default:{DEVICE}', T0 - 3 * 3600)
+        xcodebuild = [500, 400, lstart(T0 - 60), '/usr/bin/xcodebuild test -scheme App '
+                      '-destination platform=iOS Simulator,name=iPhone gate 0,OS=latest -quiet']
+        self.fixture(default=[device(DEVICE)], ps=[BASE_PS + [launchd_sim(100, DEVICE, T0 - 7200), xcodebuild]])
+        self.assertIn("owner: process 500 names it 'iPhone gate 0' in -destination", self.status())
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [])
+
+    def test_destination_with_another_name_does_not_own(self):
+        self.seed(f'default:{DEVICE}', T0 - 3 * 3600)
+        xcodebuild = [500, 400, lstart(T0 - 60),
+                      "/bin/zsh -c xcodebuild test -destination 'platform=iOS Simulator,name=iPhone gate 01' | xcbeautify"]
+        self.fixture(default=[device(DEVICE)], ps=[BASE_PS + [launchd_sim(100, DEVICE, T0 - 7200), xcodebuild]])
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [['default', 'shutdown', DEVICE]])
+
+    def test_destination_names_parsing(self):
+        names = janitor.destination_names
+        self.assertEqual(names('xcodebuild -destination platform=iOS Simulator,name=iPhone 17 Pro,OS=27.2 -scheme A'),
+                         ['iPhone 17 Pro'])
+        self.assertEqual(names("sh -c xcodebuild -destination 'platform=iOS Simulator,name=iPhone 17' | xcbeautify"),
+                         ['iPhone 17'])
+        self.assertEqual(names('xcodebuild -destination id=' + DEVICE), [])
+        self.assertEqual(names('maestro test flow.yaml'), [])
+
+    def test_clone_is_owned_through_its_source_name(self):
+        self.seed(f'testing:{CLONE}', T0 - 3 * 3600)
+        xcodebuild = [500, 400, lstart(T0 - 60), 'xcodebuild test -destination platform=iOS Simulator,name=Gate']
+        self.fixture(default=[device(DEVICE, 'Gate', state='Shutdown')],
+                     testing=[device(CLONE, 'Clone 1 of Gate')],
+                     ps=[BASE_PS + [launchd_sim(100, CLONE, T0 - 7200, testing=True), xcodebuild]])
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [])
+
+    def test_debugger_attached_in_the_device_tree_owns_it(self):
+        self.seed(f'default:{DEVICE}', T0 - 3 * 3600)
+        self.fixture(default=[device(DEVICE)],
+                     ps=[BASE_PS + [launchd_sim(100, DEVICE, T0 - 7200), self.app(110, T0 - 7000, stat='SXs')]])
+        self.assertIn('owner: process 110 is being debugged', self.status())
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [])
+
+    def test_traced_process_outside_the_device_tree_does_not_own_it(self):
+        self.seed(f'default:{DEVICE}', T0 - 3 * 3600)
+        other = [300, 1, lstart(T0 - 60), '/usr/bin/some-tool', 'SX']
+        self.fixture(default=[device(DEVICE)], ps=[BASE_PS + [launchd_sim(100, DEVICE, T0 - 7200), other]])
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [['default', 'shutdown', DEVICE]])
 
 
 if __name__ == '__main__':
