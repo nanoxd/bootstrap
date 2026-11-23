@@ -241,6 +241,9 @@ use_ssh_remote "$BOOTSTRAP_DIR" "$BOOTSTRAP_REPO"
 if [ "$BOOTSTRAP_PROFILE" = personal ]; then
   fancy_echo "Cloning personal repositories ..."
   make repos
+  # t3-ops (cloned above) links the foreman skill and deploys this Mac's T3 workflows.
+  fancy_echo "Setting up t3-ops ..."
+  make t3-ops
 fi
 
 make rust

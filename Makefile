@@ -1,4 +1,4 @@
-.PHONY: install brew skills fish-plugins agent-config macOS rust git-signing repos sim-janitor sim-janitor-uninstall test
+.PHONY: install brew skills fish-plugins agent-config macOS rust git-signing repos t3-ops sim-janitor sim-janitor-uninstall test
 
 BOOTSTRAP_PROFILE ?= server
 
@@ -38,6 +38,10 @@ git-signing:
 
 repos:
 	./repos
+
+t3-ops:
+	@if [ -x "$(HOME)/dev/t3-ops/install.sh" ]; then "$(HOME)/dev/t3-ops/install.sh"; \
+	else echo "No ~/dev/t3-ops checkout. Run make repos first."; fi
 
 sim-janitor:
 	./sim-janitor-install
