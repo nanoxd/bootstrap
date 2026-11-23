@@ -244,3 +244,8 @@ if [ "$BOOTSTRAP_PROFILE" = personal ]; then
 fi
 
 make rust
+
+# Shuts down iOS Simulators nothing has used for 30 minutes, whatever booted
+# them. Loads a LaunchAgent that runs one short pass every 5 minutes.
+fancy_echo "Installing the simulator janitor ..."
+make sim-janitor

@@ -83,6 +83,33 @@ and existing GPG keys are left untouched.
 `BOOTSTRAP_SSH_KEY` overrides the key path and `BOOTSTRAP_SSH_KEY_TITLE` skips
 the prompt for the key's title on GitHub.
 
+### Simulator janitor
+
+Many agents booting iOS Simulators can leave devices running for hours, and
+their `diagnosticd` processes keep the load high. `make install` installs
+`sim-janitor`, a LaunchAgent that runs one short pass every 5 minutes and shuts
+down any booted simulator nothing has used for 30 minutes. It works for any
+simulator, in the default device set and in XCTest's clone set, whatever
+booted it. Install or remove it on its own with `make sim-janitor` and
+`make sim-janitor-uninstall`.
+
+A device is in use while a process other than the simulator's own names its
+UDID (xcodebuild, `xcrun simctl`, maestro, agent-device), while an agent-device
+session holds it, or while a lease is held:
+
+```sh
+sim-janitor lease <UDID> -- xcodebuild test -destination id=<UDID> ...
+sim-janitor status            # what is booted, who owns it, what a pass would do
+sim-janitor run --dry-run     # log what would be shut down
+touch ~/.agents/sim-janitor.pause   # pause it; delete the file to resume
+```
+
+Set `SIM_JANITOR_GRACE_MINUTES` to change the grace period. Each pass writes a
+line to `~/Library/Logs/sim-janitor.log`. It only ever runs
+`xcrun simctl shutdown`: it never deletes or erases a device and never kills a
+process. A simulator someone uses by hand in Simulator.app, with no tool
+attached, looks idle, so hold a lease or pause the janitor for that.
+
 ## Customization
 
 The scripts as is favor my needs. To avoid installing packages you don't need,

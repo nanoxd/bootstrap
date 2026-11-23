@@ -32,6 +32,8 @@ make macOS             # Apply macOS system preferences
 make rust              # Install Rust packages from Cargofile
 make git-signing       # Ensure SSH commit signing (key, agent, GitHub, git config)
 make repos             # Clone missing repos from agent-config/repos.tsv into ~/dev
+make sim-janitor       # Install sim-janitor and load its LaunchAgent (sim-janitor-uninstall removes both)
+make test              # Run the unit tests (stdlib unittest, CLT Python)
 ```
 
 ### Testing Changes
@@ -41,6 +43,8 @@ make repos             # Clone missing repos from agent-config/repos.tsv into ~/
 ./git-signing          # Safe to re-run; skips anything already done
 brew bundle check --file=Brewfile   # List dependencies that are missing or outdated
 brew bundle list --all --file=Brewfile.personal   # Parse a Brewfile without checking what's installed
+./sim-janitor status   # Booted simulators, their owners, and what a pass would do
+./sim-janitor run --dry-run   # Log what a pass would shut down without doing it
 ```
 
 `setup` doesn't run `macOS`, so apply preferences with `make macOS` after a bootstrap.
@@ -52,12 +56,16 @@ brew bundle list --all --file=Brewfile.personal   # Parse a Brewfile without che
 - **setup**: Main orchestrator script that runs the complete bootstrap process. Installs Homebrew, then Xcode before any formulas so they build against it instead of the Command Line Tools, then Rust, dotfiles, and fish. Clones dotfiles over HTTPS and links them before anything else can create `~/.config`, merging any existing directories into the repo first. Restores Fish plugins with `make fish-plugins` after the Brewfile. Runs `mise install` after the Brewfile and installs Codex CLI, Claude Code, and uv with their standalone installers, preserving vendor updates and leaving shell startup files alone. Runs `make skills` after the Brewfile so `skl` links the agent skills listed in the dotfiles' `~/.config/skl`. Runs `git-signing` after dotfiles so `user.email` is set, then syncs the private `nanoxd/agent-config` repo and switches the dotfiles and bootstrap remotes to SSH. Never writes shell startup files, which the dotfiles own.
 - **git-signing**: Idempotent SSH commit-signing setup. Logs in to GitHub with the scopes needed to manage keys, generates an ED25519 key if missing, loads it into the agent and Apple Keychain, registers it with GitHub as an authentication and signing key, writes `~/.ssh/allowed_signers`, and configures signing in `~/.gitconfig.local`. Leaves existing GPG keys untouched.
 - **repos**: Clones each repository listed in the private `~/dev/agent-config/repos.tsv` (tab-separated path under `~/dev` and clone URL) that is not already present. Skips existing paths and reports failed clones without stopping. `setup` runs it on the personal profile only, after `git-signing` registers the SSH key. The list lives in agent-config because this repo is public.
+- **sim-janitor**: Machine-wide iOS Simulator backstop, Python 3 standard library only so it runs on the Command Line Tools' `/usr/bin/python3` (3.9). Knows nothing about any app. `run` makes one pass over booted devices in the default set and `--set testing`, and shuts down with `xcrun simctl shutdown` any device without an owner for longer than the grace period (30 minutes, `SIM_JANITOR_GRACE_MINUTES` or `--grace-minutes`). Owners are a held `sim-janitor lease UDID -- command` flock in `~/Library/Caches/sim-janitor/leases/`, a process outside the simulator's launchd_sim tree whose argv names the UDID, and an agent-device claim in `~/.agent-device/device-claims` whose daemon still runs with the recorded start time. An agent-device runner alone is not an owner, and a testing-set clone is also owned through its source device. It never deletes, erases, or touches a device that isn't Booted, and never kills a process. Every subprocess has a timeout, a non-blocking flock keeps one pass at a time, every pass logs to `~/Library/Logs/sim-janitor.log`, and `~/.agents/sim-janitor.pause` pauses it. Idle clocks live in `~/Library/Caches/sim-janitor/state.json`.
+- **sim-janitor-install**: Copies `sim-janitor` to `~/.local/bin`, renders `launchd/dev.nanoxd.sim-janitor.plist` into `~/Library/LaunchAgents` with a 5-minute `StartInterval`, and loads it, reloading only when something changed. The agent runs the installed copy, so branch switches and removed worktrees never change it. `uninstall` unloads and removes both. `SIM_JANITOR_LOAD=0` writes the files without touching launchd. `setup` runs it last, on both profiles.
 - **macOS**: Applies extensive macOS system preferences including Trackpad, Finder, Dock, and application-specific settings.
 
 ### Configuration Files
 - **Brewfile**: Homebrew package definitions including CLI tools, GUI applications, and Mac App Store apps. Uses tap/brew/cask/mas syntax.
 - **Cargofile**: Executable script listing Rust tools to install via cargo, one `cargo_install` call per crate. Only for crates Homebrew has no formula for, so a fresh bootstrap doesn't compile from source.
 - **Makefile**: Build automation defining installation targets and dependencies.
+- **launchd/**: LaunchAgent templates. `@BIN@` and `@HOME@` are filled in at install time.
+- **tests/**: `unittest` suites run by `make test`. They stub external commands with small scripts on disk rather than mocking `subprocess`, so timeouts and argument handling are exercised for real.
 
 ### Security & Authentication
 - Generates ED25519 SSH keys, commented with the git email when available
@@ -79,6 +87,7 @@ Always test scripts in isolation before running full bootstrap:
 3. Use `brew bundle list --all --file=<Brewfile>` to validate Brewfile syntax
 
 ### Script Conventions
+- Python tools use only the standard library and stay compatible with `/usr/bin/python3` (3.9), since they run before Homebrew and under launchd's minimal PATH
 - Preserve idempotency - scripts should be safe to run multiple times
 - Use `set -e` for fail-fast behavior in shell scripts. `macOS` is the exception: it's best effort, so one failed write doesn't skip the rest
 - Target `/bin/bash` (bash 3.2 on macOS): no associative arrays, no `+=` on arrays under `set -u`

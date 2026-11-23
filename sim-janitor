@@ -1,0 +1,735 @@
+#!/usr/bin/env python3
+"""Shut down iOS Simulators that nothing has used for a while.
+
+    sim-janitor run [--dry-run] [--grace-minutes N]   one pass, then exit
+    sim-janitor status [--grace-minutes N]            what is booted, who owns it
+    sim-janitor lease UDID -- COMMAND...              hold the device while COMMAND runs
+
+A machine-wide backstop that knows nothing about any one app. launchd runs one
+short pass every 5 minutes. Each pass lists the booted devices in the default
+device set and in `--set testing`, where XCTest keeps its parallel-testing
+clones, and decides whether each one is in use. Any of these marks a device in
+use:
+
+  - a held lease: `sim-janitor lease` holds a shared flock on
+    ~/Library/Caches/sim-janitor/leases/<UDID>.lock while its command runs;
+  - a process outside the simulator's own runtime tree (launchd_sim and its
+    descendants) whose argv names the UDID, such as xcodebuild
+    `-destination id=`, `xcrun simctl` subcommands, maestro or agent-device;
+  - an open agent-device session: a claim in ~/.agent-device/device-claims (or
+    $AGENT_DEVICE_CLAIMS_DIR) whose owner process is still running with the
+    start time the claim records.
+
+An agent-device runner (the detached `xcodebuild test-without-building` of
+AgentDeviceRunner) is not an owner by itself, because one whose session is
+gone would pin its device forever. While its session is open the claim keeps
+the device. The janitor never stops a runner; shutting the device down ends it.
+
+A clone in the testing set ("Clone N of NAME") is also owned through the
+default-set device NAME, since xcodebuild names only the source device.
+
+A device is shut down with `xcrun simctl shutdown` once it has been idle for
+longer than the grace period (30 minutes; SIM_JANITOR_GRACE_MINUTES or
+--grace-minutes). Idle time runs from the later of the last pass that saw an
+owner and the device's boot. A device seen for the first time is idle from
+that moment. The janitor never deletes or erases a device, never touches one
+that is not Booted, and never signals any process other than its own hung
+subprocesses.
+
+Every subprocess has a hard timeout and the whole pass has a deadline, since
+simctl hangs when CoreSimulatorService is overloaded. Only one pass runs at a
+time (a non-blocking flock). Every pass logs at least one line to
+~/Library/Logs/sim-janitor.log. If ~/.agents/sim-janitor.pause exists, a pass
+logs that and exits. If the process table or the claim directory cannot be
+read, the pass keeps every device. Right before shutting a device down it lists
+the devices and reads the process table again, and keeps any that gained an
+owner.
+
+What it cannot see, so hold a lease or pause it for these:
+
+  - a person using Simulator.app by hand with no tool attached;
+  - a tool that names the device some other way, such as
+    `-destination 'name=iPhone 17'` or `simctl ... booted`, between the
+    commands that do name it;
+  - the command of a `lease` whose wrapper was killed with SIGKILL, since the
+    kernel drops the flock with the wrapper.
+
+And what it trusts: an open agent-device session pins its device for as long
+as agent-device keeps the claim, and any long-lived process that names the UDID
+(a forgotten `simctl io recordVideo`, `log stream`) pins it until it exits.
+`status` names each one. Idle clocks live in a cache file, so losing it only
+restarts them.
+"""
+import argparse
+import errno
+import fcntl
+import json
+import os
+from pathlib import Path
+import re
+import signal
+import subprocess
+import sys
+import time
+import traceback
+
+UDID = re.compile(r'[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}')
+CLONE = re.compile(r'Clone \d+ of (.+)')
+LOG_LIMIT = 1 << 20
+# A claim file that cannot be parsed may be half written. One this young still
+# counts as an owner, an older one is reported and ignored so it can't pin.
+UNREADABLE_CLAIM_WINDOW = 300
+CLAIM_LIMIT = 1 << 16
+
+
+class Unavailable(Exception):
+    """A subprocess failed, timed out, or printed something unexpected."""
+
+
+class PassDeadline(Exception):
+    pass
+
+
+def env_float(name, default):
+    try:
+        return float(os.environ[name])
+    except (KeyError, ValueError):
+        return default
+
+
+class Config:
+    """Every path and limit the janitor uses, so tests can point them elsewhere."""
+
+    def __init__(self, home=None, **overrides):
+        home = Path(home or os.environ.get('SIM_JANITOR_HOME') or Path.home())
+        state_dir = Path(os.environ.get('SIM_JANITOR_STATE_DIR') or home / 'Library/Caches/sim-janitor')
+        self.state_dir = state_dir
+        self.lease_dir = state_dir / 'leases'
+        self.state_file = state_dir / 'state.json'
+        self.lock_file = state_dir / 'janitor.lock'
+        self.log_file = Path(os.environ.get('SIM_JANITOR_LOG') or home / 'Library/Logs/sim-janitor.log')
+        self.pause_file = Path(os.environ.get('SIM_JANITOR_PAUSE') or home / '.agents/sim-janitor.pause')
+        claims = [home / '.agent-device/device-claims']
+        if os.environ.get('AGENT_DEVICE_CLAIMS_DIR'):
+            claims.append(Path(os.environ['AGENT_DEVICE_CLAIMS_DIR']))
+        self.claim_dirs = claims
+        self.grace = env_float('SIM_JANITOR_GRACE_MINUTES', 30.0) * 60
+        self.xcrun = os.environ.get('SIM_JANITOR_XCRUN') or '/usr/bin/xcrun'
+        self.ps = os.environ.get('SIM_JANITOR_PS') or '/bin/ps'
+        self.list_timeout = env_float('SIM_JANITOR_LIST_TIMEOUT', 45.0)
+        self.ps_timeout = env_float('SIM_JANITOR_PS_TIMEOUT', 20.0)
+        self.shutdown_timeout = env_float('SIM_JANITOR_SHUTDOWN_TIMEOUT', 90.0)
+        # launchd starts a pass every 300s. A pass gives up well before that.
+        self.pass_budget = env_float('SIM_JANITOR_PASS_BUDGET', 240.0)
+        self.clock = time.time
+        for key, value in overrides.items():
+            if not hasattr(self, key):
+                raise TypeError(f'unknown setting {key}')
+            setattr(self, key, value)
+
+
+# --- logging -----------------------------------------------------------------
+
+def log(config, message):
+    """Append one line to the log, rotating it at 1 MB. Never raises."""
+    line = f'{time.strftime("%Y-%m-%dT%H:%M:%S%z")} [{os.getpid()}] {message}\n'
+    try:
+        config.log_file.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            if config.log_file.stat().st_size > LOG_LIMIT:
+                config.log_file.replace(config.log_file.with_name(config.log_file.name + '.1'))
+        except FileNotFoundError:
+            pass
+        with open(config.log_file, 'a') as output:
+            output.write(line)
+    except OSError:
+        sys.stderr.write(line)
+
+
+# --- subprocesses ------------------------------------------------------------
+
+def call(args, timeout):
+    """stdout of a command, or Unavailable. A command that overruns `timeout`
+    is killed: it is our own child, never a simulator or a tool's process."""
+    try:
+        result = subprocess.run(args, stdin=subprocess.DEVNULL, capture_output=True, text=True,
+                                errors='replace', timeout=timeout, env=dict(os.environ, LC_ALL='C'))
+    except subprocess.TimeoutExpired:
+        raise Unavailable(f'{" ".join(args[:4])} timed out after {timeout:.0f}s') from None
+    except OSError as error:
+        raise Unavailable(f'{args[0]}: {error}') from None
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout).strip().splitlines()
+        raise Unavailable(f'{" ".join(args[:4])} exited {result.returncode}'
+                          + (f': {detail[-1][:200]}' if detail else ''))
+    return result.stdout
+
+
+def simctl_args(config, device_set, *args):
+    return [config.xcrun, 'simctl', *(['--set', 'testing'] if device_set == 'testing' else []), *args]
+
+
+def list_devices(config, device_set):
+    """[{udid, name, state, set}] for every device in the set."""
+    output = call(simctl_args(config, device_set, 'list', 'devices', '-j'), config.list_timeout)
+    try:
+        groups = json.loads(output)['devices']
+        devices = []
+        for runtime, entries in groups.items():
+            for entry in entries:
+                if not UDID.fullmatch(entry['udid']):
+                    raise ValueError(f'odd UDID {entry["udid"]!r}')
+                devices.append(dict(udid=entry['udid'].upper(), name=entry['name'], state=entry['state'],
+                                    set=device_set, runtime=runtime.rsplit('.', 1)[-1]))
+        return devices
+    except (ValueError, KeyError, TypeError, AttributeError) as error:
+        raise Unavailable(f'simctl list ({device_set}) printed something unexpected: {error}') from None
+
+
+class Process:
+    __slots__ = ('pid', 'ppid', 'start', 'command')
+
+    def __init__(self, pid, ppid, start, command):
+        self.pid, self.ppid, self.start, self.command = pid, ppid, start, command
+
+
+def process_table(config):
+    """{pid: Process} for every process. `start` is ps's lstart, which is what
+    agent-device records as a process's start time."""
+    output = call([config.ps, '-axww', '-o', 'pid=,ppid=,lstart=,command='], config.ps_timeout)
+    table = {}
+    for line in output.splitlines():
+        fields = line.split(None, 7)
+        if len(fields) < 7:
+            continue
+        if not (fields[0].isdigit() and fields[1].isdigit()):
+            raise Unavailable(f'ps printed an unexpected line: {line[:120]!r}')
+        pid = int(fields[0])
+        table[pid] = Process(pid, int(fields[1]), ' '.join(fields[2:7]), fields[7] if len(fields) > 7 else '')
+    if not table:
+        raise Unavailable('ps listed no processes')
+    return table
+
+
+def parse_start(text):
+    try:
+        return time.mktime(time.strptime(' '.join(text.split()), '%a %b %d %H:%M:%S %Y'))
+    except (ValueError, OverflowError):
+        return None
+
+
+# --- ownership ---------------------------------------------------------------
+
+def is_runtime_root(process):
+    argv0 = process.command.split(' ', 1)[0]
+    return os.path.basename(argv0) == 'launchd_sim'
+
+
+def runtime_tree(table):
+    """Pids of every launchd_sim and its descendants: the simulators' own processes."""
+    children = {}
+    for process in table.values():
+        children.setdefault(process.ppid, []).append(process.pid)
+    inside = set()
+    stack = [pid for pid, process in table.items() if is_runtime_root(process)]
+    while stack:
+        pid = stack.pop()
+        if pid in inside:
+            continue
+        inside.add(pid)
+        stack.extend(children.get(pid, ()))
+    return inside
+
+
+def boot_times(table):
+    """{UDID: epoch} from each launchd_sim's start time."""
+    found = {}
+    for process in table.values():
+        if is_runtime_root(process):
+            match = re.search(r'/(?:Devices|XCTestDevices)/(' + UDID.pattern + r')/', process.command)
+            started = parse_start(process.start)
+            if match and started is not None:
+                found[match[1].upper()] = started
+    return found
+
+
+def is_agent_device_runner(command):
+    argv0 = command.split(' ', 1)[0]
+    return os.path.basename(argv0) == 'xcodebuild' and 'AgentDeviceRunner' in command
+
+
+class Evidence:
+    """What one look at the machine found: the process table and the claims.
+    `problem` says why ownership cannot be judged at all this pass."""
+
+    def __init__(self, config, table, problem=None):
+        self.config = config
+        self.table = table
+        self.problem = problem
+        self.inside = runtime_tree(table) if table else set()
+        self.booted = boot_times(table) if table else {}
+        self.claims = self.read_claims() if table else []
+
+    def read_claims(self):
+        claims = []
+        now = self.config.clock()
+        for directory in self.config.claim_dirs:
+            try:
+                names = sorted(os.listdir(directory))
+            except FileNotFoundError:
+                continue
+            except OSError as error:
+                self.problem = self.problem or f'agent-device claims in {directory} unreadable: {error}'
+                continue
+            for name in names:
+                if not name.endswith('.json'):
+                    continue
+                path = Path(directory) / name
+                try:
+                    info = path.stat()
+                    text = path.read_text(errors='replace') if info.st_size <= CLAIM_LIMIT else ''
+                except OSError:
+                    continue
+                try:
+                    claim = json.loads(text)
+                    device = claim['device']['id'].upper()
+                    pid = int(claim['ownerPid'])
+                    started = claim.get('ownerStartTime')
+                    updated = claim.get('updatedAtMs')
+                    claims.append(dict(path=path, device=device, pid=pid, start=started,
+                                       session=claim.get('session', '?'), readable=True,
+                                       updated=updated / 1000 if isinstance(updated, (int, float)) else None))
+                except (ValueError, KeyError, TypeError, AttributeError):
+                    claims.append(dict(path=path, text=text.upper(), readable=False,
+                                       fresh=now - info.st_mtime < UNREADABLE_CLAIM_WINDOW))
+        return claims
+
+    def claim_owners(self, udid):
+        owners, notes = [], []
+        for claim in self.claims:
+            if not claim['readable']:
+                if udid in claim['text']:
+                    if claim['fresh']:
+                        owners.append(f'agent-device claim {claim["path"].name} (being written)')
+                    else:
+                        notes.append(f'unreadable agent-device claim {claim["path"].name}, ignored')
+                continue
+            if claim['device'] != udid:
+                continue
+            owner = self.table.get(claim['pid'])
+            if owner is None:
+                notes.append(f'agent-device session {claim["session"]}: daemon {claim["pid"]} is gone')
+            elif isinstance(claim['start'], str) and claim['start'].split() != owner.start.split():
+                notes.append(f'agent-device session {claim["session"]}: pid {claim["pid"]} was reused')
+            else:
+                touched = ''
+                if claim['updated'] is not None:
+                    touched = f', claim updated {duration(max(0, self.config.clock() - claim["updated"]))} ago'
+                owners.append(f'agent-device session {claim["session"]} (daemon {claim["pid"]}{touched})')
+        return owners, notes
+
+    def process_owners(self, udid):
+        owners, notes = [], []
+        own_paths = re.compile(r'/(?:Devices|XCTestDevices)/' + udid, re.IGNORECASE)
+        for process in self.table.values():
+            if process.pid in self.inside or process.pid == os.getpid():
+                continue
+            # A path inside the device's data directory isn't a use of the
+            # device. Tools that drive one name its UDID.
+            if udid not in own_paths.sub('', process.command).upper():
+                continue
+            if is_agent_device_runner(process.command):
+                notes.append(f'agent-device runner {process.pid} (an owner only while its session is open)')
+                continue
+            owners.append(f'process {process.pid}: {process.command[:160]}')
+        return owners, notes
+
+    def owners(self, udid):
+        """(owners, notes) for one UDID. Owners mark it in use."""
+        owners, notes = [], []
+        if lease_held(self.config, udid):
+            owners.append(f'lease {self.config.lease_dir / (udid + ".lock")}')
+        for found, noted in (self.process_owners(udid), self.claim_owners(udid)):
+            owners += found
+            notes += noted
+        return owners, notes
+
+
+def lease_path(config, udid):
+    return config.lease_dir / f'{udid.upper()}.lock'
+
+
+def lease_held(config, udid):
+    """Whether any `sim-janitor lease` holds this device. Never creates the file."""
+    try:
+        handle = open(lease_path(config, udid), 'rb')
+    except OSError:
+        return False
+    with handle:
+        try:
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError:
+            return True
+        fcntl.flock(handle, fcntl.LOCK_UN)
+    return False
+
+
+def related(device, by_name):
+    """The UDIDs whose owners also own `device`: a testing-set clone is owned
+    through the default-set device it was cloned from."""
+    udids = [device['udid']]
+    if device['set'] == 'testing':
+        match = CLONE.fullmatch(device['name'])
+        if match:
+            udids += [udid for udid in by_name.get(match[1], ()) if udid != device['udid']]
+    return udids
+
+
+def look(config):
+    try:
+        return Evidence(config, process_table(config))
+    except Unavailable as error:
+        return Evidence(config, None, f'process table unreadable: {error}')
+
+
+# --- state -------------------------------------------------------------------
+
+def load_state(config):
+    try:
+        data = json.loads(config.state_file.read_text())
+        return {str(key): float(value) for key, value in data.get('since', {}).items()}
+    except (OSError, ValueError, AttributeError, TypeError):
+        return {}
+
+
+def save_state(config, since):
+    config.state_dir.mkdir(parents=True, exist_ok=True)
+    temporary = config.state_file.with_name(f'.state.{os.getpid()}.tmp')
+    temporary.write_text(json.dumps({'since': since}, indent=1, sort_keys=True) + '\n')
+    os.replace(temporary, config.state_file)
+
+
+def key_of(device):
+    return f'{device["set"]}:{device["udid"]}'
+
+
+# --- one pass ----------------------------------------------------------------
+
+def inventory(config):
+    """(devices, sets that listed, problems). Without the default set nothing is known."""
+    devices, listed, problems = [], [], []
+    for device_set in ('default', 'testing'):
+        try:
+            devices += list_devices(config, device_set)
+            listed.append(device_set)
+        except Unavailable as error:
+            problems.append(str(error))
+            if device_set == 'default':
+                break
+    return devices, listed, problems
+
+
+def judge(config, devices, evidence, since, now):
+    """One verdict per booted device: dict(device, owners, notes, idle, action).
+    Updates `since` with what was seen."""
+    by_name = {}
+    for device in devices:
+        if device['set'] == 'default':
+            by_name.setdefault(device['name'], []).append(device['udid'])
+    verdicts = []
+    for device in devices:
+        if device['state'] != 'Booted':
+            continue
+        key = key_of(device)
+        owners, notes = [], []
+        if evidence.problem is None:
+            for udid in related(device, by_name):
+                found, noted = evidence.owners(udid)
+                suffix = '' if udid == device['udid'] else f' (via source {udid})'
+                owners += [owner + suffix for owner in found]
+                notes += [note + suffix for note in noted]
+        if owners:
+            since[key] = now
+        elif key not in since:
+            since[key] = now
+        started = max(since[key], evidence.booted.get(device['udid'], 0))
+        idle = max(0.0, now - started)
+        if evidence.problem is not None:
+            action = f'keep: cannot judge ({evidence.problem})'
+        elif owners:
+            action = 'keep: in use'
+        elif idle >= config.grace:
+            action = 'shut down'
+        else:
+            action = f'keep: shut down in {duration(config.grace - idle)} if still idle'
+        verdicts.append(dict(device=device, owners=owners, notes=notes, idle=idle, action=action))
+    return verdicts
+
+
+def duration(seconds):
+    seconds = int(seconds)
+    if seconds < 60:
+        return f'{seconds}s'
+    if seconds < 3600:
+        return f'{seconds // 60}m'
+    return f'{seconds // 3600}h{seconds % 3600 // 60:02d}m'
+
+
+def label(device):
+    return f'{device["name"]} ({device["udid"]}, {device["set"]} set)'
+
+
+def shutdown(config, device):
+    call(simctl_args(config, device['set'], 'shutdown', device['udid']), config.shutdown_timeout)
+
+
+def run_pass(config, dry_run=False):
+    """One pass. Returns the exit status. Assumes the single-instance lock is held."""
+    began = config.clock()
+    deadline = time.monotonic() + config.pass_budget
+    tag = '[dry-run] ' if dry_run else ''
+    devices, listed, problems = inventory(config)
+    for problem in problems:
+        log(config, f'{tag}{problem}')
+    if 'default' not in listed:
+        log(config, f'{tag}pass done: simctl could not list devices, nothing judged')
+        return 1
+    since = load_state(config)
+    evidence = look(config)
+    if evidence.problem:
+        log(config, f'{tag}{evidence.problem}; keeping every device this pass')
+    now = config.clock()
+    verdicts = judge(config, devices, evidence, since, now)
+    candidates = [v for v in verdicts if v['action'] == 'shut down']
+    shut = failed = 0
+    if candidates:
+        if dry_run:
+            for verdict in candidates:
+                log(config, f'{tag}would shut down {label(verdict["device"])}, idle {duration(verdict["idle"])}')
+        else:
+            shut, failed = shut_down(config, candidates, since, deadline)
+    # Forget devices that are no longer booted in the sets that listed.
+    booted = {key_of(v['device']) for v in verdicts}
+    for key in list(since):
+        if key.split(':', 1)[0] in listed and key not in booted:
+            del since[key]
+    if not dry_run:
+        try:
+            save_state(config, since)
+        except OSError as error:
+            log(config, f'could not save state: {error}')
+    in_use = sum(1 for v in verdicts if v['owners'])
+    log(config, f'{tag}pass done: {len(verdicts)} booted, {in_use} in use, '
+                f'{len(candidates)} idle past {duration(config.grace)}, {shut} shut down, {failed} failed'
+                f'{"" if "testing" in listed else ", testing set unlisted"}; '
+                f'took {config.clock() - began:.1f}s')
+    return 1 if failed else 0
+
+
+def shut_down(config, candidates, since, deadline):
+    """Look again right before acting, then shut down what is still booted and
+    unowned. Returns (shut, failed)."""
+    shut = failed = 0
+    current, listed, problems = inventory(config)
+    for problem in problems:
+        log(config, problem)
+    still_booted = {key_of(d) for d in current if d['state'] == 'Booted'}
+    evidence = look(config)
+    if evidence.problem:
+        log(config, f'{evidence.problem}; shutting nothing down this pass')
+        return 0, 0
+    by_name = {}
+    for device in current:
+        if device['set'] == 'default':
+            by_name.setdefault(device['name'], []).append(device['udid'])
+    for verdict in candidates:
+        device = verdict['device']
+        key = key_of(device)
+        if key not in still_booted:
+            continue
+        owners = [owner for udid in related(device, by_name) for owner in evidence.owners(udid)[0]]
+        if owners:
+            since[key] = config.clock()
+            log(config, f'kept {label(device)}: an owner arrived ({owners[0][:120]})')
+            continue
+        if time.monotonic() > deadline:
+            log(config, f'pass budget spent, {label(device)} waits for the next pass')
+            continue
+        try:
+            shutdown(config, device)
+        except Unavailable as error:
+            failed += 1
+            log(config, f'could not shut down {label(device)}: {error}')
+            continue
+        shut += 1
+        since.pop(key, None)
+        log(config, f'shut down {label(device)} after {duration(verdict["idle"])} idle')
+    return shut, failed
+
+
+# --- commands ----------------------------------------------------------------
+
+def acquire_instance_lock(config):
+    """The open lock file, or None when another pass holds it."""
+    config.state_dir.mkdir(parents=True, exist_ok=True)
+    handle = open(config.lock_file, 'a+')
+    try:
+        fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError as error:
+        handle.close()
+        if error.errno in (errno.EWOULDBLOCK, errno.EAGAIN):
+            return None
+        raise
+    handle.seek(0)
+    handle.truncate()
+    handle.write(f'{os.getpid()}\n')
+    handle.flush()
+    return handle
+
+
+def holder(config):
+    try:
+        return config.lock_file.read_text().strip() or '?'
+    except OSError:
+        return '?'
+
+
+def on_alarm(signum, frame):
+    raise PassDeadline()
+
+
+def command_run(config, dry_run=False):
+    tag = '[dry-run] ' if dry_run else ''
+    if config.pause_file.exists():
+        log(config, f'{tag}paused: {config.pause_file} exists, doing nothing')
+        return 0
+    try:
+        lock = acquire_instance_lock(config)
+    except OSError as error:
+        log(config, f'{tag}cannot take the single-instance lock: {error}')
+        return 1
+    if lock is None:
+        log(config, f'{tag}another pass is running (pid {holder(config)}), exiting')
+        return 0
+    # A hard stop for the whole pass, beyond each subprocess's own timeout.
+    previous = signal.signal(signal.SIGALRM, on_alarm)
+    signal.alarm(int(config.pass_budget + config.shutdown_timeout + 30))
+    try:
+        return run_pass(config, dry_run)
+    except PassDeadline:
+        log(config, f'{tag}pass hit its hard deadline and stopped')
+        return 1
+    except Exception as error:  # noqa: BLE001 - a crash must still leave a log line
+        log(config, f'{tag}pass failed: {type(error).__name__}: {error} | '
+                    + ' / '.join(traceback.format_exc().strip().splitlines()[-3:]))
+        return 1
+    finally:
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, previous)
+        lock.close()
+
+
+def command_status(config, out=sys.stdout):
+    devices, listed, problems = inventory(config)
+    for problem in problems:
+        print(f'warning: {problem}', file=out)
+    if 'default' not in listed:
+        print('simctl could not list devices', file=out)
+        return 1
+    since = load_state(config)
+    evidence = look(config)
+    if evidence.problem:
+        print(f'warning: {evidence.problem}', file=out)
+    paused = config.pause_file.exists()
+    print(f'grace {duration(config.grace)}; log {config.log_file}; leases {config.lease_dir}'
+          + (f'; PAUSED by {config.pause_file}' if paused else ''), file=out)
+    verdicts = judge(config, devices, evidence, since, config.clock())
+    if not verdicts:
+        print('no booted devices', file=out)
+    for verdict in verdicts:
+        device = verdict['device']
+        boot = evidence.booted.get(device['udid'])
+        up = f', up {duration(config.clock() - boot)}' if boot else ''
+        print(f'{label(device)} {device["runtime"]}{up}', file=out)
+        if not verdict['owners']:
+            print('    owners: none found', file=out)
+        for owner in verdict['owners']:
+            print(f'    owner: {owner}', file=out)
+        for note in verdict['notes']:
+            print(f'    not an owner: {note}', file=out)
+        action = verdict['action']
+        if paused and action == 'shut down':
+            action = 'shut down (once unpaused)'
+        print(f'    idle {duration(verdict["idle"])} -> {action}', file=out)
+    return 0
+
+
+def command_lease(config, udid, command):
+    if not UDID.fullmatch(udid):
+        print(f'sim-janitor lease: {udid!r} is not a simulator UDID', file=sys.stderr)
+        return 64
+    if not command:
+        print('sim-janitor lease: nothing to run (sim-janitor lease UDID -- COMMAND...)', file=sys.stderr)
+        return 64
+    config.lease_dir.mkdir(parents=True, exist_ok=True)
+    with open(lease_path(config, udid), 'a') as handle:
+        # Shared, so several tools can hold one device at once. The janitor's
+        # exclusive probe fails while any of them runs.
+        fcntl.flock(handle, fcntl.LOCK_SH)
+        try:
+            child = subprocess.Popen(command)
+        except OSError as error:
+            print(f'sim-janitor lease: {command[0]}: {error}', file=sys.stderr)
+            return 127
+
+        def forward(signum, frame):
+            try:
+                child.send_signal(signum)
+            except OSError:
+                pass
+
+        # The terminal already sends SIGINT to the whole process group, so the
+        # lease only has to outlive the command rather than die first and drop
+        # the lock. Set after Popen, since an ignored signal survives exec.
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+        for each in (signal.SIGTERM, signal.SIGHUP):
+            signal.signal(each, forward)
+        while True:
+            try:
+                status = child.wait()
+                break
+            except InterruptedError:
+                continue
+    return status if status >= 0 else 128 - status
+
+
+def main(argv=None, config=None):
+    argv = sys.argv[1:] if argv is None else argv
+    if argv[:1] == ['lease']:
+        rest = argv[1:]
+        if len(rest) < 2 or rest[1] != '--':
+            print('usage: sim-janitor lease UDID -- COMMAND...', file=sys.stderr)
+            return 64
+        return command_lease(config or Config(), rest[0], rest[2:])
+    parser = argparse.ArgumentParser(prog='sim-janitor', description=__doc__.split('\n\n')[0])
+    commands = parser.add_subparsers(dest='command')
+    run = commands.add_parser('run', help='one pass, then exit')
+    run.add_argument('--dry-run', action='store_true', help='decide and log, but shut nothing down')
+    status = commands.add_parser('status', help='booted devices, their owners, and what run would do')
+    for each in (run, status):
+        each.add_argument('--grace-minutes', type=float, help='idle minutes before shutdown (default 30)')
+    commands.add_parser('lease', help='sim-janitor lease UDID -- COMMAND...: hold the device while COMMAND runs')
+    args = parser.parse_args(argv)
+    if args.command is None:
+        parser.print_help()
+        return 64
+    config = config or Config()
+    if args.grace_minutes is not None:
+        config.grace = args.grace_minutes * 60
+    if args.command == 'run':
+        return command_run(config, args.dry_run)
+    return command_status(config)
+
+
+if __name__ == '__main__':
+    sys.exit(main())

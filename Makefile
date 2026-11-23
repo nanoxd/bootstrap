@@ -1,4 +1,4 @@
-.PHONY: install brew skills fish-plugins agent-config macOS rust git-signing repos
+.PHONY: install brew skills fish-plugins agent-config macOS rust git-signing repos sim-janitor sim-janitor-uninstall test
 
 BOOTSTRAP_PROFILE ?= server
 
@@ -38,3 +38,12 @@ git-signing:
 
 repos:
 	./repos
+
+sim-janitor:
+	./sim-janitor-install
+
+sim-janitor-uninstall:
+	./sim-janitor-install uninstall
+
+test:
+	/usr/bin/python3 -m unittest discover -s tests

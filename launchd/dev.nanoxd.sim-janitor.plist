@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Template: sim-janitor-install replaces @BIN@ and @HOME@ and writes the
+     result to ~/Library/LaunchAgents. One short pass every 5 minutes. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>dev.nanoxd.sim-janitor</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/bin/python3</string>
+    <string>@BIN@</string>
+    <string>run</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+  <key>StartInterval</key>
+  <integer>300</integer>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>WorkingDirectory</key>
+  <string>/</string>
+  <!-- sim-janitor logs each pass itself. These catch only what escapes it. -->
+  <key>StandardOutPath</key>
+  <string>@HOME@/Library/Logs/sim-janitor.launchd.log</string>
+  <key>StandardErrorPath</key>
+  <string>@HOME@/Library/Logs/sim-janitor.launchd.log</string>
+</dict>
+</plist>

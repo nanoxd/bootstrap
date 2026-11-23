@@ -1,0 +1,77 @@
+#!/bin/bash
+
+# Installs or removes the sim-janitor LaunchAgent. Safe to rerun.
+#
+#   ./sim-janitor-install            copy sim-janitor to ~/.local/bin and load the agent
+#   ./sim-janitor-install uninstall  unload the agent and remove both
+#
+# The agent runs an installed copy rather than this checkout, so switching
+# branches or removing a worktree never changes what launchd runs. Rerun this
+# to pick up a new version. SIM_JANITOR_LOAD=0 writes the files without
+# touching launchd.
+
+set -e
+
+label="dev.nanoxd.sim-janitor"
+bootstrap_dir="$(cd "$(dirname "$0")" && pwd)"
+bin_dir="${SIM_JANITOR_BIN_DIR:-$HOME/.local/bin}"
+agents_dir="${SIM_JANITOR_AGENTS_DIR:-$HOME/Library/LaunchAgents}"
+load="${SIM_JANITOR_LOAD:-1}"
+bin="$bin_dir/sim-janitor"
+plist="$agents_dir/$label.plist"
+domain="gui/$(id -u)"
+
+loaded() {
+  launchctl print "$domain/$label" >/dev/null 2>&1
+}
+
+unload() {
+  if [ "$load" = 1 ] && loaded; then
+    printf 'Unloading %s ...\n' "$label"
+    launchctl bootout "$domain/$label" 2>/dev/null || launchctl bootout "$domain" "$plist" || true
+  fi
+}
+
+case "${1:-install}" in
+  install)
+    mkdir -p "$bin_dir" "$agents_dir" "$HOME/Library/Logs"
+    changed=0
+
+    if ! cmp -s "$bootstrap_dir/sim-janitor" "$bin"; then
+      printf 'Installing %s ...\n' "$bin"
+      install -m 755 "$bootstrap_dir/sim-janitor" "$bin"
+      changed=1
+    fi
+
+    rendered="$(mktemp "${TMPDIR:-/tmp}/sim-janitor-plist.XXXXXX")"
+    trap 'rm -f "$rendered"' EXIT
+    sed -e "s|@BIN@|$bin|g" -e "s|@HOME@|$HOME|g" \
+      "$bootstrap_dir/launchd/$label.plist" > "$rendered"
+    plutil -lint "$rendered" >/dev/null
+    if ! cmp -s "$rendered" "$plist"; then
+      printf 'Writing %s ...\n' "$plist"
+      install -m 644 "$rendered" "$plist"
+      changed=1
+    fi
+
+    if [ "$load" != 1 ]; then
+      printf 'Skipping launchctl (SIM_JANITOR_LOAD=%s).\n' "$load"
+    elif [ "$changed" = 1 ] || ! loaded; then
+      unload
+      printf 'Loading %s ...\n' "$label"
+      launchctl enable "$domain/$label"
+      launchctl bootstrap "$domain" "$plist"
+    else
+      printf '%s is installed and loaded.\n' "$label"
+    fi
+    ;;
+  uninstall)
+    unload
+    rm -f "$plist" "$bin"
+    printf 'Removed %s. Its log and state stay in ~/Library/Logs and ~/Library/Caches/sim-janitor.\n' "$label"
+    ;;
+  *)
+    printf 'usage: %s [install|uninstall]\n' "$0" >&2
+    exit 64
+    ;;
+esac
