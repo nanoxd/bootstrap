@@ -601,10 +601,11 @@ def look(config, held=(), timeout=None):
 # --- state -------------------------------------------------------------------
 
 def load_state(config):
-    """{since: {key: epoch}, attempts: {key: {last, failures}}}. `since` is
-    when each device was last seen owned (or first seen), `attempts` its run
-    of failed shutdowns."""
-    state = dict(since={}, attempts={})
+    """{since: {key: epoch}, attempts: {key: {last, failures}}, unchecked:
+    {key: epoch}}. `since` is when each device was last seen owned (or first
+    seen), `attempts` its run of failed shutdowns, and `unchecked` when its
+    last final check could not finish, so it waits behind the others."""
+    state = dict(since={}, attempts={}, unchecked={})
     try:
         data = json.loads(config.state_file.read_text())
     except (OSError, ValueError):
@@ -618,6 +619,10 @@ def load_state(config):
             state['attempts'][str(key)] = dict(last=float(entry['last']), failures=int(entry['failures']))
     except (AttributeError, TypeError, ValueError, KeyError):
         state['attempts'] = {}
+    try:
+        state['unchecked'] = {str(key): float(value) for key, value in data.get('unchecked', {}).items()}
+    except (AttributeError, TypeError, ValueError):
+        pass
     return state
 
 
@@ -642,10 +647,13 @@ def backoff_left(entry, now):
 
 # --- one pass ----------------------------------------------------------------
 
-def inventory(config, sets=('default', 'testing'), timeout=None):
-    """(devices, sets that listed, problems). Without the default set nothing is known."""
+def inventory(config, sets=('default', 'testing'), timeout=None, deadline=None):
+    """(devices, sets that listed, problems). Without the default set nothing is
+    known. With a monotonic `deadline`, each listing gets only the time left."""
     devices, listed, problems = [], [], []
     for device_set in sets:
+        if deadline is not None:
+            timeout = min(config.list_timeout, deadline - time.monotonic())
         try:
             devices += list_devices(config, device_set, timeout)
             listed.append(device_set)
@@ -741,7 +749,7 @@ def run_pass(config, dry_run=False):
 
     def forget():
         # Forget devices that are no longer booted in the sets that listed.
-        for table in (since, attempts):
+        for table in (since, attempts, state['unchecked']):
             for key in list(table):
                 if key.split(':', 1)[0] in listed and key not in booted:
                     del table[key]
@@ -779,15 +787,17 @@ def run_pass(config, dry_run=False):
 def shut_down(config, candidates, state, deadline, save):
     """Shut down each candidate that is still idle when checked again right
     before acting. Tries devices that never failed first, then the least
-    recently failed, and skips one backing off. Returns (counts, why it
+    recently failed, and skips one backing off. Among those, a device whose
+    final check could not finish last time goes behind the rest, so slow
+    checks rotate instead of starving later devices. Returns (counts, why it
     stopped early or '')."""
-    since, attempts = state['since'], state['attempts']
+    since, attempts, unchecked = state['since'], state['attempts'], state['unchecked']
     counts = dict(shut=0, failed=0, waiting=0)
     now = config.clock()
 
     def order(verdict):
         key = key_of(verdict['device'])
-        return (attempts[key]['last'] if key in attempts else 0, -verdict['idle'], key)
+        return (attempts[key]['last'] if key in attempts else 0, unchecked.get(key, 0), -verdict['idle'], key)
 
     queue = sorted(candidates, key=order)
     for index, verdict in enumerate(queue):
@@ -809,6 +819,10 @@ def shut_down(config, candidates, state, deadline, save):
             counts['waiting'] += left
             return counts, 'budget spent'
         result = shut_down_one(config, device, since, deadline)
+        if result == 'unchecked':
+            unchecked[key] = config.clock()
+        else:
+            unchecked.pop(key, None)
         if result == 'shut':
             counts['shut'] += 1
             attempts.pop(key, None)
@@ -838,7 +852,7 @@ def shut_down_one(config, device, since, deadline):
         return deadline - time.monotonic()
 
     sets = ('default',) if device['set'] == 'default' else ('default', device['set'])
-    current, listed, problems = inventory(config, sets, min(config.list_timeout, left()))
+    current, listed, problems = inventory(config, sets, deadline=deadline)
     if device['set'] not in listed or 'default' not in listed:
         log(config, f'kept {label(device)} this pass: cannot list devices ({"; ".join(problems)})')
         return 'unchecked'
@@ -865,6 +879,11 @@ def shut_down_one(config, device, since, deadline):
         if evidence.problem:
             log(config, f'kept {label(device)} this pass: {evidence.problem}')
             return 'unchecked'
+        if device['udid'] not in evidence.trees:
+            # simctl listed it Booted, but its launchd_sim is gone, so it is
+            # already shutting down. Something else did that; leave it alone.
+            log(config, f'left {label(device)} alone: its launchd_sim exited during the check')
+            return 'gone'
         verdict = judge(config, current, evidence, since, config.clock(), keys={key})[0]
         if verdict['action'] != 'shut down':
             if verdict['owners']:

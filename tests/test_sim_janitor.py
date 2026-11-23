@@ -92,7 +92,10 @@ open(counter, 'w').write(str(count + 1))
 if fixture.get('ps_fail'):
     sys.exit(1)
 tables = fixture['ps']
-for row in tables[min(count, len(tables) - 1)]:
+table = tables[min(count, len(tables) - 1)]
+if table == 'fail':
+    sys.exit(1)
+for row in table:
     pid, ppid, start, command = row[:4]
     stat = row[4] if len(row) > 4 else 'Ss'
     print('%6d %6d %-4s %s %s' % (pid, ppid, stat, start, command))
@@ -482,6 +485,53 @@ class JanitorTest(unittest.TestCase):
             f'default:{DEVICE}': T0 - 5 * 3600, f'default:{OTHER}': T0 - 5 * 3600}}))
         quiet = BASE_PS + [launchd_sim(100, DEVICE, T0 - 4 * 3600), launchd_sim(200, OTHER, T0 - 3 * 3600)]
         return quiet, dict(default=[device(DEVICE), device(OTHER, 'iPhone gate 1')], ps=[quiet, quiet, *extra_tables] if extra_tables else [quiet])
+
+    def test_device_whose_launchd_sim_exits_during_the_final_check_is_left_alone(self):
+        self.seed(f'default:{DEVICE}', T0 - 3 * 3600)
+        busy = BASE_PS + [launchd_sim(100, DEVICE, T0 - 7200)]
+        self.fixture(default=[device(DEVICE)], ps=[busy, BASE_PS])
+        self.assertEqual(self.run_pass(), 0)
+        self.assertEqual(self.shutdowns(), [], 'something else already shut it down')
+        self.assertIn(f'left iPhone gate 0 ({DEVICE}, default set) alone: its launchd_sim exited', self.log_text())
+
+    def test_a_final_check_that_cannot_finish_goes_behind_the_others(self):
+        quiet, fixture = self.two_idle_devices()
+        fixture['ps'] = [quiet, 'fail', quiet]
+        self.fixture(**fixture)
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [['default', 'shutdown', OTHER]])
+        self.assertIn(f'kept iPhone gate 0 ({DEVICE}, default set) this pass: process table unreadable',
+                      self.log_text())
+        state = json.loads(self.config.state_file.read_text())
+        self.assertEqual(state['unchecked'], {f'default:{DEVICE}': T0})
+
+    def test_unchecked_devices_rotate_behind_devices_that_were_checked(self):
+        quiet, fixture = self.two_idle_devices()
+        state = json.loads(self.config.state_file.read_text())
+        state['unchecked'] = {f'default:{DEVICE}': T0 - 300}
+        self.config.state_file.write_text(json.dumps(state))
+        self.fixture(**fixture)
+        self.run_pass()
+        self.assertEqual(self.shutdowns(), [['default', 'shutdown', OTHER], ['default', 'shutdown', DEVICE]],
+                         'the device whose last check could not finish waits behind the other')
+        self.assertEqual(json.loads(self.config.state_file.read_text())['unchecked'], {})
+
+    def test_each_final_listing_gets_only_the_time_left(self):
+        self.config.list_timeout = 30
+        janitor_calls = []
+        real = janitor.list_devices
+
+        def spy(config, device_set, timeout=None):
+            janitor_calls.append(timeout)
+            return real(config, device_set, timeout)
+
+        janitor.list_devices = spy
+        self.addCleanup(setattr, janitor, 'list_devices', real)
+        deadline = time.monotonic() + 4
+        janitor.inventory(self.config, ('default', 'testing'), deadline=deadline)
+        self.assertEqual(len(janitor_calls), 2)
+        self.assertTrue(all(t <= 4 for t in janitor_calls), janitor_calls)
+        self.assertGreaterEqual(janitor_calls[0], janitor_calls[1])
 
     def test_owner_arriving_during_an_earlier_shutdown_keeps_the_next_device(self):
         quiet, fixture = self.two_idle_devices()
